@@ -150,20 +150,12 @@ export function CharacterView({ character, stats, equipped, onOpenInventory, onB
                />
             </div>
 
-            <div className="absolute -bottom-[15px] left-1/2 -translate-x-1/2 w-[120px] sm:w-[140px] h-[45px] sm:h-[55px] -z-10 drop-shadow-[0_12px_15px_rgba(0,0,0,0.9)] opacity-95">
-              <svg viewBox="0 0 100 40" className="w-full h-full filter" preserveAspectRatio="none">
-                <polygon points="18,10 82,10 100,20 100,32 80,40 20,40 0,32 0,20" fill="#2a2f33" />
-                <polygon points="20,8 80,8 98,18 98,30 80,38 20,38 2,30 2,18" fill="#5b666b" stroke="#222" strokeWidth="1" />
-                <polygon points="20,8 80,8 98,18 80,22 20,22 2,18" fill="#758187" stroke="#444" strokeWidth="0.5" />
-                <polygon points="20,22 80,22 98,30 80,38 20,38 2,30" fill="#4f595e" />
-                <line x1="20" y1="22" x2="20" y2="38" stroke="#333" strokeWidth="0.75" />
-                <line x1="80" y1="22" x2="80" y2="38" stroke="#333" strokeWidth="0.75" />
-                {/* Runic squiggles */}
-                <path d="M40,28 L45,26 L50,30 L55,26 L60,28" fill="none" stroke="#333" strokeWidth="1.5" className="opacity-60" />
-                <path d="M30,32 L35,30 L40,34 L45,30" fill="none" stroke="#333" strokeWidth="1" className="opacity-40" />
-                <path d="M60,32 L65,30 L70,34" fill="none" stroke="#333" strokeWidth="1" className="opacity-40" />
-                <circle cx="50" cy="28" r="3" fill="#698585" stroke="#222" strokeWidth="0.5" className="opacity-80" />
-              </svg>
+            <div className="absolute -bottom-[15px] left-1/2 -translate-x-1/2 w-[140px] sm:w-[160px] h-[50px] sm:h-[60px] -z-10 drop-shadow-[0_12px_15px_rgba(0,0,0,0.9)]">
+              <img
+                src="/assets/ui/plataforma.png"
+                alt="platform"
+                className="w-full h-full object-contain"
+              />
             </div>
           </div>
         </div>
