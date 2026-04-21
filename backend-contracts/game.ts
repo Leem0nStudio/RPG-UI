@@ -6,7 +6,7 @@ export type Element = z.infer<typeof elementSchema>;
 export const currencySchema = z.enum(['gems', 'zel', 'karma']);
 export type CurrencyCode = z.infer<typeof currencySchema>;
 
-export const jobTierSchema = z.enum([1, 2, 3]);
+export const jobTierSchema = z.enum(['1', '2', '3']);
 export type JobTier = z.infer<typeof jobTierSchema>;
 
 export const jobCategorySchema = z.enum(['Sword', 'Magic', 'Bow', 'Thief', 'Trade', 'Heal']);

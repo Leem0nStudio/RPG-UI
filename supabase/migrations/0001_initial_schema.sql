@@ -3,7 +3,7 @@ create extension if not exists "pgcrypto";
 create table if not exists public.job_definitions (
   id text primary key,
   name text not null,
-  tier integer not null check (tier in (1, 2, 3)),
+  tier text not null check (tier in ('1', '2', '3')),
   category text not null check (category in ('Sword', 'Magic', 'Bow', 'Thief', 'Trade', 'Heal')),
   sprite_url text not null,
   css_filter text not null default '',

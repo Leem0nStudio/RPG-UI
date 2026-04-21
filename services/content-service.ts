@@ -5,7 +5,7 @@ import { getSupabaseBrowserClient } from '@/services/supabase/client';
 type JobRow = {
   id: string;
   name: string;
-  tier: number;
+  tier: string;
   category: string;
   sprite_url: string;
   css_filter: string;

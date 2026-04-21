@@ -4,7 +4,7 @@ const jobs: JobDefinition[] = [
   {
     id: 'job_swordman',
     name: 'Swordman',
-    tier: 1,
+    tier: '1',
     category: 'Sword',
     spriteUrl: '/assets/sprites/characters/1job/swordman_.png',
     requiredJobLevel: 10,
@@ -16,7 +16,7 @@ const jobs: JobDefinition[] = [
   {
     id: 'job_thief',
     name: 'Thief',
-    tier: 1,
+    tier: '1',
     category: 'Thief',
     spriteUrl: '/assets/sprites/characters/1job/thief_.png',
     requiredJobLevel: 10,
@@ -28,7 +28,7 @@ const jobs: JobDefinition[] = [
   {
     id: 'job_mage',
     name: 'Mage',
-    tier: 1,
+    tier: '1',
     category: 'Magic',
     spriteUrl: '/assets/sprites/characters/1job/mage_.png',
     requiredJobLevel: 10,
@@ -40,7 +40,7 @@ const jobs: JobDefinition[] = [
   {
     id: 'job_acolyte',
     name: 'Acolyte',
-    tier: 1,
+    tier: '1',
     category: 'Heal',
     spriteUrl: '/assets/sprites/characters/1job/acolyte_.png',
     requiredJobLevel: 10,
@@ -52,7 +52,7 @@ const jobs: JobDefinition[] = [
   {
     id: 'job_archer',
     name: 'Archer',
-    tier: 1,
+    tier: '1',
     category: 'Bow',
     spriteUrl: '/assets/sprites/characters/1job/archer_.png',
     requiredJobLevel: 10,
@@ -64,7 +64,7 @@ const jobs: JobDefinition[] = [
   {
     id: 'job_merchant',
     name: 'Merchant',
-    tier: 1,
+    tier: '1',
     category: 'Trade',
     spriteUrl: '/assets/sprites/characters/1job/merchant_.png',
     requiredJobLevel: 10,
@@ -76,7 +76,7 @@ const jobs: JobDefinition[] = [
   {
     id: 'job_knight',
     name: 'Knight',
-    tier: 2,
+    tier: '2',
     category: 'Sword',
     spriteUrl: '/assets/sprites/characters/2job/knight_.png',
     requiredJobLevel: 10,
@@ -88,7 +88,7 @@ const jobs: JobDefinition[] = [
   {
     id: 'job_assassin',
     name: 'Assassin',
-    tier: 2,
+    tier: '2',
     category: 'Thief',
     spriteUrl: '/assets/sprites/characters/2job/assasin_.png',
     requiredJobLevel: 10,
@@ -100,7 +100,7 @@ const jobs: JobDefinition[] = [
   {
     id: 'job_wizard',
     name: 'Wizard',
-    tier: 2,
+    tier: '2',
     category: 'Magic',
     spriteUrl: '/assets/sprites/characters/2job/wizard_.png',
     requiredJobLevel: 10,
@@ -112,7 +112,7 @@ const jobs: JobDefinition[] = [
   {
     id: 'job_priest',
     name: 'Priest',
-    tier: 2,
+    tier: '2',
     category: 'Heal',
     spriteUrl: '/assets/sprites/characters/2job/priest_.png',
     requiredJobLevel: 10,
@@ -124,7 +124,7 @@ const jobs: JobDefinition[] = [
   {
     id: 'job_blacksmith',
     name: 'Blacksmith',
-    tier: 2,
+    tier: '2',
     category: 'Trade',
     spriteUrl: '/assets/sprites/characters/2job/blacksmith_.png',
     requiredJobLevel: 10,
