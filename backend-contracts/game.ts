@@ -6,6 +6,32 @@ export type Element = z.infer<typeof elementSchema>;
 export const currencySchema = z.enum(['gems', 'zel', 'karma']);
 export type CurrencyCode = z.infer<typeof currencySchema>;
 
+export const jobTierSchema = z.enum([1, 2, 3]);
+export type JobTier = z.infer<typeof jobTierSchema>;
+
+export const jobCategorySchema = z.enum(['Sword', 'Magic', 'Bow', 'Thief', 'Trade', 'Heal']);
+export type JobCategory = z.infer<typeof jobCategorySchema>;
+
+export const jobDefinitionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  tier: jobTierSchema,
+  category: jobCategorySchema,
+  spriteUrl: z.string(),
+  cssFilter: z.string().default(''),
+  requiredJobLevel: z.number().int().positive().default(10),
+  evolvedFrom: z.string().nullable(),
+  baseStats: statBlockSchema,
+  statMultipliers: z.object({
+    hp: z.number().min(0).default(1),
+    atk: z.number().min(0).default(1),
+    def: z.number().min(0).default(1),
+    rec: z.number().min(0).default(1),
+  }).default({ hp: 1, atk: 1, def: 1, rec: 1 }),
+  skills: z.array(skillDefinitionSchema).default([]),
+});
+export type JobDefinition = z.infer<typeof jobDefinitionSchema>;
+
 export const statBlockSchema = z.object({
   hp: z.number().int().nonnegative(),
   atk: z.number().int().nonnegative(),
@@ -34,6 +60,8 @@ export const unitDefinitionSchema = z.object({
   element: elementSchema,
   rarity: z.number().int().min(1).max(10),
   maxLevel: z.number().int().positive(),
+  jobId: z.string(),
+  maxJobLevel: z.number().int().positive().default(50),
   cost: z.number().int().nonnegative(),
   baseStats: statBlockSchema,
   spriteUrl: z.string(),
@@ -86,6 +114,9 @@ export const ownedUnitSchema = z.object({
   unitId: z.string(),
   level: z.number().int().positive(),
   exp: z.number().int().nonnegative(),
+  jobId: z.string(),
+  jobLevel: z.number().int().positive().default(1),
+  jobExp: z.number().int().nonnegative().default(0),
   locked: z.boolean().default(false),
   equipment: z.object({
     Weapon: z.string().nullable(),
@@ -113,6 +144,7 @@ export const gameContentSchema = z.object({
   items: z.array(itemDefinitionSchema),
   quests: z.array(questDefinitionSchema),
   banners: z.array(summonBannerSchema),
+  jobs: z.array(jobDefinitionSchema),
 });
 export type GameContent = z.infer<typeof gameContentSchema>;
 

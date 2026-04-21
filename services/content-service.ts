@@ -1,6 +1,20 @@
-import type { GameContent } from '@/backend-contracts/game';
+import type { GameContent, JobDefinition } from '@/backend-contracts/game';
 import { gameContent } from '@/content/game-content';
 import { getSupabaseBrowserClient } from '@/services/supabase/client';
+
+type JobRow = {
+  id: string;
+  name: string;
+  tier: number;
+  category: string;
+  sprite_url: string;
+  css_filter: string;
+  required_job_level: number;
+  evolved_from: string | null;
+  base_stats: JobDefinition['baseStats'];
+  stat_multipliers: JobDefinition['statMultipliers'];
+  skills: JobDefinition['skills'];
+};
 
 type UnitRow = {
   id: string;
@@ -9,6 +23,8 @@ type UnitRow = {
   element: GameContent['units'][number]['element'];
   rarity: number;
   max_level: number;
+  job_id: string;
+  max_job_level: number;
   cost: number;
   base_stats: GameContent['units'][number]['baseStats'];
   sprite_url: string;
@@ -52,7 +68,8 @@ export async function loadGameContent(): Promise<GameContent> {
   const supabase = getSupabaseBrowserClient();
   if (!supabase) return gameContent;
 
-  const [unitsRes, itemsRes, questsRes, bannersRes] = await Promise.all([
+  const [jobsRes, unitsRes, itemsRes, questsRes, bannersRes] = await Promise.all([
+    supabase.from('job_definitions').select('*'),
     supabase.from('unit_definitions').select('*'),
     supabase.from('item_definitions').select('*'),
     supabase.from('quest_definitions').select('*'),
@@ -63,6 +80,20 @@ export async function loadGameContent(): Promise<GameContent> {
     return gameContent;
   }
 
+  const remoteJobs = ((jobsRes.data as JobRow[] | null) ?? []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    tier: row.tier as 1 | 2 | 3,
+    category: row.category as 'Sword' | 'Magic' | 'Bow' | 'Thief' | 'Trade' | 'Heal',
+    spriteUrl: row.sprite_url,
+    cssFilter: row.css_filter,
+    requiredJobLevel: row.required_job_level,
+    evolvedFrom: row.evolved_from,
+    baseStats: row.base_stats,
+    statMultipliers: row.stat_multipliers,
+    skills: row.skills ?? [],
+  }));
+
   const remoteUnits = ((unitsRes.data as UnitRow[] | null) ?? []).map((row) => ({
     id: row.id,
     name: row.name,
@@ -70,6 +101,8 @@ export async function loadGameContent(): Promise<GameContent> {
     element: row.element,
     rarity: row.rarity,
     maxLevel: row.max_level,
+    jobId: row.job_id,
+    maxJobLevel: row.max_job_level,
     cost: row.cost,
     baseStats: row.base_stats,
     spriteUrl: row.sprite_url,
@@ -114,5 +147,6 @@ export async function loadGameContent(): Promise<GameContent> {
     items: remoteItems.length > 0 ? remoteItems : gameContent.items,
     quests: remoteQuests.length > 0 ? remoteQuests : gameContent.quests,
     banners: remoteBanners.length > 0 ? remoteBanners : gameContent.banners,
+    jobs: remoteJobs.length > 0 ? remoteJobs : gameContent.jobs,
   };
 }

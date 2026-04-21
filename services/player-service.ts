@@ -21,6 +21,9 @@ type PlayerUnitRow = {
   unit_id: string;
   level: number;
   exp: number;
+  job_id: string;
+  job_level: number;
+  job_exp: number;
   locked: boolean;
   equipment: {
     Weapon: string | null;
@@ -62,7 +65,7 @@ export async function loadPlayerBootstrap(): Promise<GameBootstrap> {
   const [profileRes, currenciesRes, unitsRes, itemsRes] = await Promise.all([
     supabase.from('player_profiles').select('*').eq('id', userId).maybeSingle(),
     supabase.from('player_currencies').select('code, amount').eq('player_id', userId),
-    supabase.from('player_units').select('id, unit_id, level, exp, locked, equipment').eq('player_id', userId),
+    supabase.from('player_units').select('id, unit_id, level, exp, job_id, job_level, job_exp, locked, equipment').eq('player_id', userId),
     supabase.from('player_items').select('item_id, quantity').eq('player_id', userId),
   ]);
 
@@ -87,6 +90,9 @@ export async function loadPlayerBootstrap(): Promise<GameBootstrap> {
     unitId: unit.unit_id,
     level: unit.level,
     exp: unit.exp,
+    jobId: unit.job_id,
+    jobLevel: unit.job_level,
+    jobExp: unit.job_exp,
     locked: unit.locked,
     equipment: unit.equipment ?? { Weapon: null, Armor: null, Accessory: null },
   }));

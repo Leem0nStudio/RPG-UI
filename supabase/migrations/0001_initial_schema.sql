@@ -1,5 +1,19 @@
 create extension if not exists "pgcrypto";
 
+create table if not exists public.job_definitions (
+  id text primary key,
+  name text not null,
+  tier integer not null check (tier in (1, 2, 3)),
+  category text not null check (category in ('Sword', 'Magic', 'Bow', 'Thief', 'Trade', 'Heal')),
+  sprite_url text not null,
+  css_filter text not null default '',
+  required_job_level integer not null default 10,
+  evolved_from text null,
+  base_stats jsonb not null,
+  stat_multipliers jsonb not null default '{"hp": 1, "atk": 1, "def": 1, "rec": 1}'::jsonb,
+  skills jsonb not null default '[]'::jsonb
+);
+
 create table if not exists public.unit_definitions (
   id text primary key,
   name text not null,
@@ -7,6 +21,8 @@ create table if not exists public.unit_definitions (
   element text not null check (element in ('Fire', 'Water', 'Earth', 'Light', 'Dark')),
   rarity integer not null,
   max_level integer not null,
+  job_id text not null references public.job_definitions (id),
+  max_job_level integer not null default 50,
   cost integer not null,
   base_stats jsonb not null,
   sprite_url text not null,
@@ -69,6 +85,9 @@ create table if not exists public.player_units (
   unit_id text not null references public.unit_definitions (id),
   level integer not null default 1,
   exp integer not null default 0,
+  job_id text not null references public.job_definitions (id),
+  job_level integer not null default 1,
+  job_exp integer not null default 0,
   locked boolean not null default false,
   equipment jsonb not null default '{"Weapon": null, "Armor": null, "Accessory": null}'::jsonb
 );

@@ -1,5 +1,6 @@
 grant usage on schema public to anon, authenticated;
 
+grant select on public.job_definitions to anon, authenticated;
 grant select on public.unit_definitions to anon, authenticated;
 grant select on public.item_definitions to anon, authenticated;
 grant select on public.quest_definitions to anon, authenticated;
@@ -59,12 +60,12 @@ begin
     (new.id, 'karma', 1606)
   on conflict (player_id, code) do nothing;
 
-  insert into public.player_units (id, player_id, unit_id, level, exp, locked, equipment)
+  insert into public.player_units (id, player_id, unit_id, level, exp, job_id, job_level, job_exp, locked, equipment)
   values
-    (gen_random_uuid(), new.id, 'u_sergio', 1, 0, false, '{"Weapon": null, "Armor": null, "Accessory": null}'::jsonb),
-    (gen_random_uuid(), new.id, 'u_vargas', 12, 120, false, '{"Weapon": null, "Armor": null, "Accessory": null}'::jsonb),
-    (gen_random_uuid(), new.id, 'u_lance', 25, 800, false, '{"Weapon": null, "Armor": null, "Accessory": null}'::jsonb),
-    (gen_random_uuid(), new.id, 'u_magress', 30, 4500, true, '{"Weapon": null, "Armor": null, "Accessory": null}'::jsonb)
+    (gen_random_uuid(), new.id, 'u_sergio', 1, 0, 'job_swordman', 1, 0, false, '{"Weapon": null, "Armor": null, "Accessory": null}'::jsonb),
+    (gen_random_uuid(), new.id, 'u_vargas', 12, 120, 'job_swordman', 5, 50, false, '{"Weapon": null, "Armor": null, "Accessory": null}'::jsonb),
+    (gen_random_uuid(), new.id, 'u_lance', 25, 800, 'job_thief', 10, 200, false, '{"Weapon": null, "Armor": null, "Accessory": null}'::jsonb),
+    (gen_random_uuid(), new.id, 'u_magress', 30, 4500, 'job_knight', 15, 1000, true, '{"Weapon": null, "Armor": null, "Accessory": null}'::jsonb)
   on conflict do nothing;
 
   insert into public.player_items (player_id, item_id, quantity)
