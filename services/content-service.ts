@@ -2,6 +2,52 @@ import type { GameContent } from '@/backend-contracts/game';
 import { gameContent } from '@/content/game-content';
 import { getSupabaseBrowserClient } from '@/services/supabase/client';
 
+type UnitRow = {
+  id: string;
+  name: string;
+  title: string;
+  element: GameContent['units'][number]['element'];
+  rarity: number;
+  max_level: number;
+  cost: number;
+  base_stats: GameContent['units'][number]['baseStats'];
+  sprite_url: string;
+  css_filter: string;
+  skills: GameContent['units'][number]['skills'];
+};
+
+type ItemRow = {
+  id: string;
+  name: string;
+  type: GameContent['items'][number]['type'];
+  rarity: number;
+  description: string;
+  stats: GameContent['items'][number]['stats'];
+  sprite: GameContent['items'][number]['sprite'];
+  effects: string[] | null;
+};
+
+type QuestRow = {
+  id: string;
+  world_id: string;
+  stage: number;
+  name: string;
+  energy_cost: number;
+  difficulty: GameContent['quests'][number]['difficulty'];
+  enemy_ids: string[];
+  rewards_preview: string[];
+};
+
+type BannerRow = {
+  id: string;
+  name: string;
+  cost: number;
+  currency: GameContent['banners'][number]['currency'];
+  featured_unit_ids: string[];
+  description: string;
+  active: boolean;
+};
+
 export async function loadGameContent(): Promise<GameContent> {
   const supabase = getSupabaseBrowserClient();
   if (!supabase) return gameContent;
@@ -17,10 +63,56 @@ export async function loadGameContent(): Promise<GameContent> {
     return gameContent;
   }
 
+  const remoteUnits = ((unitsRes.data as UnitRow[] | null) ?? []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    title: row.title,
+    element: row.element,
+    rarity: row.rarity,
+    maxLevel: row.max_level,
+    cost: row.cost,
+    baseStats: row.base_stats,
+    spriteUrl: row.sprite_url,
+    cssFilter: row.css_filter,
+    skills: row.skills ?? [],
+  }));
+
+  const remoteItems = ((itemsRes.data as ItemRow[] | null) ?? []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    type: row.type,
+    rarity: row.rarity,
+    description: row.description,
+    stats: row.stats,
+    sprite: row.sprite,
+    effects: row.effects ?? [],
+  }));
+
+  const remoteQuests = ((questsRes.data as QuestRow[] | null) ?? []).map((row) => ({
+    id: row.id,
+    worldId: row.world_id,
+    stage: row.stage,
+    name: row.name,
+    energyCost: row.energy_cost,
+    difficulty: row.difficulty,
+    enemyIds: row.enemy_ids ?? [],
+    rewardsPreview: row.rewards_preview ?? [],
+  }));
+
+  const remoteBanners = ((bannersRes.data as BannerRow[] | null) ?? []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    cost: row.cost,
+    currency: row.currency,
+    featuredUnitIds: row.featured_unit_ids ?? [],
+    description: row.description,
+    active: row.active,
+  }));
+
   return {
-    units: (unitsRes.data as GameContent['units']) ?? gameContent.units,
-    items: (itemsRes.data as GameContent['items']) ?? gameContent.items,
-    quests: (questsRes.data as GameContent['quests']) ?? gameContent.quests,
-    banners: (bannersRes.data as GameContent['banners']) ?? gameContent.banners,
+    units: remoteUnits.length > 0 ? remoteUnits : gameContent.units,
+    items: remoteItems.length > 0 ? remoteItems : gameContent.items,
+    quests: remoteQuests.length > 0 ? remoteQuests : gameContent.quests,
+    banners: remoteBanners.length > 0 ? remoteBanners : gameContent.banners,
   };
 }

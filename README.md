@@ -77,6 +77,7 @@ Recommended:
 Initial database files live in:
 
 - `supabase/migrations/0001_initial_schema.sql`
+- `supabase/migrations/0002_auth_bootstrap.sql`
 - `supabase/seed.sql`
 
 Apply them with your preferred Supabase workflow:
@@ -84,6 +85,10 @@ Apply them with your preferred Supabase workflow:
 - Supabase CLI
 - SQL editor in the dashboard
 - migration runner in your deployment pipeline
+
+Setup guide:
+
+- `supabase/SETUP.md`
 
 ## Architecture notes
 

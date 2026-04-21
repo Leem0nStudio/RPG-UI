@@ -214,6 +214,15 @@ export const defaultRoster: OwnedUnit[] = [
   { instanceId: 'owned_magress_1', unitId: 'u_magress', level: 30, exp: 4500, locked: true, equipment: { Weapon: null, Armor: null, Accessory: null } },
 ];
 
+export const defaultInventory = [
+  { itemId: 'w_brave_sword', quantity: 1 },
+  { itemId: 'w_flame_dagger', quantity: 1 },
+  { itemId: 'a_knight_shield', quantity: 1 },
+  { itemId: 'a_aura_plate', quantity: 1 },
+  { itemId: 'ac_hero_ring', quantity: 1 },
+  { itemId: 'ac_recovery_amulet', quantity: 2 },
+];
+
 export const gameContent: GameContent = {
   units,
   items,
@@ -224,14 +233,6 @@ export const gameContent: GameContent = {
 export const bootstrapData: GameBootstrap = {
   player: defaultPlayerProfile,
   roster: defaultRoster,
-  items: [
-    { itemId: 'w_brave_sword', quantity: 1 },
-    { itemId: 'w_flame_dagger', quantity: 1 },
-    { itemId: 'a_knight_shield', quantity: 1 },
-    { itemId: 'a_aura_plate', quantity: 1 },
-    { itemId: 'ac_hero_ring', quantity: 1 },
-    { itemId: 'ac_recovery_amulet', quantity: 2 },
-  ],
+  items: defaultInventory,
   content: gameContent,
 };
-
