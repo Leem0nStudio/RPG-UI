@@ -11,6 +11,15 @@ import { BattleScreenView } from '@/components/views/BattleScreenView';
 import { SummoningScreenView } from '@/components/views/SummoningScreenView';
 import { calculateUnitStats } from '@/core/stats';
 import { useGameStore, selectCurrentOwnedUnit, selectCurrentUnitDefinition, selectEquippedItems } from '@/store/game-store';
+import type { JobDefinition } from '@/backend-contracts/game';
+
+function resolveUnitSprite(unit: any, jobs: JobDefinition[]): { spriteUrl: string; cssFilter: string } {
+  const job = jobs.find(j => j.id === unit.jobId);
+  if (job) {
+    return { spriteUrl: job.spriteUrl, cssFilter: job.cssFilter };
+  }
+  return { spriteUrl: unit.spriteUrl ?? '', cssFilter: unit.cssFilter ?? '' };
+}
 
 export default function Home() {
   const {
@@ -41,8 +50,12 @@ export default function Home() {
 
   const uiCharacters = bootstrap.content.units.map((unit) => {
     const owned = bootstrap.roster.find((entry) => entry.unitId === unit.id);
+    const { spriteUrl, cssFilter } = resolveUnitSprite(unit, bootstrap.content.jobs);
     return {
       ...unit,
+      spriteUrl,
+      cssFilter,
+      jobId: unit.jobId,
       level: owned?.level ?? 1,
       maxLevel: unit.maxLevel,
       exp: owned?.exp ?? 0,
@@ -53,6 +66,11 @@ export default function Home() {
   const inventory = bootstrap.content.items.filter((item) =>
     bootstrap.items.some((ownedItem) => ownedItem.itemId === item.id && ownedItem.quantity > 0)
   );
+
+  const summonUnits = bootstrap.content.units.map((unit) => {
+    const { spriteUrl, cssFilter } = resolveUnitSprite(unit, bootstrap.content.jobs);
+    return { ...unit, spriteUrl, cssFilter };
+  });
 
   return (
     <div className="flex h-screen w-full items-center justify-center overflow-hidden select-none ui-text bg-[var(--color-bg-root)]">
@@ -134,7 +152,7 @@ export default function Home() {
           )}
 
           {!isBootstrapping && view === 'summon' && (
-            <SummoningScreenView />
+            <SummoningScreenView units={summonUnits} banners={bootstrap.content.banners} />
           )}
         </div>
 

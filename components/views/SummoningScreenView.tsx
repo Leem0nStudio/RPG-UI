@@ -1,26 +1,41 @@
 import React, { useState } from 'react';
 import { Diamond, Sparkles, Star } from 'lucide-react';
-import { CharacterData } from '@/lib/types';
-import { CHARACTERS } from '@/lib/mock-data';
+import type { CharacterData } from '@/lib/types';
+import type { SummonBanner, UnitDefinition } from '@/backend-contracts/game';
 
-export function SummoningScreenView() {
+type SummonUnit = UnitDefinition & { spriteUrl: string; cssFilter: string };
+
+export function SummoningScreenView({ units, banners }: { units: SummonUnit[]; banners: SummonBanner[] }) {
   const [summoningState, setSummoningState] = useState<'idle' | 'summoning' | 'result'>('idle');
-  const [resultChar, setResultChar] = useState<CharacterData | null>(null);
+  const [resultChar, setResultChar] = useState<CharacterData | SummonUnit | null>(null);
   const [isConsuming, setIsConsuming] = useState(false);
 
   const handleSummon = () => {
     setIsConsuming(true);
     setTimeout(() => {
-      const charOptions = [CHARACTERS[0], CHARACTERS[1], CHARACTERS[2], CHARACTERS[3], CHARACTERS[4]];
-      const rngChar = charOptions[Math.floor(Math.random() * charOptions.length)];
-      setResultChar(rngChar);
+      const rngIndex = Math.floor(Math.random() * units.length);
+      const rngChar = units[rngIndex];
+      setResultChar({
+        id: rngChar.id,
+        name: rngChar.name,
+        title: rngChar.title,
+        element: rngChar.element,
+        rarity: rngChar.rarity,
+        spriteUrl: rngChar.spriteUrl,
+        cssFilter: rngChar.cssFilter ?? '',
+        cost: rngChar.cost,
+        level: 1,
+        maxLevel: rngChar.maxLevel,
+        exp: 0,
+        maxExp: rngChar.maxLevel * 150,
+      } as CharacterData);
       setSummoningState('summoning');
       setIsConsuming(false);
       
       setTimeout(() => {
          setSummoningState('result');
       }, 2500);
-    }, 400); // 400ms delay to show the gem animation
+    }, 400);
   };
 
   const getRarityGateColors = (rarity: number) => {

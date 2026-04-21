@@ -1,12 +1,21 @@
 import { bootstrapData, gameContent } from '@/content/game-content';
 import type { CharacterData, Item } from '@/lib/types';
+import type { JobDefinition } from '@/backend-contracts/game';
+
+const resolveSprite = (unit: typeof gameContent.units[0], jobs: JobDefinition[]) => {
+  const job = jobs.find(j => j.id === unit.jobId);
+  return job ? { spriteUrl: job.spriteUrl, cssFilter: job.cssFilter } : { spriteUrl: '', cssFilter: '' };
+};
 
 const ownedUnitByUnitId = new Map(bootstrapData.roster.map((owned) => [owned.unitId, owned]));
 
 export const CHARACTERS: CharacterData[] = gameContent.units.map((unit) => {
   const owned = ownedUnitByUnitId.get(unit.id);
+  const { spriteUrl, cssFilter } = resolveSprite(unit, gameContent.jobs);
   return {
     ...unit,
+    spriteUrl,
+    cssFilter,
     level: owned?.level ?? 1,
     maxLevel: unit.maxLevel,
     exp: owned?.exp ?? 0,
