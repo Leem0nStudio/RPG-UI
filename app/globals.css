@@ -132,3 +132,90 @@
     background: linear-gradient(to bottom, #d8b277, #9e6c38);
   }
 }
+
+/* === RPG UI Texture Layer === */
+/* Panel texture states: use assets as overlay on existing gradients */
+.ui-panel-textured {
+  background:
+    linear-gradient(to bottom, var(--color-surface-1), var(--color-surface-2)),
+    url('/assets/ui/textures/panel-fill.png');
+  background-blend-mode: overlay;
+}
+
+.ui-panel-bordered {
+  position: relative;
+  background: linear-gradient(to bottom, var(--color-surface-1), var(--color-surface-2));
+  border: none;
+}
+.ui-panel-bordered::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/assets/ui/borders/frame-simple.png');
+  background-size: 100% 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Corner decorations - position at each corner */
+.ui-corners {
+  position: relative;
+}
+.ui-corners::before,
+.ui-corners::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  background: url('/assets/ui/corners/corner-gold.png');
+  background-size: 96px 96px;
+  pointer-events: none;
+}
+.ui-corners::before {
+  top: 4px;
+  left: 4px;
+  background-position: 0 0;
+}
+.ui-corners::after {
+  top: 4px;
+  left: 4px;
+  background-position: 0 0;
+  transform: rotate(90deg);
+  transform-origin: top left;
+}
+
+/* Individual corner positioning classes */
+.ui-corner-tl { --corner-pos-x: 0; --corner-pos-y: 0; }
+.ui-corner-tr { --corner-pos-x: -24px; --corner-pos-y: 0; }
+.ui-corner-bl { --corner-pos-x: 0; --corner-pos-y: -24px; }
+.ui-corner-br { --corner-pos-x: -24px; --corner-pos-y: -24px; }
+
+.ui-corner-single::before {
+  background: url('/assets/ui/corners/corner-gold.png');
+  background-size: 96px 96px;
+  background-position: calc(var(--corner-pos-x, 0)) calc(var(--corner-pos-y, 0));
+}
+.ui-corner-tl::before { background-position: 0 0; }
+.ui-corner-tr::before { background-position: -24px 0; }
+.ui-corner-bl::before { background-position: 0 -24px; }
+.ui-corner-br::before { background-position: -24px -24px; }
+
+/* Border frame variations */
+.ui-border-frame {
+  border-image: url('/assets/ui/borders/frame-tile.png');
+  border-image-slice: 12 fill;
+  border-image-repeat: stretch;
+}
+
+/* Panel fill with texture overlay */
+.ui-bg-panel {
+  background-color: var(--color-surface-4);
+  background-image: url('/assets/ui/textures/panel-noise.png');
+  background-blend-mode: soft-light;
+}
+
+/* Icon helper - use with SpriteIcon component */
+.ui-icon-frame {
+  background: url('/assets/ui/borders/icon-frame.png');
+  background-size: cover;
+}
