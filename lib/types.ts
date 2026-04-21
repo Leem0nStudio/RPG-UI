@@ -12,6 +12,9 @@ export interface CharacterData extends Omit<UnitDefinition, 'maxLevel'> {
   exp: number;
   maxExp: number;
   element: Element;
+  jobId: string;
+  spriteUrl?: string;
+  cssFilter?: string;
 }
 
 export type CharEquipment = { Weapon: Item | null; Armor: Item | null; Accessory: Item | null };

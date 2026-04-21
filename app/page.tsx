@@ -109,7 +109,7 @@ export default function Home() {
             />
           )}
 
-          {!isBootstrapping && view === 'unitList' && (
+          {!isBootstrapping && view === 'unitList' && uiCharacters.length > 0 && (
             <UnitListView
               characters={uiCharacters}
               onSelectCharacter={(unitId) => {
@@ -117,6 +117,15 @@ export default function Home() {
                 if (owned) selectUnit(owned.instanceId);
               }}
             />
+          )}
+
+          {!isBootstrapping && view === 'unitList' && uiCharacters.length === 0 && (
+            <div className="flex-1 flex items-center justify-center text-[#a58d78] text-center p-4">
+              <div>
+                <p className="ui-heading text-[18px] mb-2">No Units Found</p>
+                <p className="text-[12px]">Visit the Summon to recruit units</p>
+              </div>
+            </div>
           )}
 
           {!isBootstrapping && view === 'character' && currentUnit && (

@@ -63,7 +63,7 @@ export function CharacterView({ character, job, stats, equipped, onOpenInventory
             </div>
 
             <div className="text-[12px] text-[#2c1d11] font-bold mb-[2px] tracking-tight ui-text">
-              Type: <span className="text-[#2c1d11] capitalize">Oracle</span>
+              Class: <span className="text-[#2c1d11] capitalize">{job?.name ?? 'Unknown'}</span>
             </div>
             
             <div className="w-[102%] -ml-[1%] h-[2px] bg-gradient-to-r from-transparent via-[#8a6b4c] to-transparent my-[6px] opacity-60"></div>

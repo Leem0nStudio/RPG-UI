@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { ChevronLeft, Flame, Droplet, Leaf, Moon, Sun, Sparkles } from 'lucide-react';
 import { SpriteIcon } from '@/components/ui/SpriteIcon';
 import { SQUAD_MOCK, ITEMS_MOCK } from '@/lib/mock-data';
@@ -71,7 +71,7 @@ export function BattleScreenView({ onBack }: { onBack: () => void }) {
           <div className="absolute bottom-0 w-full bg-gradient-to-t from-[rgba(0,0,0,0.9)] via-[rgba(0,0,0,0.5)] to-transparent pt-6 pb-2 px-1 flex flex-col justify-end z-10 border-t border-[rgba(255,255,255,0.1)]">
             <div className="flex items-end gap-1 mb-1 ml-1 sm:ml-4 relative">
                <div className="w-8 h-8 flex items-center justify-center absolute -left-1 sm:-left-3 -bottom-1 z-20"><Sparkles size={24} className="text-[#f5d796] fill-[#f5d796] drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]" /></div>
-               <span className="text-white font-bold text-[15px] sm:text-[18px] text-stroke-black fx-low tracking-wide ml-6">Mímico alado</span>
+               <span className="text-white font-bold text-[15px] sm:text-[18px] text-stroke-black fx-low tracking-wide ml-6">Enemy</span>
             </div>
             <div className="w-full px-1">
               <div className="w-full h-[10px] sm:h-[12px] bg-[#111] border-[1.5px] border-[#eacf9b] rounded-sm p-[1px] relative shadow-lg">

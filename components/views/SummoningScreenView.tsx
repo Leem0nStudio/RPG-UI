@@ -23,6 +23,7 @@ export function SummoningScreenView({ units, banners }: { units: SummonUnit[]; b
         rarity: rngChar.rarity,
         spriteUrl: rngChar.spriteUrl,
         cssFilter: rngChar.cssFilter ?? '',
+        jobId: rngChar.jobId,
         cost: rngChar.cost,
         level: 1,
         maxLevel: rngChar.maxLevel,
@@ -162,11 +163,11 @@ export function SummoningScreenView({ units, banners }: { units: SummonUnit[]; b
                  {resultChar.title}
               </span>
 
-              <div className="mt-4 w-full flex justify-center pt-2 border-t border-[rgba(255,255,255,0.1)] gap-4">
-                <div className="flex flex-col items-center">
-                  <span className="text-[#a3c2e0] text-[10px] font-bold uppercase tracking-widest">Type</span>
-                  <span className="text-white text-[13px] font-bold capitalize">Oracle</span>
-                </div>
+<div className="mt-4 w-full flex justify-center pt-2 border-t border-[rgba(255,255,255,0.1)] gap-4">
+                 <div className="flex flex-col items-center">
+                   <span className="text-[#a3c2e0] text-[10px] font-bold uppercase tracking-widest">Class</span>
+                   <span className="text-white text-[13px] font-bold capitalize">{resultChar.jobId ? resultChar.jobId.replace('job_', '') : '-'}</span>
+                 </div>
                 <div className="w-[1px] h-full bg-[rgba(255,255,255,0.2)]"></div>
                 <div className="flex flex-col items-center">
                   <span className="text-[#a3c2e0] text-[10px] font-bold uppercase tracking-widest">Element</span>
