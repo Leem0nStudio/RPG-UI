@@ -1,10 +1,21 @@
 import { create } from 'zustand';
-import type { GameBootstrap, ItemDefinition, ItemType, OwnedUnit, UnitDefinition } from '@/backend-contracts/game';
+import type { 
+  BattleState, 
+  CurrencyCode, 
+  EnemyDefinition, 
+  GameBootstrap, 
+  ItemDefinition, 
+  ItemType, 
+  OwnedUnit, 
+  QuestDefinition, 
+  UnitDefinition 
+} from '@/backend-contracts/game';
 import { bootstrapData } from '@/content/game-content';
 import { loadGameContent } from '@/services/content-service';
 import { loadPlayerBootstrap } from '@/services/player-service';
+import { loadEnemies } from '@/services/battle-service';
 
-export type AppView = 'home' | 'unitList' | 'character' | 'inventory' | 'battle' | 'summon';
+export type AppView = 'home' | 'unitList' | 'character' | 'inventory' | 'quest' | 'battle' | 'summon';
 
 interface GameStoreState {
   isBootstrapping: boolean;
@@ -12,12 +23,27 @@ interface GameStoreState {
   targetSlot: ItemType | null;
   bootstrap: GameBootstrap;
   selectedUnitInstanceId: string | null;
+  
+  // Battle state
+  currentQuest: QuestDefinition | null;
+  currentEnemies: EnemyDefinition[];
+  battleState: BattleState | null;
+  lastBattleResult: BattleState | null;
+  
   setView: (view: AppView) => void;
   selectUnit: (instanceId: string) => void;
   openInventoryForSlot: (slot: ItemType) => void;
   equipItem: (itemId: string) => void;
   unequipItem: (slot: ItemType) => void;
   bootstrapGame: () => Promise<void>;
+  
+  // Battle actions
+  startQuest: (quest: QuestDefinition) => Promise<void>;
+  enterBattle: () => Promise<void>;
+  setBattleState: (state: BattleState | null) => void;
+  completeBattle: (result: BattleState) => Promise<void>;
+  cancelBattle: () => void;
+  refreshEnemies: () => Promise<void>;
 }
 
 function findUnitDefinition(units: UnitDefinition[], unitId: string) {
@@ -40,6 +66,12 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   targetSlot: null,
   bootstrap: bootstrapData,
   selectedUnitInstanceId: bootstrapData.roster[0]?.instanceId ?? null,
+  
+  // Battle state
+  currentQuest: null,
+  currentEnemies: [],
+  battleState: null,
+  lastBattleResult: null,
   setView: (view) => set({ view }),
   selectUnit: (instanceId) => set({ selectedUnitInstanceId: instanceId, view: 'character' }),
   openInventoryForSlot: (slot) => set({ targetSlot: slot, view: 'inventory' }),
@@ -105,6 +137,88 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       bootstrap: mergedBootstrap,
       selectedUnitInstanceId: mergedBootstrap.roster[0]?.instanceId ?? null,
     });
+  },
+  
+  startQuest: async (quest: QuestDefinition) => {
+    const state = get();
+    
+    // Load enemies for this quest
+    const enemies = await loadEnemies(quest.enemyIds);
+    
+    set({
+      currentQuest: quest,
+      currentEnemies: enemies,
+      view: 'battle',
+    });
+  },
+  
+  enterBattle: async () => {
+    const state = get();
+    
+    if (!state.currentQuest) return;
+    
+    set({
+      battleState: {
+        questId: state.currentQuest.id,
+        enemyInstanceId: '',
+        enemyHp: 0,
+        enemyMaxHp: 0,
+        enemyElement: 'Water',
+        playerUnits: state.bootstrap.roster.slice(0, 4).map(u => ({
+          instanceId: u.instanceId,
+          currentHp: 0,
+          bbGauge: 0,
+        })),
+        battlePhase: 'player_turn',
+        turnNumber: 0,
+      },
+    });
+  },
+  
+  setBattleState: (newState: BattleState | null) => {
+    set({ battleState: newState });
+  },
+  
+  completeBattle: async (result: BattleState) => {
+    const state = get();
+    
+    // Update battle state
+    set({
+      battleState: result,
+      lastBattleResult: result,
+    });
+    
+    // Update local currencies (optimistic update)
+    if (result.battlePhase === 'victory') {
+      set({
+        bootstrap: {
+          ...state.bootstrap,
+          player: {
+            ...state.bootstrap.player,
+            currencies: {
+              ...state.bootstrap.player.currencies,
+              zel: state.bootstrap.player.currencies.zel + 100,
+            },
+          },
+        },
+      });
+    }
+  },
+  
+  cancelBattle: () => {
+    set({
+      currentQuest: null,
+      currentEnemies: [],
+      battleState: null,
+    });
+  },
+  
+  refreshEnemies: async () => {
+    const state = get();
+    if (state.currentQuest) {
+      const enemies = await loadEnemies(state.currentQuest.enemyIds);
+      set({ currentEnemies: enemies });
+    }
   },
 }));
 

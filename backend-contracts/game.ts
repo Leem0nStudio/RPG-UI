@@ -98,6 +98,44 @@ export const questDefinitionSchema = z.object({
 });
 export type QuestDefinition = z.infer<typeof questDefinitionSchema>;
 
+export const enemyDefinitionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  title: z.string().nullable().optional(),
+  element: elementSchema,
+  rarity: z.number().int().min(1).max(10),
+  maxLevel: z.number().int().positive(),
+  baseStats: statBlockSchema,
+  spriteUrl: z.string().nullable().optional(),
+  cssFilter: z.string().nullable().optional(),
+  skills: z.array(skillDefinitionSchema).default([]),
+  aiType: z.enum(['aggressive', 'defensive', 'balanced', 'boss']).default('aggressive'),
+  expReward: z.number().int().nonnegative().default(10),
+  zelReward: z.number().int().nonnegative().default(50),
+  itemDrops: z.array(z.object({
+    itemId: z.string(),
+    chance: z.number().min(0).max(1),
+    quantity: z.number().int().positive(),
+  })).default([]),
+});
+export type EnemyDefinition = z.infer<typeof enemyDefinitionSchema>;
+
+export const battleStateSchema = z.object({
+  questId: z.string().nullable(),
+  enemyInstanceId: z.string(),
+  enemyHp: z.number().int().nonnegative(),
+  enemyMaxHp: z.number().int().nonnegative(),
+  enemyElement: elementSchema,
+  playerUnits: z.array(z.object({
+    instanceId: z.string(),
+    currentHp: z.number().int().nonnegative(),
+    bbGauge: z.number().min(0).max(100),
+  })),
+  battlePhase: z.enum(['player_turn', 'enemy_turn', 'victory', 'defeat']),
+  turnNumber: z.number().int().nonnegative(),
+});
+export type BattleState = z.infer<typeof battleStateSchema>;
+
 export const summonBannerSchema = z.object({
   id: z.string(),
   name: z.string(),

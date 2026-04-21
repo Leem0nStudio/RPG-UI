@@ -1,20 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Diamond, Sparkles, Star } from 'lucide-react';
 import type { CharacterData } from '@/lib/types';
 import type { SummonBanner, UnitDefinition } from '@/backend-contracts/game';
+import { useGameStore } from '@/store/game-store';
+import { updateCurrencies } from '@/services/write-service';
+import { addUnitToRoster } from '@/services/write-service';
 
 type SummonUnit = UnitDefinition & { spriteUrl: string; cssFilter: string };
 
+const SUMMON_COST = 5; // gems per summon
+
 export function SummoningScreenView({ units, banners }: { units: SummonUnit[]; banners: SummonBanner[] }) {
+  const { bootstrap, bootstrapGame } = useGameStore();
   const [summoningState, setSummoningState] = useState<'idle' | 'summoning' | 'result'>('idle');
   const [resultChar, setResultChar] = useState<CharacterData | SummonUnit | null>(null);
   const [isConsuming, setIsConsuming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSummon = () => {
+  const hasEnoughGems = bootstrap.player.currencies.gems >= SUMMON_COST;
+
+  const handleSummon = useCallback(async () => {
+    if (!hasEnoughGems || units.length === 0) {
+      setError('Not enough gems!');
+      return;
+    }
+
+    setError(null);
     setIsConsuming(true);
-    setTimeout(() => {
+
+    try {
+      // Deduct gems first
+      const currencyResult = await updateCurrencies([{ code: 'gems', amount: -SUMMON_COST }]);
+      if (!currencyResult.success) {
+        setError(currencyResult.error ?? 'Failed to process summon');
+        setIsConsuming(false);
+        return;
+      }
+
+      // Select random unit
       const rngIndex = Math.floor(Math.random() * units.length);
       const rngChar = units[rngIndex];
+
       setResultChar({
         id: rngChar.id,
         name: rngChar.name,
@@ -31,12 +57,24 @@ export function SummoningScreenView({ units, banners }: { units: SummonUnit[]; b
         maxExp: rngChar.maxLevel * 150,
       } as CharacterData);
       setSummoningState('summoning');
-      setIsConsuming(false);
-      
-      setTimeout(() => {
-         setSummoningState('result');
+
+      setTimeout(async () => {
+        setSummoningState('result');
+        setIsConsuming(false);
+
+        // Add unit to roster (persisted)
+        await addUnitToRoster(rngChar.id, rngChar.jobId, 1);
       }, 2500);
-    }, 400);
+    } catch (err) {
+      setError('An error occurred during summon');
+      setIsConsuming(false);
+    }
+  }, [hasEnoughGems, units]);
+
+  const resetSummon = () => {
+    setSummoningState('idle');
+    setResultChar(null);
+    setError(null);
   };
 
   const getRarityGateColors = (rarity: number) => {
@@ -46,11 +84,6 @@ export function SummoningScreenView({ units, banners }: { units: SummonUnit[]; b
   };
 
   const rarityColors = resultChar ? getRarityGateColors(resultChar.rarity) : getRarityGateColors(3);
-
-  const resetSummon = () => {
-    setSummoningState('idle');
-    setResultChar(null);
-  };
 
   return (
     <div className="w-full flex-1 flex flex-col items-center justify-center relative animate-in fade-in duration-300 ui-text">
@@ -68,30 +101,44 @@ export function SummoningScreenView({ units, banners }: { units: SummonUnit[]; b
       </div>
       )}
 
-      {summoningState === 'idle' && (
-        <div className="flex flex-col items-center w-full max-w-[280px] sm:max-w-[300px] gap-4 sm:gap-6 px-3 sm:px-4 mt-6 sm:mt-8">
-           <div className="relative w-full aspect-square border-[3px] border-[#c79a5d] rounded-full shadow-[0_0_30px_rgba(255,215,0,0.3),inset_0_0_30px_rgba(0,0,0,0.8)] overflow-hidden flex items-center justify-center bg-gradient-to-b from-[#2a1a0c] to-[#0a0502]">
-             <div className="absolute inset-0 border-[4px] border-[#5a4227] rounded-full opacity-50 m-2 border-dashed animate-[spin_20s_linear_infinite]"></div>
-             <div className="absolute inset-0 border-[2px] border-[#f2e6d5] shadow-[0_0_10px_white] rounded-full opacity-20 m-6 animate-[spin_15s_linear_infinite_reverse]"></div>
-             
-             <div className="z-10 flex flex-col items-center">
-                 <Diamond size={52} className={`fill-[#00ffcc] text-[#00ffcc] filter transition-all duration-300 ease-in-out sm:w-[60px] sm:h-[60px] ${isConsuming ? 'scale-[0.2] opacity-0 -translate-y-4 brightness-200 drop-shadow-[0_0_20px_rgba(0,255,204,0.9)]' : 'drop-shadow-[0_0_10px_rgba(0,255,204,0.55)] animate-pulse'}`} />
-                 <span className={`mt-2 text-white font-bold text-stroke-black text-[14px] transition-all duration-300 ${isConsuming ? 'opacity-0 scale-90' : 'opacity-100'}`}>5 Gems</span>
-             </div>
-           </div>
+{summoningState === 'idle' && (
+         <div className="flex flex-col items-center w-full max-w-[280px] sm:max-w-[300px] gap-4 sm:gap-6 px-3 sm:px-4 mt-6 sm:mt-8">
+            <div className="relative w-full aspect-square border-[3px] border-[#c79a5d] rounded-full shadow-[0_0_30px_rgba(255,215,0,0.3),inset_0_0_30px_rgba(0,0,0,0.8)] overflow-hidden flex items-center justify-center bg-gradient-to-b from-[#2a1a0c] to-[#0a0502]">
+              <div className="absolute inset-0 border-[4px] border-[#5a4227] rounded-full opacity-50 m-2 border-dashed animate-[spin_20s_linear_infinite]"></div>
+              <div className="absolute inset-0 border-[2px] border-[#f2e6d5] shadow-[0_0_10px_white] rounded-full opacity-20 m-6 animate-[spin_15s_linear_infinite_reverse]"></div>
+              
+              <div className="z-10 flex flex-col items-center">
+                  <Diamond size={52} className={`fill-[#00ffcc] text-[#00ffcc] filter transition-all duration-300 ease-in-out sm:w-[60px] sm:h-[60px] ${isConsuming ? 'scale-[0.2] opacity-0 -translate-y-4 brightness-200 drop-shadow-[0_0_20px_rgba(0,255,204,0.9)]' : 'drop-shadow-[0_0_10px_rgba(0,255,204,0.55)] animate-pulse'}`} />
+                  <span className={`mt-2 text-white font-bold text-stroke-black text-[14px] transition-all duration-300 ${isConsuming ? 'opacity-0 scale-90' : 'opacity-100'}`}>{SUMMON_COST} Gems</span>
+              </div>
+            </div>
 
-           <button 
-             onClick={handleSummon}
-             disabled={isConsuming}
-             className={`w-full relative overflow-hidden bg-gradient-to-b from-[#ffcc00] via-[#ff9900] to-[#cc3300] border-[2px] border-[#ffea99] rounded-[4px] py-3 flex items-center justify-center shadow-[0_6px_15px_rgba(200,80,0,0.6),inset_0_2px_5px_rgba(255,255,255,0.7)] group transition-all duration-200 ${isConsuming ? 'brightness-75 scale-95 pointer-events-none' : 'hover:brightness-110 active:scale-95'}`}
-           >
-              <div className="absolute top-0 w-full h-[30%] bg-gradient-to-b from-white to-transparent opacity-30"></div>
-              <span className="ui-heading font-bold text-white text-[18px] sm:text-[20px] text-stroke-sm fx-low z-10 group-hover:drop-shadow-[0_0_8px_white]">
-                 SUMMON NOW
-              </span>
-           </button>
-        </div>
-      )}
+            {/* Error display */}
+            {error && (
+              <div className="bg-[#c62828] border border-[#8b0000] rounded px-3 py-1 text-white text-[12px] font-bold">
+                {error}
+              </div>
+            )}
+
+            {/* Insufficient gems warning */}
+            {!hasEnoughGems && (
+              <div className="text-[#ef5350] text-[11px] font-bold">
+                You need {SUMMON_COST} gems to summon (you have {bootstrap.player.currencies.gems})
+              </div>
+            )}
+
+            <button 
+              onClick={handleSummon}
+              disabled={isConsuming || !hasEnoughGems}
+              className={`w-full relative overflow-hidden bg-gradient-to-b from-[#ffcc00] via-[#ff9900] to-[#cc3300] border-[2px] border-[#ffea99] rounded-[4px] py-3 flex items-center justify-center shadow-[0_6px_15px_rgba(200,80,0,0.6),inset_0_2px_5px_rgba(255,255,255,0.7)] group transition-all duration-200 ${!hasEnoughGems || isConsuming ? 'brightness-75 scale-95 pointer-events-none opacity-50' : 'hover:brightness-110 active:scale-95'}`}
+            >
+               <div className="absolute top-0 w-full h-[30%] bg-gradient-to-b from-white to-transparent opacity-30"></div>
+               <span className="ui-heading font-bold text-white text-[18px] sm:text-[20px] text-stroke-sm fx-low z-10 group-hover:drop-shadow-[0_0_8px_white]">
+                  SUMMON NOW
+               </span>
+            </button>
+         </div>
+       )}
 
       {summoningState === 'summoning' && (
         <div className="flex flex-col items-center justify-center w-full h-full relative z-20">

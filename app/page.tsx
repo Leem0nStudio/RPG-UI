@@ -1,17 +1,18 @@
 "use client";
 
-import React, { startTransition, useEffect } from 'react';
+import React, { startTransition, useEffect, useState, useCallback } from 'react';
 import { TopBar } from '@/components/layout/TopBar';
 import { BottomNavBar } from '@/components/layout/BottomNavBar';
 import { HomeHubView } from '@/components/views/HomeHubView';
 import { UnitListView } from '@/components/views/UnitListView';
 import { CharacterView } from '@/components/views/CharacterView';
 import { InventoryView } from '@/components/views/InventoryView';
-import { BattleScreenView } from '@/components/views/BattleScreenView';
+import { QuestScreen } from '@/components/views/QuestScreen';
+import { BattleScreen } from '@/components/views/BattleScreen';
 import { SummoningScreenView } from '@/components/views/SummoningScreenView';
 import { calculateUnitStats } from '@/core/stats';
 import { useGameStore, selectCurrentOwnedUnit, selectCurrentUnitDefinition, selectEquippedItems } from '@/store/game-store';
-import type { JobDefinition } from '@/backend-contracts/game';
+import type { JobDefinition, QuestDefinition, EnemyDefinition, BattleState } from '@/backend-contracts/game';
 
 function resolveUnitSprite(unit: any, jobs: JobDefinition[]): { spriteUrl: string; cssFilter: string } {
   const job = jobs.find(j => j.id === unit.jobId);
@@ -33,7 +34,17 @@ export default function Home() {
     equipItem,
     unequipItem,
     bootstrapGame,
+    startQuest,
+    currentQuest,
+    currentEnemies,
+    battleState,
+    lastBattleResult,
+    completeBattle,
+    cancelBattle,
   } = useGameStore();
+  
+  // Local state for quest selection flow
+  const [pendingQuest, setPendingQuest] = useState<QuestDefinition | null>(null);
 
   useEffect(() => {
     startTransition(() => {
@@ -104,8 +115,19 @@ export default function Home() {
             <HomeHubView
               bootstrap={bootstrap}
               onOpenUnits={() => setView('unitList')}
-              onOpenQuest={() => setView('battle')}
+              onOpenQuest={() => setView('quest')}
               onOpenSummon={() => setView('summon')}
+            />
+          )}
+          
+          {!isBootstrapping && view === 'quest' && (
+            <QuestScreen
+              bootstrap={bootstrap}
+              onSelectQuest={(quest) => {
+                setPendingQuest(quest);
+                setView('battle');
+              }}
+              onBack={() => setView('home')}
             />
           )}
 
@@ -157,7 +179,41 @@ export default function Home() {
           )}
 
           {!isBootstrapping && view === 'battle' && (
-            <BattleScreenView onBack={() => setView('home')} />
+            <BattleScreen
+              quest={pendingQuest!}
+              enemies={currentEnemies}
+              onVictory={(result) => {
+                const battleResult: BattleState = {
+                  questId: pendingQuest?.id ?? null,
+                  enemyInstanceId: result.actions[0]?.targetId ?? '',
+                  enemyHp: 0,
+                  enemyMaxHp: 0,
+                  enemyElement: 'Water',
+                  playerUnits: bootstrap.roster.slice(0, 4).map(u => ({
+                    instanceId: u.instanceId,
+                    currentHp: 0,
+                    bbGauge: 0,
+                  })),
+                  battlePhase: 'victory',
+                  turnNumber: result.turns,
+                };
+                void completeBattle(battleResult);
+                setView('home');
+              }}
+              onDefeat={() => {
+                setView('home');
+              }}
+              onBack={() => {
+                setPendingQuest(null);
+                cancelBattle();
+                setView('quest');
+              }}
+              onFlee={() => {
+                setPendingQuest(null);
+                cancelBattle();
+                setView('quest');
+              }}
+            />
           )}
 
           {!isBootstrapping && view === 'summon' && (
