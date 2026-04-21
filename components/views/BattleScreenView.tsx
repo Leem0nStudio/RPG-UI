@@ -1,7 +1,8 @@
 ﻿import React from 'react';
-import { ChevronLeft, Flame, Droplet, Leaf, Moon, Zap, Sparkles } from 'lucide-react';
+import { ChevronLeft, Flame, Droplet, Leaf, Moon, Sun, Sparkles } from 'lucide-react';
 import { SpriteIcon } from '@/components/ui/SpriteIcon';
 import { SQUAD_MOCK, ITEMS_MOCK } from '@/lib/mock-data';
+import { PhaserBattleRuntime } from '@/game-runtime/PhaserBattleRuntime';
 
 export function BattleScreenView({ onBack }: { onBack: () => void }) {
   const getElementColor = (element: string) => {
@@ -10,7 +11,7 @@ export function BattleScreenView({ onBack }: { onBack: () => void }) {
       case 'Water': return "from-[#295a8f] to-[#0a233b] border-[#1a4a7f]";
       case 'Earth': return "from-[#38703a] to-[#123614] border-[#1b5e20]";
       case 'Dark': return "from-[#4a267a] to-[#1a0833] border-[#311b92]";
-      case 'Thunder': return "from-[#b59d22] to-[#6e580a] border-[#a18116]";
+      case 'Light': return "from-[#b59d22] to-[#6e580a] border-[#a18116]";
       default: return "from-[#295a8f] to-[#0a233b] border-[#1a4a7f]";
     }
   };
@@ -21,7 +22,7 @@ export function BattleScreenView({ onBack }: { onBack: () => void }) {
       case 'Water': return <Droplet size={size} className="fill-[#2a5a8f] text-[#1a4a7f]" />;
       case 'Earth': return <Leaf size={size} className="fill-[#4caf50] text-[#1b5e20]" />;
       case 'Dark': return <Moon size={size} className="fill-[#7e57c2] text-[#311b92]" />;
-      case 'Thunder': return <Zap size={size} className="fill-[#f2da3e] text-[#a18116]" />;
+      case 'Light': return <Sun size={size} className="fill-[#f2da3e] text-[#a18116]" />;
       default: return <Droplet size={size} className="fill-[#2a5a8f] text-[#1a4a7f]" />;
     }
   };
@@ -147,6 +148,14 @@ export function BattleScreenView({ onBack }: { onBack: () => void }) {
                </div>
             ))}
          </div>
+      </div>
+
+      <div className="ui-panel p-2">
+        <div className="mb-2">
+          <div className="ui-heading text-[13px] text-white text-stroke-sm">Phaser Runtime Preview</div>
+          <p className="mt-1 text-[11px] text-[#3c2a16]">The playfield is now scaffolded in Phaser so combat can leave static-only UI composition.</p>
+        </div>
+        <PhaserBattleRuntime />
       </div>
     </div>
   );

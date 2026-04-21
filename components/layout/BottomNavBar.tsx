@@ -1,7 +1,8 @@
 import React from 'react';
 import { Flag, Sword, Sparkles, Shield } from 'lucide-react';
+import type { AppView } from '@/store/game-store';
 
-export function BottomNavBar({ currentView, setView }: { currentView: string, setView: (v: any) => void }) {
+export function BottomNavBar({ currentView, setView }: { currentView: AppView, setView: (v: AppView) => void }) {
   const tabs = [
     { id: 'home', label: 'Home', icon: Flag },
     { id: 'battle', label: 'Quests', icon: Sword },
@@ -18,8 +19,7 @@ export function BottomNavBar({ currentView, setView }: { currentView: string, se
              <button
                key={tab.id + idx}
                onClick={() => {
-                 if (tab.id === 'home') setView('unitList');
-                 else setView(tab.id as any);
+                 setView(tab.id as AppView);
                }}
                className={`flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-sm border-[1.5px] relative group overflow-hidden transition-all duration-200 mx-[1px] active:scale-95 ui-text
                  ${isActive 

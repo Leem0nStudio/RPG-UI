@@ -1,0 +1,125 @@
+import { z } from 'zod';
+
+export const elementSchema = z.enum(['Fire', 'Water', 'Earth', 'Light', 'Dark']);
+export type Element = z.infer<typeof elementSchema>;
+
+export const currencySchema = z.enum(['gems', 'zel', 'karma']);
+export type CurrencyCode = z.infer<typeof currencySchema>;
+
+export const statBlockSchema = z.object({
+  hp: z.number().int().nonnegative(),
+  atk: z.number().int().nonnegative(),
+  def: z.number().int().nonnegative(),
+  rec: z.number().int().nonnegative(),
+});
+export type StatBlock = z.infer<typeof statBlockSchema>;
+
+export const itemTypeSchema = z.enum(['Weapon', 'Armor', 'Accessory']);
+export type ItemType = z.infer<typeof itemTypeSchema>;
+
+export const skillDefinitionSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  title: z.string(),
+  description: z.string(),
+  cost: z.union([z.number(), z.string()]).optional(),
+  iconType: z.string().optional(),
+});
+export type SkillDefinition = z.infer<typeof skillDefinitionSchema>;
+
+export const unitDefinitionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  title: z.string(),
+  element: elementSchema,
+  rarity: z.number().int().min(1).max(10),
+  maxLevel: z.number().int().positive(),
+  cost: z.number().int().nonnegative(),
+  baseStats: statBlockSchema,
+  spriteUrl: z.string(),
+  cssFilter: z.string().default(''),
+  skills: z.array(skillDefinitionSchema),
+});
+export type UnitDefinition = z.infer<typeof unitDefinitionSchema>;
+
+export const itemDefinitionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  type: itemTypeSchema,
+  rarity: z.number().int().min(1).max(10),
+  description: z.string(),
+  stats: statBlockSchema,
+  effects: z.array(z.string()).optional(),
+  sprite: z.object({
+    col: z.number().int().nonnegative(),
+    row: z.number().int().nonnegative(),
+    className: z.string().optional(),
+  }),
+});
+export type ItemDefinition = z.infer<typeof itemDefinitionSchema>;
+
+export const questDefinitionSchema = z.object({
+  id: z.string(),
+  worldId: z.string(),
+  stage: z.number().int().positive(),
+  name: z.string(),
+  energyCost: z.number().int().nonnegative(),
+  difficulty: z.enum(['Normal', 'Hard', 'Heroic']),
+  enemyIds: z.array(z.string()),
+  rewardsPreview: z.array(z.string()),
+});
+export type QuestDefinition = z.infer<typeof questDefinitionSchema>;
+
+export const summonBannerSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  cost: z.number().int().positive(),
+  currency: currencySchema,
+  featuredUnitIds: z.array(z.string()),
+  description: z.string(),
+  active: z.boolean(),
+});
+export type SummonBanner = z.infer<typeof summonBannerSchema>;
+
+export const ownedUnitSchema = z.object({
+  instanceId: z.string(),
+  unitId: z.string(),
+  level: z.number().int().positive(),
+  exp: z.number().int().nonnegative(),
+  locked: z.boolean().default(false),
+  equipment: z.object({
+    Weapon: z.string().nullable(),
+    Armor: z.string().nullable(),
+    Accessory: z.string().nullable(),
+  }),
+});
+export type OwnedUnit = z.infer<typeof ownedUnitSchema>;
+
+export const playerProfileSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  level: z.number().int().positive(),
+  energy: z.object({
+    current: z.number().int().nonnegative(),
+    max: z.number().int().positive(),
+    recoverAt: z.string().datetime().nullable(),
+  }),
+  currencies: z.record(currencySchema, z.number().int().nonnegative()),
+});
+export type PlayerProfile = z.infer<typeof playerProfileSchema>;
+
+export const gameContentSchema = z.object({
+  units: z.array(unitDefinitionSchema),
+  items: z.array(itemDefinitionSchema),
+  quests: z.array(questDefinitionSchema),
+  banners: z.array(summonBannerSchema),
+});
+export type GameContent = z.infer<typeof gameContentSchema>;
+
+export const gameBootstrapSchema = z.object({
+  player: playerProfileSchema,
+  roster: z.array(ownedUnitSchema),
+  items: z.array(z.object({ itemId: z.string(), quantity: z.number().int().nonnegative() })),
+  content: gameContentSchema,
+});
+export type GameBootstrap = z.infer<typeof gameBootstrapSchema>;

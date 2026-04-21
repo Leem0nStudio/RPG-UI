@@ -1,40 +1,17 @@
-export type ItemType = 'Weapon' | 'Armor' | 'Accessory';
+import type { ItemDefinition, ItemType as BackendItemType, SkillDefinition, UnitDefinition, Element } from '@/backend-contracts/game';
 
-export interface Item {
-  id: string;
-  name: string;
-  type: ItemType;
-  sprite: { col: number; row: number; className?: string };
-  rarity: number;
-  stats: { hp: number; atk: number; def: number; rec: number };
-  description: string;
-  effects?: string[];
-}
+export type ItemType = BackendItemType;
 
-export interface CharacterSkill {
-  id: string;
-  type: string;
-  title: string;
-  description: string;
-  cost?: number | string;
-  iconType?: string;
-}
+export interface Item extends ItemDefinition {}
 
-export interface CharacterData {
-  id: string;
-  name: string;
-  title: string;
-  element: 'Water' | 'Fire' | 'Earth' | 'Dark' | 'Thunder';
-  rarity: number;
+export interface CharacterSkill extends SkillDefinition {}
+
+export interface CharacterData extends Omit<UnitDefinition, 'maxLevel'> {
   level: number;
   maxLevel: number;
   exp: number;
   maxExp: number;
-  cost: number;
-  baseStats: { hp: number; atk: number; def: number; rec: number };
-  spriteUrl: string;
-  cssFilter: string;
-  skills: CharacterSkill[];
+  element: Element;
 }
 
 export type CharEquipment = { Weapon: Item | null; Armor: Item | null; Accessory: Item | null };

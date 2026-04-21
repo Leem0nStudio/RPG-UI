@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeft, Flame, Droplet, Leaf, Moon, Zap, Star } from 'lucide-react';
+import { Flame, Droplet, Leaf, Moon, Sun, Star } from 'lucide-react';
 import { CharacterData } from '@/lib/types';
 
 export function UnitListView({ characters, onSelectCharacter }: { characters: CharacterData[], onSelectCharacter: (id: string) => void }) {
@@ -23,7 +23,7 @@ export function UnitListView({ characters, onSelectCharacter }: { characters: Ch
                 case 'Water': return "from-[#1a3a5a] to-[#0a1828] border-[#295a8f]";
                 case 'Earth': return "from-[#224424] to-[#0d1c0e] border-[#38703a]";
                 case 'Dark': return "from-[#3a225a] to-[#180e28] border-[#55318a]";
-                case 'Thunder': return "from-[#7a651f] to-[#2b2407] border-[#8a7222]";
+                case 'Light': return "from-[#7a651f] to-[#2b2407] border-[#8a7222]";
                 default: return "from-[#3a3a3a] to-[#181818] border-[#666666]";
               }
             };
@@ -33,7 +33,7 @@ export function UnitListView({ characters, onSelectCharacter }: { characters: Ch
                 case 'Water': return <Droplet size={12} className="fill-[#2a5a8f] text-[#1a4a7f]" />;
                 case 'Earth': return <Leaf size={12} className="fill-[#4caf50] text-[#1b5e20]" />;
                 case 'Dark': return <Moon size={12} className="fill-[#7e57c2] text-[#311b92]" />;
-                case 'Thunder': return <Zap size={12} className="fill-[#f2da3e] text-[#a18116]" />;
+                case 'Light': return <Sun size={12} className="fill-[#f2da3e] text-[#a18116]" />;
                 default: return <Droplet size={12} className="fill-[#2a5a8f] text-[#1a4a7f]" />;
               }
             };

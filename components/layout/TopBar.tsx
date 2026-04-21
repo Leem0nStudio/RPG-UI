@@ -1,7 +1,19 @@
 import React from 'react';
 import { Settings, Diamond } from 'lucide-react';
 
-export function TopBar() {
+export function TopBar({
+  playerName = 'Summoner',
+  playerLevel = 1,
+  gems = 0,
+  zel = 0,
+  karma = 0,
+}: {
+  playerName?: string;
+  playerLevel?: number;
+  gems?: number;
+  zel?: number;
+  karma?: number;
+}) {
   return (
     <div className="relative w-full bg-[var(--color-surface-4)] border-b-[3px] border-[var(--color-surface-5)] shadow-[var(--shadow-low)] z-30 flex-shrink-0">
       <div className="absolute top-0 w-full h-[1.5px] bg-[var(--color-surface-3)]"></div>
@@ -14,9 +26,9 @@ export function TopBar() {
             <span className="text-[var(--color-text-primary)] text-stroke-sm fx-low tracking-wide ui-heading text-[11px] sm:text-[12px]">Brave Frontier</span>
             <span className="text-[#8c7456] hidden sm:inline">|</span>
             <span className="text-[var(--color-text-muted)]">Player:</span>
-            <span className="text-white drop-shadow-[0_1px_1px_rgba(0,0,0,1)] truncate max-w-[64px] sm:max-w-none">Uptodown</span>
+            <span className="text-white drop-shadow-[0_1px_1px_rgba(0,0,0,1)] truncate max-w-[64px] sm:max-w-none">{playerName}</span>
             <span className="text-[#8c7456]">|</span>
-            <span className="text-[var(--color-text-muted)]">Lv <span className="text-white fx-low">1</span></span>
+            <span className="text-[var(--color-text-muted)]">Lv <span className="text-white fx-low">{playerLevel}</span></span>
           </div>
           <div className="mt-[3px] hidden sm:flex items-center ui-text tracking-wide">
             <span className="text-[var(--color-text-muted)] whitespace-nowrap">Arena Status:</span>
@@ -27,15 +39,15 @@ export function TopBar() {
         <div className="flex flex-col gap-[1px] bg-[var(--color-surface-5)] border border-[var(--color-surface-3)] rounded-[2px] p-[2px] w-[96px] sm:w-[110px] fx-low">
           <div className="flex items-center justify-between text-white text-[11px] font-bold px-1 relative h-[16px] bg-gradient-to-r from-[#2a1a0c] to-transparent rounded-sm ui-text">
             <Diamond size={13} className="fill-[#00ffcc] text-[#00ccaa] -ml-[2px]" />
-            <span className="text-stroke-black text-right z-10 ui-text tracking-tight">0</span>
+            <span className="text-stroke-black text-right z-10 ui-text tracking-tight">{gems}</span>
           </div>
           <div className="flex items-center justify-between text-white text-[11px] font-bold px-[5px] relative h-[16px] bg-gradient-to-r from-[#2a1a0c] to-transparent rounded-sm ui-text">
             <div className="w-[11px] h-[11px] rounded-full bg-gradient-to-br from-[#4a9eff] to-[#0033aa] border-[1px] border-[#001144] shadow-inner -ml-[1px]"></div>
-            <span className="text-stroke-black text-right z-10 ui-text tracking-tight">6420</span>
+            <span className="text-stroke-black text-right z-10 ui-text tracking-tight">{zel}</span>
           </div>
           <div className="flex items-center justify-between text-white text-[11px] font-bold px-[5px] relative h-[16px] bg-gradient-to-r from-[#2a1a0c] to-transparent rounded-sm ui-text">
             <div className="w-[11px] h-[11px] rounded-full bg-gradient-to-br from-[#ffd700] to-[#aa6600] border-[1px] border-[#442200] shadow-inner -ml-[1px]"></div>
-            <span className="text-stroke-black text-right z-10 ui-text tracking-tight">1606</span>
+            <span className="text-stroke-black text-right z-10 ui-text tracking-tight">{karma}</span>
           </div>
         </div>
       </div>

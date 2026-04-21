@@ -159,7 +159,7 @@ export function SummoningScreenView() {
                     ${resultChar.element === 'Fire' ? 'text-[#ff5500]' : 
                       resultChar.element === 'Water' ? 'text-[#00ccff]' : 
                       resultChar.element === 'Earth' ? 'text-[#55ff00]' :
-                      resultChar.element === 'Thunder' ? 'text-[#ffeb3b]' : 'text-[#cc00ff]'}`}
+                      resultChar.element === 'Light' ? 'text-[#ffeb3b]' : 'text-[#cc00ff]'}`}
                   >{resultChar.element}</span>
                 </div>
               </div>

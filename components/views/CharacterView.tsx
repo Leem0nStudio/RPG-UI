@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeft, Flame, Droplet, Leaf, Moon, Zap, Star, Flag, Sparkles, Sword } from 'lucide-react';
+import { ChevronLeft, Flame, Droplet, Leaf, Moon, Sun, Star, Flag, Sparkles, Sword } from 'lucide-react';
 import { CharacterData, ItemType, CharEquipment } from '@/lib/types';
 import { StatBox } from '@/components/ui/StatBox';
 import { SkillPanel } from '@/components/ui/SkillPanel';
@@ -14,7 +14,7 @@ export function CharacterView({ character, stats, equipped, onOpenInventory, onB
       case 'Water': return <Droplet size={24} className="fill-[#2a5a8f] text-[#1a4a7f]" />;
       case 'Earth': return <Leaf size={24} className="fill-[#4caf50] text-[#1b5e20]" />;
       case 'Dark': return <Moon size={24} className="fill-[#7e57c2] text-[#311b92]" />;
-      case 'Thunder': return <Zap size={24} className="fill-[#f2da3e] text-[#a18116]" />;
+      case 'Light': return <Sun size={24} className="fill-[#f2da3e] text-[#a18116]" />;
       default: return <Droplet size={24} className="fill-[#2a5a8f] text-[#1a4a7f]" />;
     }
   };
@@ -25,7 +25,7 @@ export function CharacterView({ character, stats, equipped, onOpenInventory, onB
       case 'Water': return "from-[#b8d4e4] to-[#4b7a9f] border-[#223545]";
       case 'Earth': return "from-[#c8e6c9] to-[#66bb6a] border-[#2e7d32]";
       case 'Dark': return "from-[#d1c4e9] to-[#9575cd] border-[#4527a0]";
-      case 'Thunder': return "from-[#f5e391] to-[#c4ab36] border-[#786b12]";
+      case 'Light': return "from-[#f5e391] to-[#c4ab36] border-[#786b12]";
       default: return "from-[#b8d4e4] to-[#4b7a9f] border-[#223545]";
     }
   };
@@ -139,7 +139,7 @@ export function CharacterView({ character, stats, equipped, onOpenInventory, onB
                   ${character.element === 'Water' ? 'bg-[#00ffcc]' : 
                     character.element === 'Fire' ? 'bg-[#ff5500]' : 
                     character.element === 'Earth' ? 'bg-[#55ff00]' : 
-                    character.element === 'Thunder' ? 'bg-[#ffeb3b]' : 'bg-[#aa00ff]'}`} />
+                    character.element === 'Light' ? 'bg-[#ffeb3b]' : 'bg-[#aa00ff]'}`} />
                
                {/* eslint-disable-next-line @next/next/no-img-element */}
                <img 

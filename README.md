@@ -1,20 +1,101 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# RPG UI
 
-# Run and deploy your AI Studio app
+Mobile-first RPG web client inspired by Brave Frontier, now restructured as a data-driven foundation with `Next.js`, `Supabase`, `Zustand`, and a starter `Phaser` runtime.
 
-This contains everything you need to run your app locally.
+## Current state
 
-View your app in AI Studio: https://ai.studio/apps/564677f4-1d68-4c77-a208-2d4704658d17
+This repository now includes the first architectural slice for the real game:
 
-## Run Locally
+- `backend-contracts/`: shared gameplay and content schemas with `zod`
+- `content/`: local seed content used as fallback while Supabase is not configured
+- `core/`: pure simulation modules for elemental rules, stats, stamina, and battle previews
+- `services/`: Supabase-aware content and bootstrap loading
+- `store/`: app state with Zustand
+- `game-runtime/`: client-only Phaser battle runtime scaffold
+- `supabase/`: initial SQL migration and seed scripts
 
-**Prerequisites:**  Node.js
+The app still uses the existing UI screens, but they now sit on top of a real bootstrap path instead of isolated view-local mock state.
 
+## Stack
+
+- `Next.js` for shell, routing, and DOM UI
+- `Supabase` for backend, auth, content, and player persistence
+- `Zustand` for client state
+- `Phaser` for runtime playfield integration
+- `TypeScript` for shared contracts and simulation modules
+
+## Environment
+
+Create `.env.local` from `.env.example` and set:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+GEMINI_API_KEY=
+APP_URL=http://localhost:3000
+```
+
+If Supabase env vars are missing, the app falls back to local seeded content so the UI can still render.
+
+## Run locally
 
 1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+
+```bash
+npm install
+```
+
+2. Configure `.env.local`
+
+3. Start the app:
+
+```bash
+npm run dev
+```
+
+## Deploy on Vercel
+
+This repo is ready to be imported directly into Vercel as a `Next.js` project.
+
+Configure these environment variables in the Vercel dashboard:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+GEMINI_API_KEY
+APP_URL
+```
+
+Recommended:
+
+- set `APP_URL` to your final Vercel domain
+- use the same Supabase project across Preview and Production only if that matches your content workflow
+- keep service-role keys out of the browser environment
+
+## Supabase bootstrap
+
+Initial database files live in:
+
+- `supabase/migrations/0001_initial_schema.sql`
+- `supabase/seed.sql`
+
+Apply them with your preferred Supabase workflow:
+
+- Supabase CLI
+- SQL editor in the dashboard
+- migration runner in your deployment pipeline
+
+## Architecture notes
+
+- Simulation rules live outside the renderer.
+- Phaser is client-only and currently used as a battle runtime scaffold.
+- React/DOM remains responsible for text-heavy HUD and management screens.
+- The current implementation is an architectural base, not the full game loop yet.
+
+## Next implementation targets
+
+- authenticated Supabase bootstrap
+- remote content loading for quests, banners, and units
+- server-validated summon and reward flows
+- full quest and battle runtime integration
+- mobile-first hub and squad preparation flows

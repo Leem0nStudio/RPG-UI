@@ -1,115 +1,142 @@
 "use client";
 
-import React, { useState } from 'react';
-import { ItemType, Item, CharEquipment } from '@/lib/types';
-import { CHARACTERS, INVENTORY } from '@/lib/mock-data';
+import React, { startTransition, useEffect } from 'react';
 import { TopBar } from '@/components/layout/TopBar';
 import { BottomNavBar } from '@/components/layout/BottomNavBar';
-
+import { HomeHubView } from '@/components/views/HomeHubView';
 import { UnitListView } from '@/components/views/UnitListView';
 import { CharacterView } from '@/components/views/CharacterView';
 import { InventoryView } from '@/components/views/InventoryView';
 import { BattleScreenView } from '@/components/views/BattleScreenView';
 import { SummoningScreenView } from '@/components/views/SummoningScreenView';
+import { calculateUnitStats } from '@/core/stats';
+import { useGameStore, selectCurrentOwnedUnit, selectCurrentUnitDefinition, selectEquippedItems } from '@/store/game-store';
 
 export default function Home() {
-  const [view, setView] = useState<'unitList' | 'character' | 'inventory' | 'battle' | 'summon'>('unitList');
-  const [selectedCharId, setSelectedCharId] = useState<string>(CHARACTERS[0].id);
-  const [targetSlot, setTargetSlot] = useState<ItemType | null>(null);
+  const {
+    isBootstrapping,
+    view,
+    targetSlot,
+    bootstrap,
+    setView,
+    selectUnit,
+    openInventoryForSlot,
+    equipItem,
+    unequipItem,
+    bootstrapGame,
+  } = useGameStore();
 
-  const [equippedByChar, setEquippedByChar] = useState<Record<string, CharEquipment>>({
-    c1: { Weapon: null, Armor: null, Accessory: null },
-    c2: { Weapon: null, Armor: null, Accessory: null },
-    c3: { Weapon: null, Armor: null, Accessory: null },
-    c4: { Weapon: null, Armor: null, Accessory: null }
+  useEffect(() => {
+    startTransition(() => {
+      void bootstrapGame();
+    });
+  }, [bootstrapGame]);
+
+  const currentOwnedUnit = selectCurrentOwnedUnit(useGameStore.getState());
+  const currentUnit = selectCurrentUnitDefinition(useGameStore.getState());
+  const equipped = selectEquippedItems(useGameStore.getState());
+  const currentStats = currentUnit && currentOwnedUnit
+    ? calculateUnitStats(currentUnit, currentOwnedUnit, [equipped.Weapon, equipped.Armor, equipped.Accessory])
+    : { hp: 0, atk: 0, def: 0, rec: 0 };
+
+  const uiCharacters = bootstrap.content.units.map((unit) => {
+    const owned = bootstrap.roster.find((entry) => entry.unitId === unit.id);
+    return {
+      ...unit,
+      level: owned?.level ?? 1,
+      maxLevel: unit.maxLevel,
+      exp: owned?.exp ?? 0,
+      maxExp: Math.max(15, unit.maxLevel * 150),
+    };
   });
 
-  const selectedChar = CHARACTERS.find(c => c.id === selectedCharId) || CHARACTERS[0];
-  const charEquip = equippedByChar[selectedCharId] || { Weapon: null, Armor: null, Accessory: null };
-
-  // Calculate current stats including equipment boosts for the selected character
-  const currentStats = {
-    hp: selectedChar.baseStats.hp + (charEquip.Weapon?.stats.hp || 0) + (charEquip.Armor?.stats.hp || 0) + (charEquip.Accessory?.stats.hp || 0),
-    atk: selectedChar.baseStats.atk + (charEquip.Weapon?.stats.atk || 0) + (charEquip.Armor?.stats.atk || 0) + (charEquip.Accessory?.stats.atk || 0),
-    def: selectedChar.baseStats.def + (charEquip.Weapon?.stats.def || 0) + (charEquip.Armor?.stats.def || 0) + (charEquip.Accessory?.stats.def || 0),
-    rec: selectedChar.baseStats.rec + (charEquip.Weapon?.stats.rec || 0) + (charEquip.Armor?.stats.rec || 0) + (charEquip.Accessory?.stats.rec || 0),
-  };
-
-  const handleOpenInventory = (slot: ItemType) => {
-    setTargetSlot(slot);
-    setView('inventory');
-  };
-
-  const handleSelectCharacter = (id: string) => {
-    setSelectedCharId(id);
-    setView('character');
-  };
-
-  const handleEquipItem = (item: Item) => {
-    if (targetSlot === item.type) {
-      setEquippedByChar(prev => ({
-        ...prev,
-        [selectedCharId]: { ...prev[selectedCharId], [item.type]: item }
-      }));
-      setView('character');
-    }
-  };
-
-  const handleUnequip = (slot: ItemType) => {
-    setEquippedByChar(prev => ({
-      ...prev,
-      [selectedCharId]: { ...prev[selectedCharId], [slot]: null }
-    }));
-  };
+  const inventory = bootstrap.content.items.filter((item) =>
+    bootstrap.items.some((ownedItem) => ownedItem.itemId === item.id && ownedItem.quantity > 0)
+  );
 
   return (
     <div className="flex h-screen w-full items-center justify-center overflow-hidden select-none ui-text bg-[var(--color-bg-root)]">
-      <div 
+      <div
         className="relative w-full max-w-[420px] h-[100dvh] max-h-[850px] sm:h-[85dvh] sm:rounded-[12px] overflow-hidden flex flex-col sm:border-[5px] sm:border-[var(--color-surface-4)] shadow-[var(--shadow-high),inset_0_0_15px_rgba(0,0,0,0.45)] bg-[var(--color-bg-surface)]"
         style={{
           backgroundImage: `
             radial-gradient(ellipse at 50% 50%, rgba(120, 60, 20, 0.11) 0%, rgba(20, 10, 5, 0.93) 100%),
             repeating-conic-gradient(from 45deg at 20% 20%, #412614 0deg 90deg, #332012 90deg 180deg)
           `,
-          backgroundSize: '100% 100%, 80px 80px'
+          backgroundSize: '100% 100%, 80px 80px',
         }}
       >
-        <TopBar />
-        
-        {/* Main Content Area */}
+        <TopBar
+          playerName={bootstrap.player.name}
+          playerLevel={bootstrap.player.level}
+          gems={bootstrap.player.currencies.gems}
+          zel={bootstrap.player.currencies.zel}
+          karma={bootstrap.player.currencies.karma}
+        />
+
         <div className="flex-1 overflow-y-auto px-2 pt-4 pb-2 relative z-10 w-full flex flex-col scroll-smooth">
-          {view === 'unitList' && (
+          {isBootstrapping && (
+            <div className="ui-panel p-4 text-center">
+              <div className="ui-heading text-[18px] text-white text-stroke-sm">Loading realm data...</div>
+              <p className="mt-2 text-[12px] text-[#3c2a16]">Bootstrapping Supabase-ready content, player state, and runtime shell.</p>
+            </div>
+          )}
+
+          {!isBootstrapping && view === 'home' && (
+            <HomeHubView
+              bootstrap={bootstrap}
+              onOpenUnits={() => setView('unitList')}
+              onOpenQuest={() => setView('battle')}
+              onOpenSummon={() => setView('summon')}
+            />
+          )}
+
+          {!isBootstrapping && view === 'unitList' && (
             <UnitListView
-               characters={CHARACTERS}
-               onSelectCharacter={handleSelectCharacter}
+              characters={uiCharacters}
+              onSelectCharacter={(unitId) => {
+                const owned = bootstrap.roster.find((entry) => entry.unitId === unitId);
+                if (owned) selectUnit(owned.instanceId);
+              }}
             />
           )}
-          {view === 'character' && (
-            <CharacterView 
-               character={selectedChar}
-               stats={currentStats} 
-               equipped={charEquip} 
-               onOpenInventory={handleOpenInventory}
-               onBack={() => setView('unitList')}
+
+          {!isBootstrapping && view === 'character' && currentUnit && (
+            <CharacterView
+              character={{
+                ...currentUnit,
+                level: currentOwnedUnit?.level ?? 1,
+                maxLevel: currentUnit.maxLevel,
+                exp: currentOwnedUnit?.exp ?? 0,
+                maxExp: Math.max(15, currentUnit.maxLevel * 150),
+              }}
+              stats={currentStats}
+              equipped={equipped}
+              onOpenInventory={openInventoryForSlot}
+              onBack={() => setView('unitList')}
             />
           )}
-          {view === 'inventory' && (
-            <InventoryView 
-               targetSlot={targetSlot} 
-               inventory={INVENTORY}
-               onBack={() => setView('character')}
-               onEquip={handleEquipItem}
-               onUnequip={handleUnequip}
-               equippedItem={targetSlot ? charEquip[targetSlot] : null}
+
+          {!isBootstrapping && view === 'inventory' && (
+            <InventoryView
+              targetSlot={targetSlot}
+              inventory={inventory}
+              onBack={() => setView('character')}
+              onEquip={(item) => equipItem(item.id)}
+              onUnequip={unequipItem}
+              equippedItem={targetSlot ? equipped[targetSlot] : null}
             />
           )}
-          {view === 'battle' && (
-            <BattleScreenView onBack={() => setView('unitList')} />
+
+          {!isBootstrapping && view === 'battle' && (
+            <BattleScreenView onBack={() => setView('home')} />
           )}
-          {view === 'summon' && (
+
+          {!isBootstrapping && view === 'summon' && (
             <SummoningScreenView />
           )}
         </div>
+
         <BottomNavBar currentView={view} setView={setView} />
       </div>
     </div>
