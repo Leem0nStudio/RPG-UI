@@ -1,12 +1,21 @@
 import React from 'react';
 import { ChevronLeft, Flame, Droplet, Leaf, Moon, Sun, Star, Flag, Sparkles, Sword } from 'lucide-react';
 import { CharacterData, ItemType, CharEquipment } from '@/lib/types';
-import type { JobDefinition } from '@/backend-contracts/game';
+import type { JobDefinition, StatBlock } from '@/backend-contracts/game';
 import { StatBox } from '@/components/ui/StatBox';
 import { SkillPanel } from '@/components/ui/SkillPanel';
 import { EquipmentSlot } from '@/components/ui/EquipmentSlot';
 
-export function CharacterView({ character, job, stats, equipped, onOpenInventory, onBack }: { character: CharacterData, job?: JobDefinition, stats: any, equipped: CharEquipment, onOpenInventory: (slot: ItemType) => void, onBack: () => void }) {
+interface CharacterViewProps {
+  character: CharacterData;
+  job?: JobDefinition;
+  stats: StatBlock;
+  equipped: CharEquipment;
+  onOpenInventory: (slot: ItemType) => void;
+  onBack: () => void;
+}
+
+export function CharacterView({ character, job, stats, equipped, onOpenInventory, onBack }: CharacterViewProps) {
   const spriteUrl = job?.spriteUrl ?? character.spriteUrl ?? '';
   const cssFilter = job?.cssFilter ?? character.cssFilter ?? '';
   const getStatColor = (current: number, base: number) => current > base ? "text-[#00ffcc]" : "text-white";

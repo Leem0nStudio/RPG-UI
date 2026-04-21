@@ -12,7 +12,8 @@ import { BattleScreen } from '@/components/views/BattleScreen';
 import { SummoningScreenView } from '@/components/views/SummoningScreenView';
 import { calculateUnitStats } from '@/core/stats';
 import { useGameStore, selectCurrentOwnedUnit, selectCurrentUnitDefinition, selectEquippedItems } from '@/store/game-store';
-import type { JobDefinition, QuestDefinition, EnemyDefinition, BattleState } from '@/backend-contracts/game';
+import type { JobDefinition, QuestDefinition, EnemyDefinition, BattleState, StatBlock } from '@/backend-contracts/game';
+import { useMemo } from 'react';
 
 function resolveUnitSprite(unit: any, jobs: JobDefinition[]): { spriteUrl: string; cssFilter: string } {
   const job = jobs.find(j => j.id === unit.jobId);
@@ -52,12 +53,15 @@ export default function Home() {
     });
   }, [bootstrapGame]);
 
-  const currentOwnedUnit = selectCurrentOwnedUnit(useGameStore.getState());
-  const currentUnit = selectCurrentUnitDefinition(useGameStore.getState());
-  const equipped = selectEquippedItems(useGameStore.getState());
-  const currentStats = currentUnit && currentOwnedUnit
-    ? calculateUnitStats(currentUnit, currentOwnedUnit, [equipped.Weapon, equipped.Armor, equipped.Accessory])
-    : { hp: 0, atk: 0, def: 0, rec: 0 };
+  // Reactive selectors - these will update when state changes
+  const currentOwnedUnit = useGameStore(selectCurrentOwnedUnit);
+  const currentUnit = useGameStore(selectCurrentUnitDefinition);
+  const equipped = useGameStore(selectEquippedItems);
+  
+  const currentStats: StatBlock = useMemo(() => {
+    if (!currentUnit || !currentOwnedUnit) return { hp: 0, atk: 0, def: 0, rec: 0 };
+    return calculateUnitStats(currentUnit, currentOwnedUnit, [equipped.Weapon, equipped.Armor, equipped.Accessory]);
+  }, [currentUnit, currentOwnedUnit, equipped.Weapon, equipped.Armor, equipped.Accessory]);
 
   const uiCharacters = bootstrap.content.units.map((unit) => {
     const owned = bootstrap.roster.find((entry) => entry.unitId === unit.id);
@@ -146,6 +150,20 @@ export default function Home() {
               <div>
                 <p className="ui-heading text-[18px] mb-2">No Units Found</p>
                 <p className="text-[12px]">Visit the Summon to recruit units</p>
+              </div>
+            </div>
+          )}
+
+          {!isBootstrapping && view === 'character' && !currentUnit && (
+            <div className="flex-1 flex items-center justify-center text-[#a58d78] text-center p-4">
+              <div>
+                <p className="ui-heading text-[18px] mb-2">No Unit Selected</p>
+                <button 
+                  onClick={() => setView('unitList')}
+                  className="ui-panel px-4 py-2 text-[12px] font-bold text-[#3c2a16]"
+                >
+                  Select a Unit
+                </button>
               </div>
             </div>
           )}
