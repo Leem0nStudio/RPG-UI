@@ -12,26 +12,6 @@ export type JobTier = z.infer<typeof jobTierSchema>;
 export const jobCategorySchema = z.enum(['Sword', 'Magic', 'Bow', 'Thief', 'Trade', 'Heal']);
 export type JobCategory = z.infer<typeof jobCategorySchema>;
 
-export const jobDefinitionSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  tier: jobTierSchema,
-  category: jobCategorySchema,
-  spriteUrl: z.string(),
-  cssFilter: z.string().default(''),
-  requiredJobLevel: z.number().int().positive().default(10),
-  evolvedFrom: z.string().nullable(),
-  baseStats: statBlockSchema,
-  statMultipliers: z.object({
-    hp: z.number().min(0).default(1),
-    atk: z.number().min(0).default(1),
-    def: z.number().min(0).default(1),
-    rec: z.number().min(0).default(1),
-  }).default({ hp: 1, atk: 1, def: 1, rec: 1 }),
-  skills: z.array(skillDefinitionSchema).default([]),
-});
-export type JobDefinition = z.infer<typeof jobDefinitionSchema>;
-
 export const statBlockSchema = z.object({
   hp: z.number().int().nonnegative(),
   atk: z.number().int().nonnegative(),
@@ -52,6 +32,26 @@ export const skillDefinitionSchema = z.object({
   iconType: z.string().optional(),
 });
 export type SkillDefinition = z.infer<typeof skillDefinitionSchema>;
+
+export const jobDefinitionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  tier: jobTierSchema,
+  category: jobCategorySchema,
+  spriteUrl: z.string(),
+  cssFilter: z.string().default(''),
+  requiredJobLevel: z.number().int().positive().default(10),
+  evolvedFrom: z.string().nullable(),
+  baseStats: statBlockSchema,
+  statMultipliers: z.object({
+    hp: z.number().min(0).default(1),
+    atk: z.number().min(0).default(1),
+    def: z.number().min(0).default(1),
+    rec: z.number().min(0).default(1),
+  }).default({ hp: 1, atk: 1, def: 1, rec: 1 }),
+  skills: z.array(skillDefinitionSchema).default([]),
+});
+export type JobDefinition = z.infer<typeof jobDefinitionSchema>;
 
 export const unitDefinitionSchema = z.object({
   id: z.string(),
