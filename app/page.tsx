@@ -53,15 +53,29 @@ export default function Home() {
     });
   }, [bootstrapGame]);
 
-  // Reactive selectors - these will update when state changes
-  const currentOwnedUnit = useGameStore(selectCurrentOwnedUnit);
-  const currentUnit = useGameStore(selectCurrentUnitDefinition);
-  const equipped = useGameStore(selectEquippedItems);
+  // Get state directly to avoid selector issues
+  const state = useGameStore();
+  const currentOwnedUnit = state.selectedUnitInstanceId 
+    ? state.bootstrap.roster.find(u => u.instanceId === state.selectedUnitInstanceId) ?? null
+    : state.bootstrap.roster[0] ?? null;
+  const currentUnit = currentOwnedUnit
+    ? state.bootstrap.content.units.find(u => u.id === currentOwnedUnit.unitId) ?? null
+    : null;
+  
+  const equipped = useMemo(() => {
+    if (!currentOwnedUnit) return { Weapon: null, Armor: null, Accessory: null };
+    return {
+      Weapon: state.bootstrap.content.items.find(i => i.id === currentOwnedUnit.equipment.Weapon) ?? null,
+      Armor: state.bootstrap.content.items.find(i => i.id === currentOwnedUnit.equipment.Armor) ?? null,
+      Accessory: state.bootstrap.content.items.find(i => i.id === currentOwnedUnit.equipment.Accessory) ?? null,
+    };
+  }, [currentOwnedUnit, state.bootstrap.content.items]);
   
   const currentStats: StatBlock = useMemo(() => {
     if (!currentUnit || !currentOwnedUnit) return { hp: 0, atk: 0, def: 0, rec: 0 };
-    return calculateUnitStats(currentUnit, currentOwnedUnit, [equipped.Weapon, equipped.Armor, equipped.Accessory]);
-  }, [currentUnit, currentOwnedUnit, equipped.Weapon, equipped.Armor, equipped.Accessory]);
+    const job = state.bootstrap.content.jobs.find(j => j.id === currentUnit.jobId);
+    return calculateUnitStats(currentUnit, currentOwnedUnit, [equipped.Weapon, equipped.Armor, equipped.Accessory], job);
+  }, [currentUnit, currentOwnedUnit, equipped, state.bootstrap.content.jobs]);
 
   const uiCharacters = bootstrap.content.units.map((unit) => {
     const owned = bootstrap.roster.find((entry) => entry.unitId === unit.id);
