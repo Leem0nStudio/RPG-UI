@@ -83,7 +83,7 @@ export async function loadGameContent(): Promise<GameContent> {
   const remoteJobs = ((jobsRes.data as JobRow[] | null) ?? []).map((row) => ({
     id: row.id,
     name: row.name,
-    tier: row.tier as 1 | 2 | 3,
+    tier: row.tier as '1' | '2' | '3',
     category: row.category as 'Sword' | 'Magic' | 'Bow' | 'Thief' | 'Trade' | 'Heal',
     spriteUrl: row.sprite_url,
     cssFilter: row.css_filter,

@@ -1,11 +1,14 @@
 import React from 'react';
 import { ChevronLeft, Flame, Droplet, Leaf, Moon, Sun, Star, Flag, Sparkles, Sword } from 'lucide-react';
 import { CharacterData, ItemType, CharEquipment } from '@/lib/types';
+import type { JobDefinition } from '@/backend-contracts/game';
 import { StatBox } from '@/components/ui/StatBox';
 import { SkillPanel } from '@/components/ui/SkillPanel';
 import { EquipmentSlot } from '@/components/ui/EquipmentSlot';
 
-export function CharacterView({ character, stats, equipped, onOpenInventory, onBack }: { character: CharacterData, stats: any, equipped: CharEquipment, onOpenInventory: (slot: ItemType) => void, onBack: () => void }) {
+export function CharacterView({ character, job, stats, equipped, onOpenInventory, onBack }: { character: CharacterData, job?: JobDefinition, stats: any, equipped: CharEquipment, onOpenInventory: (slot: ItemType) => void, onBack: () => void }) {
+  const spriteUrl = job?.spriteUrl ?? character.spriteUrl ?? '';
+  const cssFilter = job?.cssFilter ?? character.cssFilter ?? '';
   const getStatColor = (current: number, base: number) => current > base ? "text-[#00ffcc]" : "text-white";
 
   const getElementIcon = () => {
@@ -141,13 +144,13 @@ export function CharacterView({ character, stats, equipped, onOpenInventory, onB
                     character.element === 'Earth' ? 'bg-[#55ff00]' : 
                     character.element === 'Light' ? 'bg-[#ffeb3b]' : 'bg-[#aa00ff]'}`} />
                
-               {/* eslint-disable-next-line @next/next/no-img-element */}
-               <img 
-                  src={character.spriteUrl} 
-                  alt={character.name} 
-                  className="object-contain h-[135%] sm:h-[150%] max-w-[160%] sm:max-w-[180%] origin-bottom transform translate-y-2 pointer-events-none filter brightness-105"
-                  style={{ imageRendering: 'pixelated', filter: character.cssFilter }}
-               />
+{/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                   src={spriteUrl} 
+                   alt={character.name} 
+                   className="object-contain h-[135%] sm:h-[150%] max-w-[160%] sm:max-w-[180%] origin-bottom transform translate-y-2 pointer-events-none filter brightness-105"
+                   style={{ imageRendering: 'pixelated', filter: cssFilter }}
+                />
             </div>
 
             <div className="absolute -bottom-[15px] left-1/2 -translate-x-1/2 w-[140px] sm:w-[160px] h-[50px] sm:h-[60px] -z-10 drop-shadow-[0_12px_15px_rgba(0,0,0,0.9)]">

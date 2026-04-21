@@ -64,8 +64,8 @@ export const unitDefinitionSchema = z.object({
   maxJobLevel: z.number().int().positive().default(50),
   cost: z.number().int().nonnegative(),
   baseStats: statBlockSchema,
-  spriteUrl: z.string(),
-  cssFilter: z.string().default(''),
+  spriteUrl: z.string().optional(),
+  cssFilter: z.string().optional(),
   skills: z.array(skillDefinitionSchema),
 });
 export type UnitDefinition = z.infer<typeof unitDefinitionSchema>;

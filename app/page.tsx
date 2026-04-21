@@ -110,6 +110,7 @@ export default function Home() {
                 exp: currentOwnedUnit?.exp ?? 0,
                 maxExp: Math.max(15, currentUnit.maxLevel * 150),
               }}
+              job={bootstrap.content.jobs.find(j => j.id === currentUnit.jobId)}
               stats={currentStats}
               equipped={equipped}
               onOpenInventory={openInventoryForSlot}
