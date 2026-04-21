@@ -1,4 +1,4 @@
-import type { GameBootstrap, GameContent, JobDefinition } from '@/backend-contracts/game';
+import type { GameBootstrap, GameContent, JobDefinition, EnemyDefinition } from '@/backend-contracts/game';
 
 const fallbackJobs: JobDefinition[] = [
   { id: 'job_swordman', name: 'Swordman', tier: '1', category: 'Sword', spriteUrl: '/assets/sprites/characters/1job/swordman_.png', cssFilter: '', requiredJobLevel: 10, evolvedFrom: null, baseStats: { hp: 200, atk: 20, def: 15, rec: 5 }, statMultipliers: { hp: 1.2, atk: 1.1, def: 1.0, rec: 0.8 }, skills: [] },
@@ -37,6 +37,13 @@ const fallbackQuests = [
   { id: 'quest_cave_1', worldId: 'world_cave', stage: 1, name: 'Dark Cave', energyCost: 10, difficulty: 'Hard' as const, enemyIds: ['enemy_bat'], rewardsPreview: ['EXP x250', 'Zel x500'] },
 ];
 
+const fallbackEnemies: EnemyDefinition[] = [
+  { id: 'enemy_slime', name: 'Slime', title: 'Gelatinous Blob', element: 'Water', rarity: 1, maxLevel: 10, baseStats: { hp: 80, atk: 15, def: 5, rec: 5 }, skills: [], aiType: 'defensive', expReward: 10, zelReward: 20, itemDrops: [] },
+  { id: 'enemy_goblin', name: 'Goblin', title: 'Forest Scavenger', element: 'Earth', rarity: 2, maxLevel: 15, baseStats: { hp: 150, atk: 35, def: 10, rec: 8 }, skills: [], aiType: 'aggressive', expReward: 25, zelReward: 50, itemDrops: [] },
+  { id: 'enemy_wolf', name: 'Wolf', title: 'Wild Beast', element: 'Earth', rarity: 2, maxLevel: 20, baseStats: { hp: 200, atk: 45, def: 12, rec: 10 }, skills: [], aiType: 'aggressive', expReward: 40, zelReward: 80, itemDrops: [] },
+  { id: 'enemy_bat', name: 'Bat', title: 'Cave Dweller', element: 'Dark', rarity: 3, maxLevel: 25, baseStats: { hp: 180, atk: 55, def: 8, rec: 15 }, skills: [], aiType: 'balanced', expReward: 60, zelReward: 120, itemDrops: [] },
+];
+
 const fallbackBanners = [
   { id: 'banner_starter', name: 'Starter Summon', cost: 5, currency: 'gems' as const, featuredUnitIds: ['u_hero_1', 'u_hero_2', 'u_hero_3'], description: 'Basic units banner.', active: true },
 ];
@@ -47,6 +54,7 @@ export const gameContent: GameContent = {
   quests: fallbackQuests,
   banners: fallbackBanners,
   jobs: fallbackJobs,
+  enemies: fallbackEnemies,
 };
 
 export const bootstrapData: GameBootstrap = {

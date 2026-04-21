@@ -3,6 +3,7 @@ import { scaleBaseStats } from '@/core/stats';
 import { previewDamage } from '@/core/battle';
 import { getElementMultiplier } from '@/core/elemental';
 import { getSupabaseBrowserClient } from '@/services/supabase/client';
+import { gameContent } from '@/content/game-content';
 
 // AI Types
 export type AIType = 'aggressive' | 'defensive' | 'balanced' | 'boss';
@@ -68,34 +69,42 @@ const ELEMENT_SPRITES: Record<Element, string> = {
  */
 export async function loadEnemies(enemyIds?: string[]): Promise<EnemyDefinition[]> {
   const supabase = getSupabaseBrowserClient();
-  if (!supabase) return [];
-
-  let query = supabase.from('enemy_definitions').select('*');
   
-  if (enemyIds && enemyIds.length > 0) {
-    query = query.in('id', enemyIds);
+  if (supabase) {
+    let query = supabase.from('enemy_definitions').select('*');
+    
+    if (enemyIds && enemyIds.length > 0) {
+      query = query.in('id', enemyIds);
+    }
+
+    const { data, error } = await query;
+
+    if (!error && data && data.length > 0) {
+      return (data as any[]).map((row) => ({
+        id: row.id,
+        name: row.name,
+        title: row.title,
+        element: row.element,
+        rarity: row.rarity,
+        maxLevel: row.max_level,
+        baseStats: row.base_stats,
+        spriteUrl: row.sprite_url,
+        cssFilter: row.css_filter,
+        skills: row.skills ?? [],
+        aiType: row.ai_type ?? 'aggressive',
+        expReward: row.exp_reward,
+        zelReward: row.zel_reward,
+        itemDrops: row.item_drops ?? [],
+      }));
+    }
   }
 
-  const { data, error } = await query;
-
-  if (error || !data) return [];
-
-  return (data as any[]).map((row) => ({
-    id: row.id,
-    name: row.name,
-    title: row.title,
-    element: row.element,
-    rarity: row.rarity,
-    maxLevel: row.max_level,
-    baseStats: row.base_stats,
-    spriteUrl: row.sprite_url,
-    cssFilter: row.css_filter,
-    skills: row.skills ?? [],
-    aiType: row.ai_type ?? 'aggressive',
-    expReward: row.exp_reward,
-    zelReward: row.zel_reward,
-    itemDrops: row.item_drops ?? [],
-  }));
+  // Fallback to local content
+  let enemies = gameContent.enemies;
+  if (enemyIds && enemyIds.length > 0) {
+    enemies = enemies.filter(e => enemyIds.includes(e.id));
+  }
+  return enemies;
 }
 
 /**

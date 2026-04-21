@@ -183,6 +183,7 @@ export const gameContentSchema = z.object({
   quests: z.array(questDefinitionSchema),
   banners: z.array(summonBannerSchema),
   jobs: z.array(jobDefinitionSchema),
+  enemies: z.array(enemyDefinitionSchema),
 });
 export type GameContent = z.infer<typeof gameContentSchema>;
 
