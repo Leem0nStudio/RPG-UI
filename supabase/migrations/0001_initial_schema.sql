@@ -5,8 +5,8 @@ create table if not exists public.job_definitions (
   name text not null,
   tier text not null check (tier in ('1', '2', '3')),
   category text not null check (category in ('Sword', 'Magic', 'Bow', 'Thief', 'Trade', 'Heal')),
-  sprite_url text not null,
-  css_filter text not null default '',
+  sprite_url text,
+  css_filter text,
   required_job_level integer not null default 10,
   evolved_from text null,
   base_stats jsonb not null,
@@ -25,8 +25,8 @@ create table if not exists public.unit_definitions (
   max_job_level integer not null default 50,
   cost integer not null,
   base_stats jsonb not null,
-  sprite_url text not null,
-  css_filter text not null default '',
+  sprite_url text,
+  css_filter text,
   skills jsonb not null default '[]'::jsonb
 );
 
