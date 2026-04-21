@@ -196,9 +196,21 @@ export default function Home() {
             />
           )}
 
-          {!isBootstrapping && view === 'battle' && (
+          {!isBootstrapping && view === 'battle' && pendingQuest && currentEnemies.length === 0 && (
+            <div className="flex-1 flex items-center justify-center text-[#a58d78] text-center p-4">
+              <div>
+                <p className="ui-heading text-[18px] mb-2">No Enemies Found</p>
+                <p className="text-[12px]">Quest enemies not loaded</p>
+                <button onClick={() => setView('quest')} className="ui-panel px-4 py-2 text-[12px] font-bold text-[#3c2a16] mt-2">
+                  Back to Quests
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!isBootstrapping && view === 'battle' && pendingQuest && currentEnemies.length > 0 && (
             <BattleScreen
-              quest={pendingQuest!}
+              quest={pendingQuest}
               enemies={currentEnemies}
               onVictory={(result) => {
                 const battleResult: BattleState = {
