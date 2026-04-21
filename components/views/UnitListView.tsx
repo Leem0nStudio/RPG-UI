@@ -4,18 +4,18 @@ import { CharacterData } from '@/lib/types';
 
 export function UnitListView({ characters, onSelectCharacter }: { characters: CharacterData[], onSelectCharacter: (id: string) => void }) {
   return (
-    <div className="w-full flex-1 flex flex-col animate-in fade-in duration-300 relative">
+    <div className="w-full flex-1 flex flex-col animate-in fade-in duration-300 relative ui-text">
       {/* Header Banner */}
-      <div className="relative w-full h-[40px] bg-gradient-to-r from-[#4a2e1a] via-[#5c3a21] to-[#4a2e1a] border-[2px] border-[#c79a5d] rounded-[4px] mb-4 shadow-[0_4px_10px_rgba(0,0,0,0.8)] flex items-center justify-center overflow-hidden">
+      <div className="relative w-full h-[36px] sm:h-[40px] bg-gradient-to-r from-[#4a2e1a] via-[#5c3a21] to-[#4a2e1a] border-[2px] border-[var(--color-accent-gold)] rounded-[4px] mb-3 sm:mb-4 shadow-[var(--shadow-medium)] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\\'20\\' height=\\'20\\' viewBox=\\'0 0 20 20\\' xmlns=\\'http://www.w3.org/2000/svg\\'%3E%3Cpath d=\\'M0 0h20v20H0V0zm10 10l10-10H0l10 10zm0 10L0 10v10h20V10L10 20z\\' fill=\\'%23000\\' fill-opacity=\\'0.1\\' fill-rule=\\'evenodd\\'/%3E%3C/svg%3E')]"></div>
         <div className="absolute top-0 w-[90%] h-[1px] bg-white opacity-30 mt-[1px]"></div>
-        <span className="font-serif font-bold text-[#f2e6d5] text-stroke-black text-[18px] tracking-widest drop-shadow-[0_2px_2px_rgba(0,0,0,1)] z-10">
+        <span className="ui-heading font-bold text-[var(--color-text-primary)] text-stroke-black text-[15px] sm:text-[18px] tracking-wide sm:tracking-widest fx-low z-10">
           SELECT UNIT
         </span>
       </div>
 
       {/* Roster Grid */}
-      <div className="grid grid-cols-3 gap-2 px-1 overflow-y-auto pb-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 px-1 overflow-y-auto pb-4">
         {characters.map(char => {
             const getElementBg = () => {
               switch (char.element) {
@@ -42,7 +42,7 @@ export function UnitListView({ characters, onSelectCharacter }: { characters: Ch
               <div 
                 key={char.id}
                 onClick={() => onSelectCharacter(char.id)}
-                className={`relative aspect-[3/4] bg-gradient-to-b ${getElementBg()} border-[2px] rounded-md shadow-[0_4px_6px_rgba(0,0,0,0.8),inset_0_2px_4px_rgba(255,255,255,0.2)] overflow-hidden cursor-pointer group active:scale-[0.97] transition-all duration-200 hover:brightness-110 hover:shadow-[0_4px_12px_rgba(255,255,255,0.3)]`}
+                className={`relative aspect-[3/4] bg-gradient-to-b ${getElementBg()} border-[2px] rounded-md shadow-[0_4px_6px_rgba(0,0,0,0.7),inset_0_2px_4px_rgba(255,255,255,0.14)] overflow-hidden cursor-pointer group active:scale-[0.97] transition-all duration-200 hover:brightness-105 hover:shadow-[0_4px_10px_rgba(255,255,255,0.2)]`}
               >
                  {/* Top Label */}
                  <div className="absolute top-0 w-full flex justify-between items-start px-1 pt-1 z-20">
@@ -71,7 +71,7 @@ export function UnitListView({ characters, onSelectCharacter }: { characters: Ch
                     <div className="flex gap-[1px] mb-[2px]">
                        {[...Array(char.rarity)].map((_, i) => <Star key={i} size={8} className="fill-[#ffe46e] text-[#b39832]" />)}
                     </div>
-                    <span className="text-[10px] font-bold text-white text-stroke-black truncate w-full text-center drop-shadow-md leading-none mb-1">
+                    <span className="text-[10px] font-bold text-white text-stroke-black truncate w-full text-center fx-low leading-none mb-1">
                       {char.name}
                     </span>
                     <span className="text-[9px] font-bold text-[#c79a5d] bg-[#1a110a] border border-[#3a2214] px-1 rounded-sm shadow-inner leading-tight">

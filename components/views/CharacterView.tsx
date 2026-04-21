@@ -31,23 +31,23 @@ export function CharacterView({ character, stats, equipped, onOpenInventory, onB
   };
 
   return (
-    <div className="flex flex-col w-full animate-in fade-in zoom-in-95 duration-300">
+    <div className="flex flex-col w-full animate-in fade-in zoom-in-95 duration-300 ui-text">
       <div className="w-full flex justify-start mb-2 relative z-30">
-        <button onClick={onBack} className="bg-gradient-to-b from-[#e3cfb4] to-[#c7b08d] border-[2px] border-[#5a4227] rounded shadow-[0_2px_4px_rgba(0,0,0,0.5)] px-2 py-1 flex items-center text-[12px] font-bold text-[#3c2a16] text-stroke-sm active:scale-95 hover:brightness-110 transition-all font-serif tracking-wide">
+        <button onClick={onBack} className="ui-panel px-2 py-1 flex items-center text-[12px] font-bold text-[#3c2a16] text-stroke-sm active:scale-95 hover:brightness-110 transition-all ui-heading tracking-wide">
            <ChevronLeft size={16} className="-ml-1 text-[#3c2a16]" /> Units
         </button>
       </div>
-      <div className="flex w-full mb-2 relative space-x-1 sm:space-x-2">
+      <div className="flex flex-col sm:flex-row w-full mb-2 relative gap-2 sm:gap-0 sm:space-x-2">
         {/* LEFT COLUMN - STATS */}
         <div className="flex-[1.1] min-w-0 flex flex-col gap-[6px] relative z-20">
           
           {/* Header Panel */}
-          <div className="bg-gradient-to-b from-[#e3cfb4] to-[#c7b08d] rounded-[4px] border-[2px] border-[#5a4227] p-2 rpg-panel-shadow relative">
+          <div className="ui-panel p-2 rpg-panel-shadow relative">
             <div className="absolute inset-0 border border-[#f3e5ca] rounded-[2px] pointer-events-none"></div>
             
             <div className="flex justify-between items-start relative mb-1">
               <div className="flex flex-col min-w-0">
-                <h1 className="text-[20px] sm:text-[22px] font-serif text-[#f2e6d5] text-stroke-black drop-shadow-[0_1px_2px_rgba(0,0,0,1)] leading-none font-bold tracking-tight truncate">
+                <h1 className="text-[20px] sm:text-[22px] ui-heading text-[#f2e6d5] text-stroke-black fx-low leading-none font-bold tracking-tight truncate">
                   {character.name}
                 </h1>
                 <div className="flex mt-[3px] text-[#ffe46e]">
@@ -59,14 +59,14 @@ export function CharacterView({ character, stats, equipped, onOpenInventory, onB
               </div>
             </div>
 
-            <div className="text-[12px] text-[#2c1d11] font-bold mb-[2px] tracking-tight">
+            <div className="text-[12px] text-[#2c1d11] font-bold mb-[2px] tracking-tight ui-text">
               Type: <span className="text-[#2c1d11] capitalize">Oracle</span>
             </div>
             
             <div className="w-[102%] -ml-[1%] h-[2px] bg-gradient-to-r from-transparent via-[#8a6b4c] to-transparent my-[6px] opacity-60"></div>
 
             {/* Level / EXP block */}
-            <div className="flex flex-col gap-[2px] text-[11px] font-bold text-[#2c1d11] font-sans w-full leading-tight">
+            <div className="flex flex-col gap-[2px] text-[11px] font-bold text-[#2c1d11] w-full leading-tight ui-text">
               <div className="flex justify-between items-end border-b border-[#2c1d11] border-opacity-20 pb-[2px] mb-[2px]">
                 <div className="text-[13px] leading-none">Lv <span className="text-[16px] text-[#1a110a]">{character.level}</span>/{character.maxLevel}</div>
                 <div className="leading-none text-[11px]">{character.exp} / {character.maxExp} EXP</div>
@@ -84,7 +84,7 @@ export function CharacterView({ character, stats, equipped, onOpenInventory, onB
           </div>
 
           {/* Stats Box Grid */}
-          <div className="bg-gradient-to-b from-[#e3cfb4] to-[#c7b08d] rounded-[4px] border-[2px] border-[#5a4227] p-2 rpg-panel-shadow flex flex-wrap justify-between gap-y-[4px] relative">
+          <div className="ui-panel p-2 rpg-panel-shadow flex flex-wrap justify-between gap-y-[4px] relative">
             <div className="absolute inset-0 border border-[#f3e5ca] rounded-[2px] pointer-events-none"></div>
             
             <StatBox label="HP" value={stats.hp} colorClass="from-[#3a6b42] via-[#295a30] to-[#1e4224]" borderClass="border-[#554b3e]" labelColor="text-[#89e09d]" valueColor={getStatColor(stats.hp, character.baseStats.hp)} />
@@ -120,11 +120,11 @@ export function CharacterView({ character, stats, equipped, onOpenInventory, onB
         </div>
 
         {/* RIGHT COLUMN - SPRITE */}
-        <div className="flex-[0.9] flex flex-col justify-start items-center z-10 sticky top-0 py-2 min-w-0">
+        <div className="flex-[0.9] flex flex-col justify-start items-center z-10 sm:sticky sm:top-0 py-1 sm:py-2 min-w-0">
           
-          <div className="w-[85%] max-w-[140px] bg-gradient-to-b from-[#e3cfb4] to-[#c7b08d] rounded-[4px] border-[2px] border-[#5a4227] shadow-[0_4px_4px_rgba(0,0,0,0.5)] flex flex-col items-center py-[6px] px-1 relative z-30 mb-8 mx-auto -mt-2">
+          <div className="w-[72%] sm:w-[85%] max-w-[140px] ui-panel shadow-[var(--shadow-medium)] flex flex-col items-center py-[6px] px-1 relative z-30 mb-4 sm:mb-8 mx-auto mt-0 sm:-mt-2">
             <div className="absolute inset-0 border border-[#f3e5ca] rounded-[2px] pointer-events-none"></div>
-            <span className="font-serif text-[12px] sm:text-[13px] font-bold text-white text-stroke-black drop-shadow-[0_1px_1px_rgba(0,0,0,1)] tracking-widest leading-none mb-[2px] truncate w-full text-center">
+            <span className="ui-heading text-[12px] sm:text-[13px] font-bold text-white text-stroke-black fx-low tracking-widest leading-none mb-[2px] truncate w-full text-center">
               {character.title}
             </span>
             <div className="flex flex-wrap justify-center max-w-full">
@@ -132,10 +132,10 @@ export function CharacterView({ character, stats, equipped, onOpenInventory, onB
             </div>
           </div>
 
-          <div className="relative w-full h-[200px] flex flex-col items-center justify-end z-20 overflow-visible mt-2">
+          <div className="relative w-full h-[170px] sm:h-[200px] flex flex-col items-center justify-end z-20 overflow-visible mt-1 sm:mt-2">
             <div className="relative w-full h-full flex justify-center items-end drop-shadow-[0_3px_6px_rgba(0,0,0,0.8)] z-10">
                {/* Pulsing Aura/Glow */}
-               <div className={`absolute bottom-[0px] left-1/2 -translate-x-1/2 w-[80px] h-[100px] rounded-full blur-[20px] opacity-60 animate-pulse -z-10 mix-blend-screen
+               <div className={`absolute bottom-[0px] left-1/2 -translate-x-1/2 w-[80px] h-[100px] rounded-full blur-[20px] opacity-35 -z-10 mix-blend-screen
                   ${character.element === 'Water' ? 'bg-[#00ffcc]' : 
                     character.element === 'Fire' ? 'bg-[#ff5500]' : 
                     character.element === 'Earth' ? 'bg-[#55ff00]' : 
@@ -170,12 +170,12 @@ export function CharacterView({ character, stats, equipped, onOpenInventory, onB
       </div>
 
       {/* EQUIPMENT PANEL */}
-      <div className="w-full mt-2 bg-gradient-to-b from-[#e3cfb4] to-[#c7b08d] rounded-[4px] border-[2px] border-[#5a4227] p-2 rpg-panel-shadow relative z-20 text-black overflow-hidden flex flex-col flex-shrink-0">
+      <div className="w-full mt-2 ui-panel p-2 rpg-panel-shadow relative z-20 text-black overflow-hidden flex flex-col flex-shrink-0">
         <div className="absolute inset-0 border border-[#f3e5ca] rounded-[2px] pointer-events-none"></div>
         
         <div className="flex items-center gap-1 mb-2">
           <Sword size={16} className="text-[#cc9653]" />
-          <span className="font-serif text-[13px] font-bold text-stroke-black text-white tracking-wide">EQUIPMENT</span>
+          <span className="ui-heading text-[13px] font-bold text-stroke-black text-white tracking-wide">EQUIPMENT</span>
         </div>
 
         <div className="flex justify-between items-start w-full gap-[6px] overflow-x-auto custom-scrollbar pb-1">

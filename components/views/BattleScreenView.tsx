@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { ChevronLeft, Flame, Droplet, Leaf, Moon, Zap, Sparkles } from 'lucide-react';
 import { SpriteIcon } from '@/components/ui/SpriteIcon';
 import { SQUAD_MOCK, ITEMS_MOCK } from '@/lib/mock-data';
@@ -27,10 +27,10 @@ export function BattleScreenView({ onBack }: { onBack: () => void }) {
   };
 
   return (
-    <div className="w-full flex-1 flex flex-col gap-2 relative font-sans select-none animate-in fade-in duration-300">
+    <div className="w-full flex-1 flex flex-col gap-2 relative select-none animate-in fade-in duration-300 ui-text">
       
       {/* 1. Battlefield Environment (Framed) */}
-      <div className="w-full bg-gradient-to-b from-[#e3cfb4] to-[#c7b08d] rounded-[4px] border-[2px] border-[#5a4227] p-1 rpg-panel-shadow relative flex-shrink-0 flex flex-col">
+      <div className="w-full ui-panel p-1 rpg-panel-shadow relative flex-shrink-0 flex flex-col">
         <div className="absolute inset-0 border border-[#f3e5ca] rounded-[2px] pointer-events-none z-20"></div>
         
         {/* Header row with back button */}
@@ -40,11 +40,11 @@ export function BattleScreenView({ onBack }: { onBack: () => void }) {
           </button>
           
           <div className="bg-[#1a110a] border-[1.5px] border-[#5a4227] rounded px-3 py-1 flex items-center shadow-inner mt-[2px] mr-[2px]">
-             <span className="font-serif font-bold text-white text-[12px] tracking-widest text-stroke-sm leading-none">BATTLE PENDING</span>
+             <span className="ui-heading font-bold text-white text-[12px] tracking-widest text-stroke-sm leading-none">BATTLE PENDING</span>
           </div>
         </div>
 
-        <div className="relative w-full h-[180px] sm:h-[220px] bg-cover bg-center rounded-[2px] overflow-hidden border-[1.5px] border-[#5a4227] shadow-[inset_0_4px_10px_rgba(0,0,0,0.5)]" style={{ backgroundImage: "url('https://raw.githubusercontent.com/Leem0nGames/gameassets/main/file_000000004e3071f5a7171db25e254771.png')" }}>
+        <div className="relative w-full h-[160px] sm:h-[220px] bg-cover bg-center rounded-[2px] overflow-hidden border-[1.5px] border-[#5a4227] shadow-[inset_0_4px_10px_rgba(0,0,0,0.5)]" style={{ backgroundImage: "url('https://raw.githubusercontent.com/Leem0nGames/gameassets/main/file_000000004e3071f5a7171db25e254771.png')" }}>
         
           {/* Mock Players Sprites (Right side) */}
           <div className="absolute right-[5%] sm:right-[10%] top-[40%] flex flex-col gap-6 scale-90 sm:scale-100">
@@ -70,7 +70,7 @@ export function BattleScreenView({ onBack }: { onBack: () => void }) {
           <div className="absolute bottom-0 w-full bg-gradient-to-t from-[rgba(0,0,0,0.9)] via-[rgba(0,0,0,0.5)] to-transparent pt-6 pb-2 px-1 flex flex-col justify-end z-10 border-t border-[rgba(255,255,255,0.1)]">
             <div className="flex items-end gap-1 mb-1 ml-1 sm:ml-4 relative">
                <div className="w-8 h-8 flex items-center justify-center absolute -left-1 sm:-left-3 -bottom-1 z-20"><Sparkles size={24} className="text-[#f5d796] fill-[#f5d796] drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]" /></div>
-               <span className="text-white font-bold text-[15px] sm:text-[18px] text-stroke-black drop-shadow-[0_2px_2px_rgba(0,0,0,1)] tracking-wide ml-6">Mímico alado</span>
+               <span className="text-white font-bold text-[15px] sm:text-[18px] text-stroke-black fx-low tracking-wide ml-6">Mímico alado</span>
             </div>
             <div className="w-full px-1">
               <div className="w-full h-[10px] sm:h-[12px] bg-[#111] border-[1.5px] border-[#eacf9b] rounded-sm p-[1px] relative shadow-lg">
@@ -82,10 +82,10 @@ export function BattleScreenView({ onBack }: { onBack: () => void }) {
       </div>
 
       {/* 2. Squad Roster (Framed) */}
-      <div className="w-full bg-gradient-to-b from-[#e3cfb4] to-[#c7b08d] rounded-[4px] border-[2px] border-[#5a4227] p-1.5 rpg-panel-shadow flex-shrink-0 relative">
+      <div className="w-full ui-panel p-1 rpg-panel-shadow flex-shrink-0 relative">
           <div className="absolute inset-0 border border-[#f3e5ca] rounded-[2px] pointer-events-none z-20"></div>
           
-          <div className="grid grid-cols-2 gap-[4px] relative z-10 w-full h-[160px] sm:h-[190px]">
+          <div className="grid grid-cols-2 gap-[4px] relative z-10 w-full h-[145px] sm:h-[190px]">
               {SQUAD_MOCK.map((unit, idx) => (
                  <div key={idx} className={`relative bg-gradient-to-b ${getElementColor(unit.element)} border-[1.5px] border-[#5a4227] rounded-[3px] flex shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)] overflow-hidden`}>
                     
@@ -99,11 +99,11 @@ export function BattleScreenView({ onBack }: { onBack: () => void }) {
                     <div className="flex-1 flex flex-col justify-center px-1 sm:px-2 relative bg-gradient-to-r from-[rgba(0,0,0,0.5)] to-transparent">
                         <div className="flex items-center gap-[2px]">
                            {getElementIcon(unit.element, 11)}
-                           <span className="text-[10px] sm:text-[11px] font-bold text-white text-stroke-sm drop-shadow-sm leading-none truncate max-w-[90px]">
+                           <span className="text-[9px] sm:text-[11px] font-bold text-white text-stroke-sm drop-shadow-sm leading-none truncate max-w-[90px]">
                              {unit.name}
                            </span>
                         </div>
-                        <div className="text-[12px] sm:text-[14px] font-bold text-white text-stroke-sm drop-shadow-[0_1px_1px_rgba(0,0,0,1)] leading-none text-right w-full pr-1 font-serif tracking-tighter mt-[2px] mb-[1px]">
+                        <div className="text-[11px] sm:text-[14px] font-bold text-white text-stroke-sm drop-shadow-[0_1px_1px_rgba(0,0,0,1)] leading-none text-right w-full pr-1 font-serif tracking-tighter mt-[2px] mb-[1px]">
                            {unit.hp}/{unit.maxHp}
                         </div>
                         {/* HP Bar */}
@@ -151,3 +151,4 @@ export function BattleScreenView({ onBack }: { onBack: () => void }) {
     </div>
   );
 }
+

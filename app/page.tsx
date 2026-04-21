@@ -63,13 +63,13 @@ export default function Home() {
   };
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-[#1a110a] overflow-hidden font-sans select-none">
+    <div className="flex h-screen w-full items-center justify-center overflow-hidden select-none ui-text bg-[var(--color-bg-root)]">
       <div 
-        className="relative w-full max-w-[420px] h-[100dvh] max-h-[850px] sm:h-[85dvh] sm:rounded-[12px] overflow-hidden flex flex-col sm:border-[5px] sm:border-[#382618] shadow-[0_10px_25px_rgba(0,0,0,0.8),inset_0_0_15px_rgba(0,0,0,0.5)] bg-[#3a2010]"
+        className="relative w-full max-w-[420px] h-[100dvh] max-h-[850px] sm:h-[85dvh] sm:rounded-[12px] overflow-hidden flex flex-col sm:border-[5px] sm:border-[var(--color-surface-4)] shadow-[var(--shadow-high),inset_0_0_15px_rgba(0,0,0,0.45)] bg-[var(--color-bg-surface)]"
         style={{
           backgroundImage: `
-            radial-gradient(ellipse at 50% 50%, rgba(120, 60, 20, 0.15) 0%, rgba(20, 10, 5, 0.95) 100%),
-            repeating-conic-gradient(from 45deg at 20% 20%, #462916 0deg 90deg, #3d2312 90deg 180deg)
+            radial-gradient(ellipse at 50% 50%, rgba(120, 60, 20, 0.11) 0%, rgba(20, 10, 5, 0.93) 100%),
+            repeating-conic-gradient(from 45deg at 20% 20%, #412614 0deg 90deg, #332012 90deg 180deg)
           `,
           backgroundSize: '100% 100%, 80px 80px'
         }}

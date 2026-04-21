@@ -37,15 +37,15 @@ export function SummoningScreenView() {
   };
 
   return (
-    <div className="w-full flex-1 flex flex-col items-center justify-center relative animate-in fade-in duration-300">
+    <div className="w-full flex-1 flex flex-col items-center justify-center relative animate-in fade-in duration-300 ui-text">
       
       {/* Banner / Title */}
       {summoningState === 'idle' && (
-      <div className="absolute top-0 w-full mb-4">
-         <div className="relative w-full h-[40px] bg-gradient-to-r from-[#4a2e1a] via-[#5c3a21] to-[#4a2e1a] border-[2px] border-[#c79a5d] rounded-[4px] shadow-[0_4px_10px_rgba(0,0,0,0.8)] flex flex-col items-center justify-center overflow-hidden">
+      <div className="absolute top-0 w-full mb-3 sm:mb-4">
+         <div className="relative w-full h-[36px] sm:h-[40px] bg-gradient-to-r from-[#4a2e1a] via-[#5c3a21] to-[#4a2e1a] border-[2px] border-[var(--color-accent-gold)] rounded-[4px] shadow-[var(--shadow-medium)] flex flex-col items-center justify-center overflow-hidden">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\\'20\\' height=\\'20\\' viewBox=\\'0 0 20 20\\' xmlns=\\'http://www.w3.org/2000/svg\\'%3E%3Cpath d=\\'M0 0h20v20H0V0zm10 10l10-10H0l10 10zm0 10L0 10v10h20V10L10 20z\\' fill=\\'%23000\\' fill-opacity=\\'0.1\\' fill-rule=\\'evenodd\\'/%3E%3C/svg%3E')]"></div>
             <div className="absolute top-0 w-[90%] h-[1px] bg-white opacity-30 mt-[1px]"></div>
-            <span className="font-serif font-bold text-[#f2e6d5] text-stroke-black text-[18px] tracking-widest drop-shadow-[0_2px_2px_rgba(0,0,0,1)] z-10">
+            <span className="ui-heading font-bold text-[#f2e6d5] text-stroke-black text-[15px] sm:text-[18px] tracking-wide sm:tracking-widest fx-low z-10">
                RARE SUMMON
             </span>
          </div>
@@ -53,13 +53,13 @@ export function SummoningScreenView() {
       )}
 
       {summoningState === 'idle' && (
-        <div className="flex flex-col items-center w-full max-w-[300px] gap-6 px-4 mt-8">
+        <div className="flex flex-col items-center w-full max-w-[280px] sm:max-w-[300px] gap-4 sm:gap-6 px-3 sm:px-4 mt-6 sm:mt-8">
            <div className="relative w-full aspect-square border-[3px] border-[#c79a5d] rounded-full shadow-[0_0_30px_rgba(255,215,0,0.3),inset_0_0_30px_rgba(0,0,0,0.8)] overflow-hidden flex items-center justify-center bg-gradient-to-b from-[#2a1a0c] to-[#0a0502]">
              <div className="absolute inset-0 border-[4px] border-[#5a4227] rounded-full opacity-50 m-2 border-dashed animate-[spin_20s_linear_infinite]"></div>
              <div className="absolute inset-0 border-[2px] border-[#f2e6d5] shadow-[0_0_10px_white] rounded-full opacity-20 m-6 animate-[spin_15s_linear_infinite_reverse]"></div>
              
              <div className="z-10 flex flex-col items-center">
-                 <Diamond size={60} className={`fill-[#00ffcc] text-[#00ffcc] filter transition-all duration-300 ease-in-out ${isConsuming ? 'scale-[0.2] opacity-0 -translate-y-4 brightness-200 drop-shadow-[0_0_30px_rgba(0,255,204,1)]' : 'drop-shadow-[0_0_15px_rgba(0,255,204,0.8)] animate-pulse'}`} />
+                 <Diamond size={52} className={`fill-[#00ffcc] text-[#00ffcc] filter transition-all duration-300 ease-in-out sm:w-[60px] sm:h-[60px] ${isConsuming ? 'scale-[0.2] opacity-0 -translate-y-4 brightness-200 drop-shadow-[0_0_20px_rgba(0,255,204,0.9)]' : 'drop-shadow-[0_0_10px_rgba(0,255,204,0.55)] animate-pulse'}`} />
                  <span className={`mt-2 text-white font-bold text-stroke-black text-[14px] transition-all duration-300 ${isConsuming ? 'opacity-0 scale-90' : 'opacity-100'}`}>5 Gems</span>
              </div>
            </div>
@@ -70,7 +70,7 @@ export function SummoningScreenView() {
              className={`w-full relative overflow-hidden bg-gradient-to-b from-[#ffcc00] via-[#ff9900] to-[#cc3300] border-[2px] border-[#ffea99] rounded-[4px] py-3 flex items-center justify-center shadow-[0_6px_15px_rgba(200,80,0,0.6),inset_0_2px_5px_rgba(255,255,255,0.7)] group transition-all duration-200 ${isConsuming ? 'brightness-75 scale-95 pointer-events-none' : 'hover:brightness-110 active:scale-95'}`}
            >
               <div className="absolute top-0 w-full h-[30%] bg-gradient-to-b from-white to-transparent opacity-30"></div>
-              <span className="font-serif font-black text-white text-[20px] text-stroke-sm drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] z-10 group-hover:drop-shadow-[0_0_10px_white]">
+              <span className="ui-heading font-bold text-white text-[18px] sm:text-[20px] text-stroke-sm fx-low z-10 group-hover:drop-shadow-[0_0_8px_white]">
                  SUMMON NOW
               </span>
            </button>
@@ -88,7 +88,7 @@ export function SummoningScreenView() {
              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[2px] h-[200vh] bg-white opacity-50 rotate-45 mix-blend-overlay"></div>
              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200vh] h-[2px] bg-white opacity-50 rotate-45 mix-blend-overlay"></div>
           </div>
-          <span className="mt-8 font-serif font-bold text-white text-[24px] text-stroke-sm tracking-widest animate-pulse z-10 drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">
+          <span className="mt-8 ui-heading font-bold text-white text-[24px] text-stroke-sm tracking-widest animate-pulse z-10 fx-low">
             CONNECTING...
           </span>
         </div>
@@ -107,8 +107,15 @@ export function SummoningScreenView() {
            </div>
 
            {/* Stars */}
-           <div className={`relative z-20 flex gap-1 drop-shadow-[0_2px_4px_rgba(0,0,0,1)] bg-black/30 px-6 py-2 rounded-full border border-white/10 mt-4 ${rarityColors.shadowRaw === '#ff0055' ? 'animate-pulse' : ''}`}>
-               {[...Array(resultChar.rarity)].map((_, i) => <Star key={i} size={32} className={`fill-[${rarityColors.shadowRaw}] text-[${rarityColors.shadowRaw}] animate-[pulse_2s_ease-in-out_infinite]`} style={{ animationDelay: `${i * 0.2}s` }} />)}
+           <div className={`relative z-20 flex gap-1 drop-shadow-[0_2px_4px_rgba(0,0,0,1)] bg-black/30 px-4 sm:px-6 py-2 rounded-full border border-white/10 mt-3 sm:mt-4 ${rarityColors.shadowRaw === '#ff0055' ? 'animate-pulse' : ''}`}>
+               {[...Array(resultChar.rarity)].map((_, i) => (
+                 <Star
+                   key={i}
+                   size={24}
+                   className="animate-[pulse_2s_ease-in-out_infinite]"
+                   style={{ animationDelay: `${i * 0.2}s`, color: rarityColors.shadowRaw, fill: rarityColors.shadowRaw }}
+                 />
+               ))}
            </div>
            
            {/* Sprite container */}
@@ -132,7 +139,7 @@ export function SummoningScreenView() {
 
            {/* Name Banner */}
            <div className={`relative z-20 flex flex-col items-center w-[90%] bg-black/40 p-4 rounded-xl border-[2px] shadow-[0_4px_15px_rgba(0,0,0,0.8),inset_0_0_15px_rgba(${rarityColors.shadowRaw === '#a3c2e0' ? '163,194,224' : rarityColors.shadowRaw === '#ffcc00' ? '255,215,0' : '255,0,85'},0.2)] ${rarityColors.ring}`}>
-              <span className="font-serif font-black text-[#f2e6d5] text-[32px] sm:text-[38px] leading-none drop-shadow-[0_4px_4px_rgba(0,0,0,1)] text-center text-stroke-md uppercase tracking-wider mb-1">
+              <span className="ui-heading font-bold text-[#f2e6d5] text-[24px] sm:text-[38px] leading-none drop-shadow-[0_4px_4px_rgba(0,0,0,1)] text-center text-stroke-md uppercase tracking-wide sm:tracking-wider mb-1">
                  {resultChar.name}
               </span>
               <div className={`w-[80%] bg-gradient-to-r ${rarityColors.rays} h-[2px] opacity-80 my-1`}></div>
@@ -160,7 +167,7 @@ export function SummoningScreenView() {
 
            <button 
              onClick={resetSummon}
-             className="relative z-20 mt-6 bg-[#1a110a] border-[2px] border-[#c79a5d] rounded px-6 py-2 shadow-[0_4px_10px_rgba(0,0,0,0.8)] hover:bg-[#2a1b12] active:scale-95 transition-all text-white font-serif font-bold tracking-widest text-[14px]"
+             className="relative z-20 mt-6 bg-[#1a110a] border-[2px] border-[var(--color-accent-gold)] rounded px-6 py-2 shadow-[0_4px_10px_rgba(0,0,0,0.8)] hover:bg-[#2a1b12] active:scale-95 transition-all text-white ui-heading font-bold tracking-widest text-[14px]"
            >
               CONTINUE
            </button>
