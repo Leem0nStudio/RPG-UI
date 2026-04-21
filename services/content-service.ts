@@ -148,5 +148,6 @@ export async function loadGameContent(): Promise<GameContent> {
     quests: remoteQuests.length > 0 ? remoteQuests : gameContent.quests,
     banners: remoteBanners.length > 0 ? remoteBanners : gameContent.banners,
     jobs: remoteJobs.length > 0 ? remoteJobs : gameContent.jobs,
+    enemies: gameContent.enemies,
   };
 }
