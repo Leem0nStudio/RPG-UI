@@ -133,11 +133,10 @@ const [playerUnitHp, setPlayerUnitHp] = useState<Record<string, number>>({});
     }).filter(Boolean) as CombatUnit[];
   }, [bootstrap.roster, bootstrap.content.units, bootstrap.content.jobs, playerUnitHp]);
 
-  // Create enemy instance
-  // Use persisted enemy from state, or create new one
-  const currentEnemy: EnemyInstance | null = React.useMemo(() => {
-    if (battleEnemy) return battleEnemy;
-    if (enemies.length === 0) return null;
+  // Initialize enemy from store when first rendered
+  React.useEffect(() => {
+    if (battleEnemy) return;
+    if (enemies.length === 0) return;
 
     console.log('[BattleScreen] Creating enemy instance, def:', enemies[0]?.id);
 
@@ -148,8 +147,10 @@ const [playerUnitHp, setPlayerUnitHp] = useState<Record<string, number>>({});
 
     const enemy = createEnemyInstance(enemyDef, Math.floor(avgPlayerLevel), Math.floor(avgPlayerLevel));
     setBattleEnemy(enemy);
-    return enemy;
-  }, [enemies, bootstrap.roster, battleEnemy]);
+  }, [enemies, bootstrap.roster]);
+
+  // Use persisted enemy
+  const currentEnemy = battleEnemy;
 
   // Start battle - use persisted enemy
   const startBattle = useCallback(() => {
