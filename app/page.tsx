@@ -225,6 +225,13 @@ export default function Home() {
             </div>
           )}
 
+          {/* Debug: show battle state info */}
+          {view === 'battle' && (
+            <div className="text-[10px] text-yellow-400 absolute top-0 left-0 z-50 bg-black/50 p-1">
+              Debug: view={view} pendingQuest={pendingQuest?.id} currentEnemies.len={currentEnemies.length}
+            </div>
+          )}
+
           {!isBootstrapping && view === 'battle' && pendingQuest && currentEnemies.length > 0 && (
             <BattleScreen
               quest={pendingQuest}
