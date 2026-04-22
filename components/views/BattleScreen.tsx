@@ -108,8 +108,8 @@ const [playerUnitHp, setPlayerUnitHp] = useState<Record<string, number>>({});
   }, [bootstrap.roster, bootstrap.content.units, bootstrap.content.jobs]);
 
   // Calculate player units from real data (with dynamic HP)
+  console.log('[BattleScreen] playerUnits, roster length:', bootstrap.roster.length);
   const playerUnits: CombatUnit[] = React.useMemo(() => {
-    console.log('[BattleScreen] playerUnits from roster, length:', bootstrap.roster.length);
     return bootstrap.roster.slice(0, 4).map((owned) => {
       const unitDef = bootstrap.content.units.find(u => u.id === owned.unitId);
       if (!unitDef) {
