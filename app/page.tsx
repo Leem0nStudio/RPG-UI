@@ -157,7 +157,10 @@ export default function Home() {
               characters={uiCharacters}
               onSelectCharacter={(unitId) => {
                 const owned = bootstrap.roster.find((entry) => entry.unitId === unitId);
-                if (owned) selectUnit(owned.instanceId);
+                if (owned) {
+                  selectUnit(owned.instanceId);
+                  setView('character');
+                }
               }}
             />
           )}
