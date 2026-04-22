@@ -4,6 +4,39 @@ import { getSupabaseBrowserClient } from '@/services/supabase/client';
 // Supabase client type for bypass
 type SupabaseClient = ReturnType<typeof getSupabaseBrowserClient>;
 
+// Types for database rows
+interface CurrencyRow {
+  player_id: string;
+  code: string;
+  amount: number;
+}
+
+interface ItemRow {
+  player_id: string;
+  item_id: string;
+  quantity: number;
+}
+
+interface UnitRow {
+  id: string;
+  player_id: string;
+  unit_id: string;
+  level: number;
+  exp: number;
+  job_id: string;
+  job_level: number;
+  job_exp: number;
+  locked: boolean;
+  equipment: Record<string, string | null>;
+}
+
+interface QuestProgressRow {
+  player_id: string;
+  quest_id: string;
+  completed: boolean;
+  attempts: number;
+}
+
 // Types for write operations
 type WriteResult = { success: boolean; error?: string };
 
@@ -54,34 +87,31 @@ export async function updateCurrencies(
   const { supabase, session } = connection;
   const userId = session.user.id;
 
-  // Process each change individually (simpler approach)
   const results: Array<{ code: string; amount: number }> = [];
-  
+
   for (const change of changes) {
-    // Get current balance
     const { data: currentData } = await supabase
       .from('player_currencies')
       .select('amount')
       .eq('player_id', userId)
       .eq('code', change.code)
       .single();
-    
+
     const current = (currentData as { amount: number } | null)?.amount ?? 0;
     const newAmount = current + change.amount;
-    
+
     if (newAmount < 0) {
       return { success: false, error: `Insufficient ${change.code} (have ${current}, need ${Math.abs(change.amount)})` };
     }
-    
+
     results.push({ code: change.code, amount: newAmount });
-    
-    // Use raw SQL through RPC or bypass type checking
-    const { error } = await (supabase as any).from('player_currencies').insert({
-      player_id: userId,
-      code: change.code,
-      amount: newAmount,
-    }, { upsert: true });
-    
+
+    const { error } = await (supabase as any).rpc('upsert_currency', {
+      p_player_id: userId,
+      p_code: change.code,
+      p_amount: newAmount,
+    });
+
     if (error) {
       return { success: false, error: error.message };
     }
@@ -123,28 +153,18 @@ export async function addUnitToRoster(
   // Use provided jobId or the unit's default job
   const finalJobId = jobId || (unitDef as { job_id: string }).job_id;
 
-  // Insert into player_units (bypass type checking for custom columns)
-  const { data: newUnit, error: insertError } = await (supabase as any)
-    .from('player_units')
-    .insert({
-      player_id: userId,
-      unit_id: unitId,
-      level,
-      exp: 0,
-      job_id: finalJobId,
-      job_level: 1,
-      job_exp: 0,
-      locked: false,
-      equipment: { Weapon: null, Armor: null, Accessory: null },
-    })
-    .select('id')
-    .single();
+  const { data: newUnitId, error: insertError } = await (supabase as any).rpc('add_unit_to_roster', {
+    p_player_id: userId,
+    p_unit_id: unitId,
+    p_level: level,
+    p_job_id: finalJobId,
+  });
 
   if (insertError) {
     return { success: false, error: insertError.message };
   }
 
-  return { success: true, instanceId: (newUnit as { id: string }).id };
+  return { success: true, instanceId: newUnitId };
 }
 
 /**
@@ -211,7 +231,6 @@ export async function addUnitExp(
       leveledUnits.push({ instanceId: currentUnit.id, newLevel, newExp: Math.min(newExp, maxExp) });
     }
 
-    // Update the unit (bypass type checking)
     const { error } = await (supabase as any)
       .from('player_units')
       .update({ level: newLevel, exp: Math.min(newExp, maxExp) })
@@ -252,12 +271,11 @@ export async function addItems(
     const current = (currentData as { quantity: number } | null)?.quantity ?? 0;
     const newQuantity = current + reward.quantity;
 
-    // Use raw insert with upsert bypass
-    const { error } = await (supabase as any).from('player_items').insert({
-      player_id: userId,
-      item_id: reward.itemId,
-      quantity: newQuantity,
-    }, { upsert: true });
+    const { error } = await (supabase as any).rpc('upsert_item', {
+      p_player_id: userId,
+      p_item_id: reward.itemId,
+      p_quantity: newQuantity,
+    });
 
     if (error) {
       return { success: false, error: error.message };
@@ -292,7 +310,6 @@ export async function updateQuestProgress(
 
   if (existing) {
     const existingData = existing as { attempts: number; completed: boolean };
-    // Update existing (bypass type checking)
     const { error } = await (supabase as any)
       .from('player_quest_progress')
       .update({
@@ -307,7 +324,6 @@ export async function updateQuestProgress(
       return { success: false, error: error.message };
     }
   } else {
-    // Create new (bypass type checking)
     const { error } = await (supabase as any).from('player_quest_progress').insert({
       player_id: userId,
       quest_id: questId,
@@ -370,7 +386,6 @@ export async function deductEnergy(
 
   const newEnergy = currentEnergy - energyCost;
 
-  // Update (bypass type checking)
   const { error } = await (supabase as any)
     .from('player_profiles')
     .update({ energy_current: newEnergy })
