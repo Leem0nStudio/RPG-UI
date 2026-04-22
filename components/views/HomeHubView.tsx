@@ -7,9 +7,10 @@ type Props = {
   onOpenUnits: () => void;
   onOpenQuest: () => void;
   onOpenSummon: () => void;
+  onOpenQR: () => void;
 };
 
-export function HomeHubView({ bootstrap, onOpenUnits, onOpenQuest, onOpenSummon }: Props) {
+export function HomeHubView({ bootstrap, onOpenUnits, onOpenQuest, onOpenSummon, onOpenQR }: Props) {
   const activeBanner = bootstrap.content.banners.find((banner) => banner.active);
 
   return (
@@ -56,7 +57,13 @@ export function HomeHubView({ bootstrap, onOpenUnits, onOpenQuest, onOpenSummon 
         <div className="ui-panel p-3">
           <ScanLine size={18} className="text-[#89e09d]" />
           <div className="mt-3 ui-heading text-[14px] text-white text-stroke-sm">QR Hunt</div>
-          <p className="mt-1 text-[11px] leading-[1.3] text-[#3c2a16]">Reserved for mobile camera rewards with server-safe claim validation.</p>
+          <p className="mt-1 text-[11px] leading-[1.3] text-[#3c2a16]">Scan real-world QR codes for exclusive rewards!</p>
+          <button
+            onClick={onOpenQR}
+            className="mt-2 w-full py-2 text-[11px] font-bold text-white bg-[#2a5a3a] hover:bg-[#3a7a4a] rounded transition-colors"
+          >
+            Open Scanner
+          </button>
         </div>
       </section>
 

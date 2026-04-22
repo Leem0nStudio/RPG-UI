@@ -11,6 +11,7 @@ import { QuestScreen } from '@/components/views/QuestScreen';
 import { BattleScreen } from '@/components/views/BattleScreen';
 import { SummoningScreenView } from '@/components/views/SummoningScreenView';
 import { AuthScreen } from '@/components/views/AuthScreen';
+import { QRScannerView } from '@/components/views/QRScannerView';
 import { calculateUnitStats } from '@/core/stats';
 import { useGameStore, selectCurrentOwnedUnit, selectCurrentUnitDefinition, selectEquippedItems } from '@/store/game-store';
 import { onAuthStateChange } from '@/services/auth-service';
@@ -158,6 +159,7 @@ export default function Home() {
               onOpenUnits={() => setView('unitList')}
               onOpenQuest={() => setView('quest')}
               onOpenSummon={() => setView('summon')}
+              onOpenQR={() => setView('qrScanner')}
             />
           )}
           
@@ -289,6 +291,10 @@ export default function Home() {
 
           {!isBootstrapping && view === 'summon' && (
             <SummoningScreenView banners={bootstrap.content.banners} />
+          )}
+
+          {!isBootstrapping && view === 'qrScanner' && (
+            <QRScannerView onClose={() => setView('home')} />
           )}
         </div>
 

@@ -17,7 +17,7 @@ import { loadGameContent } from '@/services/content-service';
 import { loadPlayerBootstrap } from '@/services/player-service';
 import { loadEnemies } from '@/services/battle-service';
 
-export type AppView = 'home' | 'unitList' | 'character' | 'inventory' | 'quest' | 'battle' | 'summon';
+export type AppView = 'home' | 'unitList' | 'character' | 'inventory' | 'quest' | 'battle' | 'summon' | 'qrScanner';
 
 interface GameStoreState {
   isBootstrapping: boolean;
