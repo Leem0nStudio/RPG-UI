@@ -18,3 +18,4 @@ drop table if exists public.job_definitions;
 
 drop function if exists public.update_quest_progress_timestamp;
 drop extension if exists "pgcrypto";
+
