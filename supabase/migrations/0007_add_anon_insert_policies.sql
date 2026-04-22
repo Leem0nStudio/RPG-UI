@@ -10,43 +10,40 @@ grant select, insert, update on public.player_units to anon;
 grant select, insert, update on public.player_items to anon;
 grant select, insert, update on public.player_quest_progress to anon;
 
+-- Drop existing anon policies if they exist (for re-runability)
+drop policy if exists "anon insert own profile" on public.player_profiles;
+drop policy if exists "anon insert own currencies" on public.player_currencies;
+drop policy if exists "anon update own currencies" on public.player_currencies;
+drop policy if exists "anon insert own units" on public.player_units;
+drop policy if exists "anon update own units" on public.player_units;
+drop policy if exists "anon insert own items" on public.player_items;
+drop policy if exists "anon update own items" on public.player_items;
+drop policy if exists "anon manage quest progress" on public.player_quest_progress;
+
 -- Add INSERT policies for anonymous (anon) role
--- This allows anonymous sign-in users to insert/update their own data
 create policy "anon insert own profile" on public.player_profiles
-for insert
-with check (auth.uid() = id);
+for insert with check (auth.uid() = id);
 
 create policy "anon insert own currencies" on public.player_currencies
-for insert
-with check (auth.uid() = player_id);
+for insert with check (auth.uid() = player_id);
 
 create policy "anon update own currencies" on public.player_currencies
-for update
-using (auth.uid() = player_id)
-with check (auth.uid() = player_id);
+for update using (auth.uid() = player_id) with check (auth.uid() = player_id);
 
 create policy "anon insert own units" on public.player_units
-for insert
-with check (auth.uid() = player_id);
+for insert with check (auth.uid() = player_id);
 
 create policy "anon update own units" on public.player_units
-for update
-using (auth.uid() = player_id)
-with check (auth.uid() = player_id);
+for update using (auth.uid() = player_id) with check (auth.uid() = player_id);
 
 create policy "anon insert own items" on public.player_items
-for insert
-with check (auth.uid() = player_id);
+for insert with check (auth.uid() = player_id);
 
 create policy "anon update own items" on public.player_items
-for update
-using (auth.uid() = player_id)
-with check (auth.uid() = player_id);
+for update using (auth.uid() = player_id) with check (auth.uid() = player_id);
 
 create policy "anon manage quest progress" on public.player_quest_progress
-for all
-using (auth.uid() = player_id)
-with check (auth.uid() = player_id);
+for all using (auth.uid() = player_id) with check (auth.uid() = player_id);
 
 -- RPC functions for type-safe upserts
 create or replace function public.upsert_currency(
@@ -83,11 +80,9 @@ begin
 end;
 $$;
 
-grant execute on function public.upsert_currency to anon, authenticated;
-grant execute on function public.upsert_item to anon, authenticated;
+drop function if exists public.add_unit_to_roster(uuid, text, integer, text);
 
--- Add unit to roster RPC
-create or replace function public.add_unit_to_roster(
+create function public.add_unit_to_roster(
   p_player_id uuid,
   p_unit_id text,
   p_level integer,
@@ -108,4 +103,6 @@ begin
 end;
 $$;
 
+grant execute on function public.upsert_currency to anon, authenticated;
+grant execute on function public.upsert_item to anon, authenticated;
 grant execute on function public.add_unit_to_roster to anon, authenticated;
