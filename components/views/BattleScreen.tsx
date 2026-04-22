@@ -76,8 +76,26 @@ export function BattleScreen({
   const [lastAction, setLastAction] = useState<BattleAction | null>(null);
   const [isPlayerTurn, setIsPlayerTurn] = useState(true);
   const [animatingAction, setAnimatingAction] = useState(false);
+  const [showDamage, setShowDamage] = useState<{ value: number; isEnemy: boolean } | null>(null);
+  
+  // Track player unit HP in state
+  const [playerUnitHp, setPlayerUnitHp] = useState<Record<string, number>>({});
 
-  // Calculate player units from real data
+  // Initialize player unit HP
+  React.useEffect(() => {
+    const initialHp: Record<string, number> = {};
+    bootstrap.roster.slice(0, 4).forEach(owned => {
+      const unitDef = bootstrap.content.units.find(u => u.id === owned.unitId);
+      if (unitDef) {
+        const job = bootstrap.content.jobs.find(j => j.id === owned.jobId);
+        const stats = calculateUnitStats(unitDef, owned, [], job);
+        initialHp[owned.instanceId] = stats.hp;
+      }
+    });
+    setPlayerUnitHp(initialHp);
+  }, [bootstrap.roster, bootstrap.content.units, bootstrap.content.jobs]);
+
+  // Calculate player units from real data (with dynamic HP)
   const playerUnits: CombatUnit[] = React.useMemo(() => {
     return bootstrap.roster.slice(0, 4).map((owned) => {
       const unitDef = bootstrap.content.units.find(u => u.id === owned.unitId);
@@ -87,6 +105,7 @@ export function BattleScreen({
       
       const job = bootstrap.content.jobs.find(j => j.id === owned.jobId);
       const stats = calculateUnitStats(unitDef, owned, [], job);
+      const currentHp = playerUnitHp[owned.instanceId] ?? stats.hp;
       
       return {
         instanceId: owned.instanceId,
@@ -94,13 +113,13 @@ export function BattleScreen({
         name: unitDef.name,
         element: unitDef.element,
         stats,
-        hp: stats.hp,
+        hp: currentHp,
         maxHp: stats.hp,
         bbGauge: 0,
-        alive: true,
+        alive: currentHp > 0,
       };
     }).filter(Boolean) as CombatUnit[];
-  }, [bootstrap.roster, bootstrap.content.units, bootstrap.content.jobs]);
+  }, [bootstrap.roster, bootstrap.content.units, bootstrap.content.jobs, playerUnitHp]);
 
   // Create enemy instance
   const currentEnemy: EnemyInstance | null = React.useMemo(() => {
@@ -186,6 +205,17 @@ export function BattleScreen({
           
           const target = aliveUnits[Math.floor(Math.random() * aliveUnits.length)];
           const enemyDamage = Math.max(1, currentEnemy.stats.atk - Math.round(target.stats.def * 0.55));
+          
+          // Show damage indicator
+          setShowDamage({ value: enemyDamage, isEnemy: true });
+          setTimeout(() => setShowDamage(null), 800);
+          
+          // Update target HP
+          setPlayerUnitHp(prev => {
+            const newHp = Math.max(0, prev[target.instanceId] - enemyDamage);
+            return { ...prev, [target.instanceId]: newHp };
+          });
+          
           const enemyAction: BattleAction = {
             type: 'attack',
             sourceId: currentEnemy.id,
@@ -288,14 +318,25 @@ export function BattleScreen({
 
       {/* Battle Log / Animation Area */}
       {phase === 'fighting' && lastAction && (
-        <div className="w-full ui-panel p-2 rpg-panel-shadow relative h-[60px] flex items-center justify-center">
-          <div className="text-center animate-pulse">
+        <div className="w-full ui-panel p-2 rpg-panel-shadow relative h-[60px] flex items-center justify-center overflow-hidden">
+          {/* Damage popup animation */}
+          {showDamage && (
+            <div className={`absolute text-[24px] font-bold ${showDamage.isEnemy ? 'text-[#ff4444]' : 'text-[#ffdd44]'} animate-bounce`}>
+              -{showDamage.value}
+            </div>
+          )}
+          <div className={`text-center ${showDamage ? 'opacity-30' : 'animate-pulse'}`}>
             <span className="text-[14px] font-bold text-white">
               {lastAction.sourceId.includes('enemy') ? currentEnemy.name : playerUnits.find(u => u.instanceId === lastAction.sourceId)?.name}
             </span>
             <span className="text-[#ef5350]"> deals </span>
             <span className="text-[16px] font-bold text-[#ffdd44]">{lastAction.damage}</span>
             <span className="text-[#ef5350]"> damage!</span>
+            {lastAction && (lastAction.elementMultiplier ?? 1) !== 1 && (
+              <span className={`ml-2 text-[12px] font-bold ${(lastAction.elementMultiplier ?? 1) > 1 ? 'text-[#88ff00]' : 'text-[#ff8800]'}`}>
+                {(lastAction.elementMultiplier ?? 1) > 1 ? 'SUPER EFFECTIVE!' : 'NOT VERY EFFECTIVE...'}
+              </span>
+            )}
           </div>
         </div>
       )}
@@ -305,10 +346,12 @@ export function BattleScreen({
         <div className="absolute inset-0 border border-[#f3e5ca] rounded-[2px] pointer-events-none z-20" />
         
         <div className="grid grid-cols-2 gap-[4px] relative z-10">
-          {playerUnits.map((unit, idx) => (
+          {playerUnits.map((unit, idx) => {
+            const isBeingAttacked = showDamage?.isEnemy && lastAction?.targetId === unit.instanceId;
+            return (
             <div
               key={unit.instanceId}
-              className={`relative bg-gradient-to-b ${getElementColor(unit.element)} border-[1.5px] border-[#5a4227] rounded-[3px] flex shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)] overflow-hidden ${!unit.alive ? 'opacity-50' : ''}`}
+              className={`relative bg-gradient-to-b ${getElementColor(unit.element)} border-[1.5px] border-[#5a4227] rounded-[3px] flex shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)] overflow-hidden transition-all duration-200 ${!unit.alive ? 'opacity-50' : ''} ${isBeingAttacked ? 'animate-pulse bg-red-900/50' : ''}`}
             >
               <div className="w-[50px] bg-black border-r-[1.5px] border-[#382618] flex-shrink-0 flex justify-center items-center">
                 <Sparkles size={24} className="fill-[#f5d796] text-[#c79a5d]" />
@@ -321,12 +364,12 @@ export function BattleScreen({
                     {unit.name}
                   </span>
                 </div>
-                <div className="text-[12px] font-bold text-white text-right">
+                <div className={`text-[12px] font-bold text-right ${unit.hp < unit.maxHp * 0.3 ? 'text-[#ff4444]' : 'text-white'}`}>
                   {unit.hp}/{unit.maxHp}
                 </div>
                 <div className="w-full h-[6px] bg-[#1a1105] border-[1px] border-[#000] rounded p-[1px]">
                   <div
-                    className="h-full bg-gradient-to-r from-[#88ff00] to-[#20cc20] transition-all duration-300"
+                    className={`h-full transition-all duration-300 ${unit.hp < unit.maxHp * 0.3 ? 'bg-gradient-to-r from-[#ff3333] via-[#cc0000] to-[#660000]' : 'bg-gradient-to-r from-[#88ff00] to-[#20cc20]'}`}
                     style={{ width: `${(unit.hp / unit.maxHp) * 100}%` }}
                   />
                 </div>
@@ -350,7 +393,8 @@ export function BattleScreen({
                 </button>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
