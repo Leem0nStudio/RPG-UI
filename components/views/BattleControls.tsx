@@ -27,12 +27,24 @@ export function BattleControls({
   return (
     <div className="flex flex-col bg-gradient-to-t from-[#0d0502] to-[#1a0a05] border-t border-[#3a2820] p-3">
       {/* Turn counter */}
-      <div className="flex justify-between items-center mb-3">
+      <div className="flex justify-between items-center mb-2">
         <span className="text-[#a58d78] text-[12px]">Turn {turnCount + 1}</span>
-        <div className="flex gap-4 text-[#a58d78] text-[10px]">
+        <div className="flex gap-3 text-[#a58d78] text-[10px]">
           <span>Units: {playerUnits.filter(u => u.alive).length}/{playerUnits.length}</span>
-          {enemy && <span>HP: {Math.round((currentEnemyHp / enemy.maxHp) * 100)}%</span>}
+          {enemy && <span>Enemy: {Math.round((currentEnemyHp / enemy.maxHp) * 100)}%</span>}
         </div>
+      </div>
+
+      {/* Unit quick view */}
+      <div className="flex justify-around mb-3">
+        {playerUnits.slice(0, 4).map(unit => (
+          <div key={unit.instanceId} className="flex flex-col items-center">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${unit.alive ? 'bg-[#2a4a3a] border border-[#4a6a4a]' : 'bg-[#1a1a1a] border border-[#3a3a3a] opacity-50'}`}>
+              <span className="text-sm">⚔️</span>
+            </div>
+            <div className={`h-1 w-8 mt-1 rounded ${unit.hp > unit.maxHp * 0.3 ? 'bg-[#40cc40]' : 'bg-[#cc2020]'}`} style={{ width: `${Math.min(100, (unit.hp / unit.maxHp) * 100)}%` }} />
+          </div>
+        ))}
       </div>
 
       {/* Action buttons */}

@@ -47,11 +47,6 @@ export default function Home() {
   // Local state for quest selection flow
   const [pendingQuest, setPendingQuest] = useState<QuestDefinition | null>(null);
 
-  // Debug: log state changes
-  useEffect(() => {
-    console.log('[debug] State changed: view=', view, 'enemies.len=', currentEnemies.length);
-  }, [view, currentEnemies.length]);
-
   useEffect(() => {
     startTransition(() => {
       void bootstrapGame();
@@ -231,8 +226,8 @@ export default function Home() {
           )}
 
           {/* Debug: show battle state info only in problematic views */}
-          <div className="fixed top-0 left-0 z-[100] text-[10px] bg-red-600 text-white p-1">
-            view={view} | pendingQuest={pendingQuest?.id ?? 'null'} | enemies.len={currentEnemies.length} | roster.len={bootstrap.roster.length}
+          <div className="fixed top-0 left-0 z-[100] text-[8px] bg-red-800 text-white p-0.5">
+            view={view} | enemies={currentEnemies.length} | roster={bootstrap.roster.length}
           </div>
 
           {!isBootstrapping && view === 'battle' && pendingQuest && currentEnemies.length > 0 && (
