@@ -1,26 +1,25 @@
 import React, { useState, useCallback } from 'react';
 import { Diamond, Sparkles, Star } from 'lucide-react';
 import type { CharacterData } from '@/lib/types';
-import type { SummonBanner, UnitDefinition } from '@/backend-contracts/game';
+import type { SummonBanner } from '@/backend-contracts/game';
 import { useGameStore } from '@/store/game-store';
 import { updateCurrencies } from '@/services/write-service';
 import { addUnitToRoster } from '@/services/write-service';
-
-type SummonUnit = UnitDefinition & { spriteUrl: string; cssFilter: string };
+import { generateUnit, getRarityNumber, getRarityLabel } from '@/services/unit-generator';
 
 const SUMMON_COST = 5; // gems per summon
 
-export function SummoningScreenView({ units, banners }: { units: SummonUnit[]; banners: SummonBanner[] }) {
-  const { bootstrap, bootstrapGame } = useGameStore();
+export function SummoningScreenView({ banners }: { banners: SummonBanner[] }) {
+  const { bootstrap } = useGameStore();
   const [summoningState, setSummoningState] = useState<'idle' | 'summoning' | 'result'>('idle');
-  const [resultChar, setResultChar] = useState<CharacterData | SummonUnit | null>(null);
+  const [resultChar, setResultChar] = useState<CharacterData | null>(null);
   const [isConsuming, setIsConsuming] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const hasEnoughGems = bootstrap.player.currencies.gems >= SUMMON_COST;
 
   const handleSummon = useCallback(async () => {
-    if (!hasEnoughGems || units.length === 0) {
+    if (!hasEnoughGems) {
       setError('Not enough gems!');
       return;
     }
@@ -29,7 +28,6 @@ export function SummoningScreenView({ units, banners }: { units: SummonUnit[]; b
     setIsConsuming(true);
 
     try {
-      // Deduct gems first
       const currencyResult = await updateCurrencies([{ code: 'gems', amount: -SUMMON_COST }]);
       if (!currencyResult.success) {
         setError(currencyResult.error ?? 'Failed to process summon');
@@ -37,24 +35,22 @@ export function SummoningScreenView({ units, banners }: { units: SummonUnit[]; b
         return;
       }
 
-      // Select random unit
-      const rngIndex = Math.floor(Math.random() * units.length);
-      const rngChar = units[rngIndex];
-
+      const generated = generateUnit(undefined, undefined, '1');
+      
       setResultChar({
-        id: rngChar.id,
-        name: rngChar.name,
-        title: rngChar.title,
-        element: rngChar.element,
-        rarity: rngChar.rarity,
-        spriteUrl: rngChar.spriteUrl,
-        cssFilter: rngChar.cssFilter ?? '',
-        jobId: rngChar.jobId,
-        cost: rngChar.cost,
+        id: generated.id,
+        name: generated.name,
+        title: generated.title,
+        element: generated.element,
+        rarity: getRarityNumber(generated.rarity),
+        spriteUrl: '',
+        cssFilter: '',
+        jobId: generated.jobId,
+        cost: 5,
         level: 1,
-        maxLevel: rngChar.maxLevel,
+        maxLevel: 50,
         exp: 0,
-        maxExp: rngChar.maxLevel * 150,
+        maxExp: 750,
       } as CharacterData);
       setSummoningState('summoning');
 
@@ -62,14 +58,13 @@ export function SummoningScreenView({ units, banners }: { units: SummonUnit[]; b
         setSummoningState('result');
         setIsConsuming(false);
 
-        // Add unit to roster (persisted)
-        await addUnitToRoster(rngChar.id, rngChar.jobId, 1);
+        await addUnitToRoster(generated.id, generated.jobId, 1);
       }, 2500);
     } catch (err) {
       setError('An error occurred during summon');
       setIsConsuming(false);
     }
-  }, [hasEnoughGems, units]);
+  }, [hasEnoughGems]);
 
   const resetSummon = () => {
     setSummoningState('idle');

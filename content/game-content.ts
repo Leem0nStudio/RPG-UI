@@ -84,18 +84,10 @@ export const bootstrapData: GameBootstrap = {
     name: 'Hero',
     level: 1,
     energy: { current: 50, max: 50, recoverAt: null },
-    currencies: { gems: 100, zel: 1000, karma: 100 },
+    currencies: { gems: 25, zel: 1000, karma: 100 },
   },
-  roster: [
-    { instanceId: 'owned_1', unitId: 'u_hero_1', level: 1, exp: 0, jobId: 'job_swordman', jobLevel: 1, jobExp: 0, locked: false, equipment: { Weapon: null, Armor: null, Accessory: null } },
-    { instanceId: 'owned_2', unitId: 'u_hero_2', level: 1, exp: 0, jobId: 'job_mage', jobLevel: 1, jobExp: 0, locked: false, equipment: { Weapon: null, Armor: null, Accessory: null } },
-    { instanceId: 'owned_3', unitId: 'u_hero_3', level: 1, exp: 0, jobId: 'job_archer', jobLevel: 1, jobExp: 0, locked: false, equipment: { Weapon: null, Armor: null, Accessory: null } },
-  ],
-  items: [
-    { itemId: 'w_iron_sword', quantity: 1 },
-    { itemId: 'a_wood_shield', quantity: 1 },
-    { itemId: 'ac_power_ring', quantity: 2 },
-  ],
+  roster: [],
+  items: [],
   content: gameContent,
 };
 

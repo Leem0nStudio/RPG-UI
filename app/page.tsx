@@ -96,11 +96,6 @@ export default function Home() {
     bootstrap.items.some((ownedItem) => ownedItem.itemId === item.id && ownedItem.quantity > 0)
   );
 
-  const summonUnits = bootstrap.content.units.map((unit) => {
-    const { spriteUrl, cssFilter } = resolveUnitSprite(unit, bootstrap.content.jobs);
-    return { ...unit, spriteUrl, cssFilter };
-  });
-
   return (
     <div className="flex h-screen w-full items-center justify-center overflow-hidden select-none ui-text bg-[var(--color-bg-root)]">
       <div
@@ -265,7 +260,7 @@ export default function Home() {
           )}
 
           {!isBootstrapping && view === 'summon' && (
-            <SummoningScreenView units={summonUnits} banners={bootstrap.content.banners} />
+            <SummoningScreenView banners={bootstrap.content.banners} />
           )}
         </div>
 

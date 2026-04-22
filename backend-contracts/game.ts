@@ -12,6 +12,9 @@ export type JobTier = z.infer<typeof jobTierSchema>;
 export const jobCategorySchema = z.enum(['Sword', 'Magic', 'Bow', 'Thief', 'Trade', 'Heal']);
 export type JobCategory = z.infer<typeof jobCategorySchema>;
 
+export const genderSchema = z.enum(['male', 'female', 'neutral']);
+export type Gender = z.infer<typeof genderSchema>;
+
 export const statBlockSchema = z.object({
   hp: z.number().int().nonnegative(),
   atk: z.number().int().nonnegative(),
@@ -50,6 +53,7 @@ export const jobDefinitionSchema = z.object({
     rec: z.number().min(0).default(1),
   }).default({ hp: 1, atk: 1, def: 1, rec: 1 }),
   skills: z.array(skillDefinitionSchema).default([]),
+  allowedGenders: z.array(genderSchema).optional(),
 });
 export type JobDefinition = z.infer<typeof jobDefinitionSchema>;
 
@@ -67,6 +71,7 @@ export const unitDefinitionSchema = z.object({
   spriteUrl: z.string().optional(),
   cssFilter: z.string().optional(),
   skills: z.array(skillDefinitionSchema),
+  gender: genderSchema.optional(),
 });
 export type UnitDefinition = z.infer<typeof unitDefinitionSchema>;
 
