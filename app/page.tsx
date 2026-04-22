@@ -235,15 +235,13 @@ export default function Home() {
             view={view} | pendingQuest={pendingQuest?.id ?? 'null'} | enemies.len={currentEnemies.length} | roster.len={bootstrap.roster.length}
           </div>
 
-          {/* [debug] battle condition: view, pendingQuestId, enemiesLen */}
           {!isBootstrapping && view === 'battle' && pendingQuest && currentEnemies.length > 0 && (
             <BattleScreen
               quest={pendingQuest}
-              enemies={currentEnemies}
-              onVictory={(result) => {
-                const battleResult: BattleState = {
+              onVictory={() => {
+                void completeBattle({
                   questId: pendingQuest?.id ?? null,
-                  enemyInstanceId: result.actions[0]?.targetId ?? '',
+                  enemyInstanceId: '',
                   enemyHp: 0,
                   enemyMaxHp: 0,
                   enemyElement: 'Water',
@@ -253,9 +251,8 @@ export default function Home() {
                     bbGauge: 0,
                   })),
                   battlePhase: 'victory',
-                  turnNumber: result.turns,
-                };
-                void completeBattle(battleResult);
+                  turnNumber: 1,
+                });
                 setView('home');
               }}
               onDefeat={() => {
