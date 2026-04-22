@@ -326,9 +326,8 @@ CREATE OR REPLACE FUNCTION claim_quest_reward(p_player_id UUID, p_quest_id TEXT)
 RETURNS JSONB AS $$
 DECLARE
   v_progress record;
-  v_quest record;
 BEGIN
-  SELECT dp.*, dq.reward_data, dq.reward_type INTO v_progress, v_quest
+  SELECT dp.*, dq.reward_data, dq.reward_type INTO v_progress
   FROM player_daily_progress dp
   JOIN daily_quests dq ON dp.quest_id = dq.id
   WHERE dp.player_id = p_player_id AND dp.quest_id = p_quest_id AND dp.claimed = false;
@@ -348,9 +347,3 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- ============================================
--- Update energy settings
--- ============================================
-
-ALTER TABLE player_profiles ALTER COLUMN energy_max SET DEFAULT 100;
