@@ -52,23 +52,26 @@ function getElementIcon(element: Element, size = 14) {
 }
 
 interface BattleScreenProps {
-  quest: QuestDefinition;
-  enemies: EnemyDefinition[];
-  onVictory: (result: BattleResult) => void;
-  onDefeat: () => void;
-  onBack: () => void;
-  onFlee: () => void;
+  quest?: QuestDefinition;
+  enemies?: EnemyDefinition[];
+  onVictory?: (result: BattleResult) => void;
+  onDefeat?: () => void;
+  onBack?: () => void;
+  onFlee?: () => void;
 }
 
 export function BattleScreen({
-  quest,
-  enemies,
+  quest: initialQuest,
+  enemies: initialEnemies,
   onVictory,
   onDefeat,
   onBack,
   onFlee,
 }: BattleScreenProps) {
-  const { bootstrap } = useGameStore();
+  const { bootstrap, currentQuest, currentEnemies, setView } = useGameStore();
+  const quest = currentQuest ?? initialQuest ?? { id: '', name: 'Unknown', enemyIds: [], energyCost: 0, difficulty: 'Normal', worldId: '', stage: 0, rewardsPreview: [] };
+  const enemies = (currentEnemies.length > 0 ? currentEnemies : initialEnemies) ?? [];
+
   const [phase, setPhase] = useState<BattlePhase>('selecting');
   const [turnCount, setTurnCount] = useState(0);
   const [currentEnemyHp, setCurrentEnemyHp] = useState(0);
@@ -185,7 +188,7 @@ const [playerUnitHp, setPlayerUnitHp] = useState<Record<string, number>>({});
       if (newHp <= 0) {
         // Victory!
         setPhase('victory');
-        onVictory({
+        onVictory?.({
           victory: true,
           turns: turnCount + 1,
           actions: battleLog,
@@ -206,7 +209,7 @@ const [playerUnitHp, setPlayerUnitHp] = useState<Record<string, number>>({});
           const aliveUnits = playerUnits.filter(u => u.alive);
           if (aliveUnits.length === 0) {
             setPhase('defeat');
-            onDefeat();
+            onDefeat?.();
             return;
           }
           
@@ -247,12 +250,12 @@ const [playerUnitHp, setPlayerUnitHp] = useState<Record<string, number>>({});
         <div className="text-center">
           <p className="text-[#ef5350] text-[14px]">Enemy not found</p>
           <p className="text-[#ef5350] text-[12px] mt-2">
-            enemies: {enemies.length} | quest: {quest.id}
+            enemies: {enemies.length} | quest: {quest?.id}
           </p>
           <p className="text-[#ef5350] text-[10px]">
             phase: {phase}
           </p>
-          <button onClick={onBack} className="mt-4 px-4 py-2 bg-[#5c3a21] rounded text-white font-bold">
+          <button onClick={() => onBack?.()} className="mt-4 px-4 py-2 bg-[#5c3a21] rounded text-white font-bold">
             Go Back
           </button>
         </div>
@@ -268,7 +271,7 @@ const [playerUnitHp, setPlayerUnitHp] = useState<Record<string, number>>({});
         
         <div className="flex justify-between items-center relative z-10">
           <button
-            onClick={onBack}
+            onClick={() => onBack?.()}
             className="bg-gradient-to-b from-[#e3cfb4] to-[#c7b08d] border-[2px] border-[#5a4227] rounded shadow-[0_2px_4px_rgba(0,0,0,0.5)] px-2 py-1 flex items-center hover:brightness-110 active:scale-95 transition-all duration-200 text-[#3c2a16]"
           >
             <ChevronLeft size={16} />
@@ -281,7 +284,7 @@ const [playerUnitHp, setPlayerUnitHp] = useState<Record<string, number>>({});
           </div>
 
           <button
-            onClick={onFlee}
+            onClick={() => onFlee?.()}
             className="bg-[#c62828] border-[2px] border-[#8b0000] rounded px-2 py-1 text-white text-[10px] font-bold"
           >
             FLEE
@@ -425,7 +428,7 @@ const [playerUnitHp, setPlayerUnitHp] = useState<Record<string, number>>({});
               FIGHT!
             </button>
             <button
-              onClick={onFlee}
+              onClick={() => onFlee?.()}
               className="bg-[#5c3a21] border-[2px] border-[#3c2a16] rounded px-6 py-3 text-white font-bold hover:brightness-110 active:scale-95"
             >
               RETREAT
@@ -450,7 +453,7 @@ const [playerUnitHp, setPlayerUnitHp] = useState<Record<string, number>>({});
                   : 'Your squad was defeated...'}
               </p>
               <button
-                onClick={onBack}
+                onClick={() => onBack?.()}
                 className="mt-4 bg-[#5c3a21] border-[2px] border-[#c79a5d] rounded px-6 py-2 text-white font-bold"
               >
                 CONTINUE
