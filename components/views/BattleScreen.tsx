@@ -79,7 +79,14 @@ export function BattleScreen({
   const [showDamage, setShowDamage] = useState<{ value: number; isEnemy: boolean } | null>(null);
   
   // Track player unit HP in state
-  const [playerUnitHp, setPlayerUnitHp] = useState<Record<string, number>>({});
+const [playerUnitHp, setPlayerUnitHp] = useState<Record<string, number>>({});
+
+  // Debug: Show enemy IDs in UI when empty
+  const debugEnemyInfo = enemies.length === 0 ? (
+    <div className="text-[10px] text-red-400 mt-1">
+      Debug: enemies empty | quest: {quest?.id} | phase: {phase}
+    </div>
+  ) : null;
 
   // Initialize player unit HP
   React.useEffect(() => {
@@ -239,6 +246,12 @@ export function BattleScreen({
       <div className="w-full flex-1 flex items-center justify-center">
         <div className="text-center">
           <p className="text-[#ef5350] text-[14px]">Enemy not found</p>
+          <p className="text-[#ef5350] text-[12px] mt-2">
+            enemies: {enemies.length} | quest: {quest.id}
+          </p>
+          <p className="text-[#ef5350] text-[10px]">
+            phase: {phase}
+          </p>
           <button onClick={onBack} className="mt-4 px-4 py-2 bg-[#5c3a21] rounded text-white font-bold">
             Go Back
           </button>
