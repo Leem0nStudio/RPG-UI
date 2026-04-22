@@ -1,22 +1,8 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useGameStore } from '@/store/game-store';
 import { calculateUnitStats } from '@/core/stats';
+import { getElementMultiplier } from '@/core/elemental';
 import { createEnemyInstance, CombatUnit, EnemyInstance, BattleAction } from '@/services/battle-service';
-import type { Element } from '@/backend-contracts/game';
-
-const ELEMENT_ADVANTAGES: Record<Element, Element> = {
-  Fire: 'Earth',
-  Earth: 'Water',
-  Water: 'Fire',
-  Light: 'Dark',
-  Dark: 'Light',
-};
-
-function getElementMultiplier(attacker: Element, defender: Element): number {
-  if (ELEMENT_ADVANTAGES[attacker] === defender) return 1.5;
-  if (ELEMENT_ADVANTAGES[defender] === attacker) return 0.75;
-  return 1.0;
-}
 
 export type BattlePhase = 'selecting' | 'fighting' | 'victory' | 'defeat';
 

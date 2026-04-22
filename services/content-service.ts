@@ -77,13 +77,7 @@ export async function loadGameContent(): Promise<GameContent> {
   ]);
 
   if (jobsRes.error || unitsRes.error || itemsRes.error || questsRes.error || bannersRes.error) {
-    console.warn('[loadGameContent] Some queries failed, falling back to local content:', {
-      jobsError: jobsRes.error,
-      unitsError: unitsRes.error,
-      itemsError: itemsRes.error,
-      questsError: questsRes.error,
-      bannersError: bannersRes.error,
-    });
+    console.warn('[loadGameContent] Some queries failed, falling back to local content');
     return gameContent;
   }
 

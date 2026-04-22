@@ -225,11 +225,6 @@ export default function Home() {
             </div>
           )}
 
-          {/* Debug: show battle state info only in problematic views */}
-          <div className="fixed top-0 left-0 z-[100] text-[8px] bg-red-800 text-white p-0.5">
-            view={view} | enemies={currentEnemies.length} | roster={bootstrap.roster.length}
-          </div>
-
           {!isBootstrapping && view === 'battle' && pendingQuest && currentEnemies.length > 0 && (
             <BattleScreen
               quest={pendingQuest}

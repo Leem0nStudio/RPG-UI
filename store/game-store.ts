@@ -148,16 +148,13 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
     try {
       const state = get();
       
-      console.log('[store] startQuest called, enemyIds:', quest.enemyIds);
       const enemies = await loadEnemies(quest.enemyIds);
-      console.log('[store] startQuest loaded enemies:', enemies.length, enemies.map(e => e.id));
       
       set({
         currentQuest: quest,
         currentEnemies: enemies,
         view: 'battle',
       });
-      console.log('[store] startQuest set state, currentEnemies:', enemies.length);
     } catch (error) {
       console.error('[store] startQuest failed:', error);
     }

@@ -71,9 +71,6 @@ const ELEMENT_SPRITES: Record<Element, string> = {
 export async function loadEnemies(enemyIds?: string[]): Promise<EnemyDefinition[]> {
   const supabase = getSupabaseBrowserClient();
   
-  console.log('[loadEnemies] Loading enemies, IDs:', enemyIds);
-  console.log('[loadEnemies] Supabase client:', !!supabase);
-  
   if (supabase) {
     try {
       let query = supabase.from('enemy_definitions').select('*');
@@ -83,8 +80,6 @@ export async function loadEnemies(enemyIds?: string[]): Promise<EnemyDefinition[
       }
 
       const { data, error } = await query;
-
-      console.log('[loadEnemies] Query result - data:', data?.length, 'error:', error);
       
       if (!error && data && data.length > 0) {
         return (data as any[]).map((row) => ({
@@ -109,13 +104,10 @@ export async function loadEnemies(enemyIds?: string[]): Promise<EnemyDefinition[
     }
   }
 
-  // Fallback to local content
-  console.log('[loadEnemies] Using fallback, available:', gameContent.enemies.map(e => e.id));
   let enemies = gameContent.enemies;
   if (enemyIds && enemyIds.length > 0) {
     enemies = enemies.filter(e => enemyIds.includes(e.id));
   }
-  console.log('[loadEnemies] Fallback result:', enemies.map(e => e.id));
   return enemies;
 }
 
@@ -127,7 +119,6 @@ export function createEnemyInstance(
   level: number,
   playerAvgLevel: number
 ): EnemyInstance {
-  console.log('[createEnemyInstance]', { definitionId: definition.id, level, playerAvgLevel });
   const scaledLevel = Math.max(1, Math.min(definition.maxLevel, Math.floor(level + Math.floor(Math.random() * 3) - 1)));
   
   const scaledStats = scaleBaseStats(definition.baseStats, scaledLevel, definition.maxLevel);
