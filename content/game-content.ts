@@ -31,10 +31,16 @@ const fallbackItems = [
 ];
 
 const fallbackQuests = [
-  { id: 'quest_tutorial_1', worldId: 'world_tutorial', stage: 1, name: 'First Battle', energyCost: 0, difficulty: 'Normal' as const, enemyIds: ['enemy_slime'], rewardsPreview: ['EXP x50', 'Zel x100'] },
-  { id: 'quest_forest_1', worldId: 'world_forest', stage: 1, name: 'Forest Ambush', energyCost: 5, difficulty: 'Normal' as const, enemyIds: ['enemy_goblin'], rewardsPreview: ['EXP x100', 'Zel x200'] },
-  { id: 'quest_forest_2', worldId: 'world_forest', stage: 2, name: 'Wolf Pack', energyCost: 7, difficulty: 'Normal' as const, enemyIds: ['enemy_wolf'], rewardsPreview: ['EXP x150', 'Zel x300'] },
-  { id: 'quest_cave_1', worldId: 'world_cave', stage: 1, name: 'Dark Cave', energyCost: 10, difficulty: 'Hard' as const, enemyIds: ['enemy_bat'], rewardsPreview: ['EXP x250', 'Zel x500'] },
+  { id: 'quest_1', worldId: 'prontera', stage: 1, name: 'First Steps', energyCost: 5, difficulty: 'Normal' as const, enemyIds: ['enemy_slime'], rewardsPreview: ['10 EXP', '20 Zel'] },
+  { id: 'quest_2', worldId: 'prontera', stage: 2, name: 'Forest Ambush', energyCost: 5, difficulty: 'Normal' as const, enemyIds: ['enemy_goblin'], rewardsPreview: ['25 EXP', '50 Zel'] },
+  { id: 'quest_3', worldId: 'prontera', stage: 3, name: 'Wolf Pack', energyCost: 7, difficulty: 'Normal' as const, enemyIds: ['enemy_wolf'], rewardsPreview: ['40 EXP', '80 Zel'] },
+  { id: 'quest_4', worldId: 'prontera', stage: 4, name: 'Cave Explorer', energyCost: 10, difficulty: 'Normal' as const, enemyIds: ['enemy_bat'], rewardsPreview: ['60 EXP', '120 Zel'] },
+  { id: 'quest_5', worldId: 'prontera', stage: 5, name: 'Fire Dungeon', energyCost: 12, difficulty: 'Hard' as const, enemyIds: ['enemy_salamander', 'enemy_ifrit'], rewardsPreview: ['80 EXP', '200 Zel'] },
+  { id: 'quest_6', worldId: 'prontera', stage: 6, name: 'Water Temple', energyCost: 15, difficulty: 'Hard' as const, enemyIds: ['enemy_sea_serpent', 'enemy_siren'], rewardsPreview: ['100 EXP', '300 Zel'] },
+  { id: 'quest_7', worldId: 'prontera', stage: 7, name: 'Earth Guardian', energyCost: 18, difficulty: 'Hard' as const, enemyIds: ['enemy_golem'], rewardsPreview: ['120 EXP', '400 Zel'] },
+  { id: 'quest_8', worldId: 'prontera', stage: 8, name: 'Dark Dungeon', energyCost: 20, difficulty: 'Heroic' as const, enemyIds: ['enemy_shadow', 'enemy_demon'], rewardsPreview: ['150 EXP', '500 Zel'] },
+  { id: 'quest_9', worldId: 'prontera', stage: 9, name: 'Light Temple', energyCost: 22, difficulty: 'Heroic' as const, enemyIds: ['enemy_spark', 'enemy_angel'], rewardsPreview: ['180 EXP', '600 Zel'] },
+  { id: 'quest_10', worldId: 'prontera', stage: 10, name: 'Final Boss', energyCost: 30, difficulty: 'Heroic' as const, enemyIds: ['enemy_titan'], rewardsPreview: ['300 EXP', '1000 Zel'] },
 ];
 
 const fallbackEnemies: EnemyDefinition[] = [
@@ -42,6 +48,17 @@ const fallbackEnemies: EnemyDefinition[] = [
   { id: 'enemy_goblin', name: 'Goblin', title: 'Forest Scavenger', element: 'Earth', rarity: 2, maxLevel: 15, baseStats: { hp: 150, atk: 35, def: 10, rec: 8 }, skills: [], aiType: 'aggressive', expReward: 25, zelReward: 50, itemDrops: [] },
   { id: 'enemy_wolf', name: 'Wolf', title: 'Wild Beast', element: 'Earth', rarity: 2, maxLevel: 20, baseStats: { hp: 200, atk: 45, def: 12, rec: 10 }, skills: [], aiType: 'aggressive', expReward: 40, zelReward: 80, itemDrops: [] },
   { id: 'enemy_bat', name: 'Bat', title: 'Cave Dweller', element: 'Dark', rarity: 3, maxLevel: 25, baseStats: { hp: 180, atk: 55, def: 8, rec: 15 }, skills: [], aiType: 'balanced', expReward: 60, zelReward: 120, itemDrops: [] },
+  // Add all enemies that quests reference
+  { id: 'enemy_salamander', name: 'Salamander', title: 'Flame Lizard', element: 'Fire', rarity: 2, maxLevel: 30, baseStats: { hp: 800, atk: 85, def: 45, rec: 35 }, skills: [], aiType: 'aggressive', expReward: 15, zelReward: 80, itemDrops: [] },
+  { id: 'enemy_ifrit', name: 'Ifrit', title: 'Flame Spirit', element: 'Fire', rarity: 4, maxLevel: 50, baseStats: { hp: 1800, atk: 160, def: 80, rec: 55 }, skills: [], aiType: 'aggressive', expReward: 35, zelReward: 180, itemDrops: [] },
+  { id: 'enemy_sea_serpent', name: 'Sea Serpent', title: 'Ocean Serpent', element: 'Water', rarity: 2, maxLevel: 30, baseStats: { hp: 900, atk: 65, def: 55, rec: 50 }, skills: [], aiType: 'balanced', expReward: 15, zelReward: 85, itemDrops: [] },
+  { id: 'enemy_siren', name: 'Siren', title: 'Ocean Song', element: 'Water', rarity: 4, maxLevel: 50, baseStats: { hp: 1600, atk: 140, def: 95, rec: 90 }, skills: [], aiType: 'defensive', expReward: 35, zelReward: 175, itemDrops: [] },
+  { id: 'enemy_golem', name: 'Stone Golem', title: 'Earth Guardian', element: 'Earth', rarity: 3, maxLevel: 40, baseStats: { hp: 1500, atk: 70, def: 90, rec: 30 }, skills: [], aiType: 'defensive', expReward: 25, zelReward: 120, itemDrops: [] },
+  { id: 'enemy_titan', name: 'Titan', title: 'Earth Giant', element: 'Earth', rarity: 5, maxLevel: 60, baseStats: { hp: 3000, atk: 140, def: 160, rec: 50 }, skills: [], aiType: 'boss', expReward: 50, zelReward: 250, itemDrops: [] },
+  { id: 'enemy_spark', name: 'Spark Sprite', title: 'Light Wisp', element: 'Light', rarity: 2, maxLevel: 30, baseStats: { hp: 600, atk: 95, def: 35, rec: 70 }, skills: [], aiType: 'aggressive', expReward: 12, zelReward: 70, itemDrops: [] },
+  { id: 'enemy_angel', name: 'Fallen Angel', title: 'Dark Light', element: 'Light', rarity: 4, maxLevel: 50, baseStats: { hp: 1400, atk: 180, def: 70, rec: 100 }, skills: [], aiType: 'balanced', expReward: 30, zelReward: 160, itemDrops: [] },
+  { id: 'enemy_shadow', name: 'Shadow Beast', title: 'Dark Hunter', element: 'Dark', rarity: 2, maxLevel: 30, baseStats: { hp: 700, atk: 100, def: 40, rec: 40 }, skills: [], aiType: 'aggressive', expReward: 15, zelReward: 75, itemDrops: [] },
+  { id: 'enemy_demon', name: 'Lesser Demon', title: 'Hell Spawn', element: 'Dark', rarity: 5, maxLevel: 60, baseStats: { hp: 2200, atk: 200, def: 100, rec: 65 }, skills: [], aiType: 'boss', expReward: 45, zelReward: 220, itemDrops: [] },
 ];
 
 const fallbackBanners = [
