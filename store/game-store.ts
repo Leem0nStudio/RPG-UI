@@ -1,16 +1,16 @@
 import { create } from 'zustand';
-import type { 
-  BattleState, 
-  CurrencyCode, 
-  Element, 
-  EnemyDefinition, 
-  GameBootstrap, 
-  ItemDefinition, 
-  ItemType, 
-  OwnedUnit, 
-  QuestDefinition, 
-  StatBlock, 
-  UnitDefinition 
+import type {
+  BattleState,
+  CurrencyCode,
+  Element,
+  EnemyDefinition,
+  GameBootstrap,
+  ItemDefinition,
+  ItemType,
+  OwnedUnit,
+  QuestDefinition,
+  StatBlock,
+  UnitDefinition
 } from '@/backend-contracts/game';
 import { bootstrapData } from '@/content/game-content';
 import { loadGameContent } from '@/services/content-service';
@@ -19,19 +19,36 @@ import { loadEnemies } from '@/services/battle-service';
 
 export type AppView = 'home' | 'unitList' | 'character' | 'inventory' | 'quest' | 'battle' | 'summon' | 'qrScanner';
 
+interface NotificationPayload {
+  type: 'reward' | 'achievement' | 'levelup' | 'rare' | 'info';
+  title: string;
+  message?: string;
+  duration?: number;
+}
+
 interface GameStoreState {
   isBootstrapping: boolean;
   view: AppView;
   targetSlot: ItemType | null;
   bootstrap: GameBootstrap;
   selectedUnitInstanceId: string | null;
-  
+
   // Battle state
   currentQuest: QuestDefinition | null;
   currentEnemies: EnemyDefinition[];
   battleState: BattleState | null;
   lastBattleResult: BattleState | null;
-  
+
+  // Notification queue
+  notifications: NotificationPayload[];
+  showCelebration: boolean;
+  celebrationData: {
+    type: 'levelup' | 'summon' | 'reward' | 'achievement' | 'battle_win';
+    title: string;
+    subtitle?: string;
+    items?: Array<{ name: string; icon?: string; rarity?: number }>;
+  } | null;
+
   setView: (view: AppView) => void;
   selectUnit: (instanceId: string) => void;
   openInventoryForSlot: (slot: ItemType) => void;
@@ -39,7 +56,12 @@ interface GameStoreState {
   unequipItem: (slot: ItemType) => void;
   addGeneratedUnit: (unitData: { instanceId: string; unitId: string; jobId: string; level: number; stats: StatBlock; rarity: number; name: string; title: string; element: Element; skills?: any[]; spriteUrl?: string; cssFilter?: string }) => void;
   bootstrapGame: () => Promise<void>;
-  
+  pushNotification: (notification: NotificationPayload) => void;
+  showLevelUpCelebration: (newLevel: number, unitName?: string) => void;
+  showSummonCelebration: (unitName: string, rarity: number) => void;
+  showBattleWinCelebration: () => void;
+  hideCelebration: () => void;
+
   // Battle actions
   startQuest: (quest: QuestDefinition) => Promise<void>;
   enterBattle: () => Promise<void>;
@@ -69,12 +91,18 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   targetSlot: null,
   bootstrap: bootstrapData,
   selectedUnitInstanceId: bootstrapData.roster[0]?.instanceId ?? null,
-  
+
   // Battle state
   currentQuest: null,
   currentEnemies: [],
   battleState: null,
   lastBattleResult: null,
+
+  // Notification state
+  notifications: [],
+  showCelebration: false,
+  celebrationData: null,
+
   setView: (view) => set({ view }),
   selectUnit: (instanceId) => set({ selectedUnitInstanceId: instanceId, view: 'character' }),
   openInventoryForSlot: (slot) => set({ targetSlot: slot, view: 'inventory' }),
@@ -167,6 +195,45 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       },
       selectedUnitInstanceId: unitData.instanceId,
     });
+  },
+  pushNotification: (notification) => {
+    set((state) => ({
+      notifications: [...state.notifications, notification],
+    }));
+  },
+  showLevelUpCelebration: (newLevel, unitName) => {
+    set({
+      showCelebration: true,
+      celebrationData: {
+        type: 'levelup',
+        title: unitName ? `${unitName} Level Up!` : 'Level Up!',
+        subtitle: `Reached level ${newLevel}`,
+      },
+    });
+  },
+  showSummonCelebration: (unitName, rarity) => {
+    set({
+      showCelebration: true,
+      celebrationData: {
+        type: 'summon',
+        title: 'New Unit Summoned!',
+        subtitle: unitName,
+        items: [{ name: unitName, rarity }],
+      },
+    });
+  },
+  showBattleWinCelebration: () => {
+    set({
+      showCelebration: true,
+      celebrationData: {
+        type: 'battle_win',
+        title: 'Victory!',
+        subtitle: 'Battle won!',
+      },
+    });
+  },
+  hideCelebration: () => {
+    set({ showCelebration: false, celebrationData: null });
   },
   bootstrapGame: async () => {
     try {

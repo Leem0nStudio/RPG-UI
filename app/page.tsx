@@ -12,6 +12,8 @@ import { BattleScreen } from '@/components/views/BattleScreen';
 import { SummoningScreenView } from '@/components/views/SummoningScreenView';
 import { AuthScreen } from '@/components/views/AuthScreen';
 import { QRScannerView } from '@/components/views/QRScannerView';
+import { NotificationProvider } from '@/components/ui/Notifications';
+import { CelebrationPopup } from '@/components/ui/GameEffects';
 import { calculateUnitStats } from '@/core/stats';
 import { useGameStore, selectCurrentOwnedUnit, selectCurrentUnitDefinition, selectEquippedItems } from '@/store/game-store';
 import { onAuthStateChange } from '@/services/auth-service';
@@ -45,6 +47,9 @@ export default function Home() {
     lastBattleResult,
     completeBattle,
     cancelBattle,
+    showCelebration,
+    celebrationData,
+    hideCelebration,
   } = useGameStore();
   
   // Local state for quest selection flow
@@ -115,9 +120,11 @@ export default function Home() {
 
   if (isLoadingAuth) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-gradient-to-b from-[#1a0a05] to-[#0d0502]">
-        <div className="text-[#6a5a4a]">Loading...</div>
-      </div>
+      <NotificationProvider>
+        <div className="flex h-screen w-full items-center justify-center bg-gradient-to-b from-[#1a0a05] to-[#0d0502]">
+          <div className="text-[#6a5a4a]">Loading...</div>
+        </div>
+      </NotificationProvider>
     );
   }
 
@@ -126,24 +133,25 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-screen w-full items-center justify-center overflow-hidden select-none ui-text bg-[var(--color-bg-root)]">
-      <div
-        className="relative w-full max-w-[420px] h-[100dvh] max-h-[850px] sm:h-[85dvh] sm:rounded-[12px] overflow-hidden flex flex-col sm:border-[5px] sm:border-[var(--color-surface-4)] shadow-[var(--shadow-high),inset_0_0_15px_rgba(0,0,0,0.45)] bg-[var(--color-bg-surface)]"
-        style={{
-          backgroundImage: `
-            radial-gradient(ellipse at 50% 50%, rgba(120, 60, 20, 0.11) 0%, rgba(20, 10, 5, 0.93) 100%),
-            repeating-conic-gradient(from 45deg at 20% 20%, #412614 0deg 90deg, #332012 90deg 180deg)
-          `,
-          backgroundSize: '100% 100%, 80px 80px',
-        }}
-      >
-        <TopBar
-          playerName={bootstrap.player.name}
-          playerLevel={bootstrap.player.level}
-          gems={bootstrap.player.currencies.gems}
-          zel={bootstrap.player.currencies.zel}
-          karma={bootstrap.player.currencies.karma}
-        />
+    <NotificationProvider>
+      <div className="flex h-screen w-full items-center justify-center overflow-hidden select-none ui-text bg-[var(--color-bg-root)]">
+        <div
+          className="relative w-full max-w-[420px] h-[100dvh] max-h-[850px] sm:h-[85dvh] sm:rounded-[12px] overflow-hidden flex flex-col sm:border-[5px] sm:border-[var(--color-surface-4)] shadow-[var(--shadow-high),inset_0_0_15px_rgba(0,0,0,0.45)] bg-[var(--color-bg-surface)]"
+          style={{
+            backgroundImage: `
+              radial-gradient(ellipse at 50% 50%, rgba(120, 60, 20, 0.11) 0%, rgba(20, 10, 5, 0.93) 100%),
+              repeating-conic-gradient(from 45deg at 20% 20%, #412614 0deg 90deg, #332012 90deg 180deg)
+            `,
+            backgroundSize: '100% 100%, 80px 80px',
+          }}
+        >
+          <TopBar
+            playerName={bootstrap.player.name}
+            playerLevel={bootstrap.player.level}
+            gems={bootstrap.player.currencies.gems}
+            zel={bootstrap.player.currencies.zel}
+            karma={bootstrap.player.currencies.karma}
+          />
 
         <div className="flex-1 overflow-y-auto px-2 pt-4 pb-2 relative z-10 w-full flex flex-col scroll-smooth">
           {isBootstrapping && (
@@ -299,7 +307,23 @@ export default function Home() {
         </div>
 
         <BottomNavBar currentView={view} setView={setView} />
+        </div>
       </div>
-    </div>
+
+      {showCelebration && celebrationData && (
+        <CelebrationPopup
+          isOpen={showCelebration}
+          onClose={hideCelebration}
+          type={celebrationData.type}
+          title={celebrationData.title}
+          subtitle={celebrationData.subtitle}
+          items={celebrationData.items?.map(item => ({
+            name: item.name,
+            icon: <div className="w-6 h-6 bg-[#3a2a1a] rounded" />,
+            rarity: item.rarity,
+          }))}
+        />
+      )}
+    </NotificationProvider>
   );
 }

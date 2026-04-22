@@ -9,7 +9,7 @@ import { generateUnit, getRarityNumber } from '@/services/unit-generator';
 const SUMMON_COST = 5;
 
 export function SummoningScreenView({ banners }: { banners: SummonBanner[] }) {
-  const { bootstrap, addGeneratedUnit } = useGameStore();
+  const { bootstrap, addGeneratedUnit, showSummonCelebration } = useGameStore();
   const [summoningState, setSummoningState] = useState<'idle' | 'summoning' | 'result'>('idle');
   const [resultChar, setResultChar] = useState<CharacterData | null>(null);
   const [isConsuming, setIsConsuming] = useState(false);
@@ -71,6 +71,8 @@ export function SummoningScreenView({ banners }: { banners: SummonBanner[] }) {
           spriteUrl: '',
           cssFilter: '',
         });
+
+        showSummonCelebration(generated.name, getRarityNumber(generated.rarity));
       }, 2500);
     } catch (err) {
       setError('An error occurred during summon');

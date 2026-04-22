@@ -7,6 +7,7 @@ import { useGameStore } from '@/store/game-store';
 import { addItems } from '@/services/write-service';
 import type { RarityTier } from '@/services/unit-generator';
 import { getRarityNumber } from '@/services/unit-generator';
+import { Gem, Zap, Star } from 'lucide-react';
 
 type ScanState = 'idle' | 'scanning' | 'processing' | 'success' | 'error' | 'already_claimed';
 
@@ -22,7 +23,7 @@ export function QRScannerView({ onClose }: { onClose: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scanIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
-  const { addGeneratedUnit } = useGameStore();
+  const { addGeneratedUnit, showSummonCelebration } = useGameStore();
 
   const stopCamera = useCallback(() => {
     if (scanIntervalRef.current) {
@@ -93,6 +94,8 @@ export function QRScannerView({ onClose }: { onClose: () => void }) {
         element: generated.element,
         skills: generated.skills,
       });
+      
+      showSummonCelebration(generated.name, getRarityNumber(generated.rarity));
     }
   };
 
@@ -185,19 +188,42 @@ export function QRScannerView({ onClose }: { onClose: () => void }) {
         )}
 
         {state === 'success' && reward && (
-          <div className="mb-4 p-4 bg-[#2a3a2a] rounded-lg border border-[#4a8a4a]">
+          <div className="mb-4 p-4 bg-[#2a3a2a] rounded-lg border border-[#4a8a4a] animate-levelUp">
             <div className="flex items-center gap-2 text-[#8ae88a] text-[14px] font-bold mb-2">
               <CheckCircle size={20} />
               Reward Claimed!
             </div>
             <div className="text-[#c9a872] text-[12px]">{reward.location}</div>
-            <div className="mt-3 flex items-center gap-3 p-3 bg-[#1a2a1a] rounded">
-              <div className="w-12 h-12 rounded bg-[#3a4a3a] flex items-center justify-center">
-                <Gift size={24} className="text-[#ffd66e]" />
+            <div className="mt-3 flex items-center gap-3 p-3 bg-[#1a2a1a] rounded-lg border border-[#3a4a3a]">
+              <div className="w-12 h-12 rounded bg-[#3a4a3a] flex items-center justify-center animate-bounce-slow">
+                {reward.type === 'currency' && <Gem size={24} className="text-[#00ffcc]" />}
+                {reward.type === 'item' && <Gift size={24} className="text-[#ffd66e]" />}
+                {reward.type === 'unit' && <Sparkles size={24} className="text-[#b388ff]" />}
               </div>
               <div>
                 <div className="text-white text-[14px] font-bold capitalize">
-                  {reward.type === 'currency' && `${reward.reward.gems} Gems, ${reward.reward.zel} Zel`}
+                  {reward.type === 'currency' && (
+                    <div className="flex flex-col gap-1">
+                      {reward.reward.gems && (
+                        <div className="flex items-center gap-1">
+                          <Gem size={14} className="text-[#00ffcc]" />
+                          <span>{reward.reward.gems} Gems</span>
+                        </div>
+                      )}
+                      {reward.reward.zel && (
+                        <div className="flex items-center gap-1">
+                          <Zap size={14} className="text-[#ffd66e]" />
+                          <span>{reward.reward.zel} Zel</span>
+                        </div>
+                      )}
+                      {reward.reward.karma && (
+                        <div className="flex items-center gap-1">
+                          <Star size={14} className="text-[#b388ff]" />
+                          <span>{reward.reward.karma} Karma</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   {reward.type === 'item' && 'Item Received'}
                   {reward.type === 'unit' && 'New Unit Recruited!'}
                 </div>
