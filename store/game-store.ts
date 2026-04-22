@@ -2,12 +2,14 @@ import { create } from 'zustand';
 import type { 
   BattleState, 
   CurrencyCode, 
+  Element, 
   EnemyDefinition, 
   GameBootstrap, 
   ItemDefinition, 
   ItemType, 
   OwnedUnit, 
   QuestDefinition, 
+  StatBlock, 
   UnitDefinition 
 } from '@/backend-contracts/game';
 import { bootstrapData } from '@/content/game-content';
@@ -35,6 +37,7 @@ interface GameStoreState {
   openInventoryForSlot: (slot: ItemType) => void;
   equipItem: (itemId: string) => void;
   unequipItem: (slot: ItemType) => void;
+  addGeneratedUnit: (unitData: { instanceId: string; unitId: string; jobId: string; level: number; stats: StatBlock; rarity: number }) => void;
   bootstrapGame: () => Promise<void>;
   
   // Battle actions
@@ -121,6 +124,45 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
         ),
       },
       targetSlot: null,
+    });
+  },
+  addGeneratedUnit: (unitData) => {
+    const state = get();
+    const newOwned: OwnedUnit = {
+      instanceId: unitData.instanceId,
+      unitId: unitData.unitId,
+      level: unitData.level,
+      exp: 0,
+      jobId: unitData.jobId,
+      jobLevel: 1,
+      jobExp: 0,
+      locked: false,
+      equipment: { Weapon: null, Armor: null, Accessory: null },
+    };
+    set({
+      bootstrap: {
+        ...state.bootstrap,
+        roster: [...state.bootstrap.roster, newOwned],
+        content: {
+          ...state.bootstrap.content,
+          units: [
+            ...state.bootstrap.content.units,
+            {
+              id: unitData.unitId,
+              name: `Unit ${state.bootstrap.roster.length + 1}`,
+              title: 'Summoned',
+              element: 'Fire' as Element,
+              rarity: unitData.rarity,
+              maxLevel: 50,
+              jobId: unitData.jobId,
+              maxJobLevel: 50,
+              cost: 5,
+              baseStats: unitData.stats,
+              skills: [],
+            },
+          ],
+        },
+      },
     });
   },
   bootstrapGame: async () => {

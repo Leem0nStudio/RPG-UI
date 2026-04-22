@@ -4,13 +4,12 @@ import type { CharacterData } from '@/lib/types';
 import type { SummonBanner } from '@/backend-contracts/game';
 import { useGameStore } from '@/store/game-store';
 import { updateCurrencies } from '@/services/write-service';
-import { addUnitToRoster } from '@/services/write-service';
-import { generateUnit, getRarityNumber, getRarityLabel } from '@/services/unit-generator';
+import { generateUnit, getRarityNumber } from '@/services/unit-generator';
 
-const SUMMON_COST = 5; // gems per summon
+const SUMMON_COST = 5;
 
 export function SummoningScreenView({ banners }: { banners: SummonBanner[] }) {
-  const { bootstrap } = useGameStore();
+  const { bootstrap, addGeneratedUnit } = useGameStore();
   const [summoningState, setSummoningState] = useState<'idle' | 'summoning' | 'result'>('idle');
   const [resultChar, setResultChar] = useState<CharacterData | null>(null);
   const [isConsuming, setIsConsuming] = useState(false);
@@ -58,7 +57,14 @@ export function SummoningScreenView({ banners }: { banners: SummonBanner[] }) {
         setSummoningState('result');
         setIsConsuming(false);
 
-        await addUnitToRoster(generated.id, generated.jobId, 1);
+        addGeneratedUnit({
+          instanceId: generated.id,
+          unitId: generated.id,
+          jobId: generated.jobId,
+          level: 1,
+          stats: generated.baseStats,
+          rarity: getRarityNumber(generated.rarity),
+        });
       }, 2500);
     } catch (err) {
       setError('An error occurred during summon');
