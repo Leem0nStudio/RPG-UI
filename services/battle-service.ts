@@ -70,40 +70,51 @@ const ELEMENT_SPRITES: Record<Element, string> = {
 export async function loadEnemies(enemyIds?: string[]): Promise<EnemyDefinition[]> {
   const supabase = getSupabaseBrowserClient();
   
+  console.log('[loadEnemies] Loading enemies, IDs:', enemyIds);
+  console.log('[loadEnemies] Supabase client:', !!supabase);
+  
   if (supabase) {
-    let query = supabase.from('enemy_definitions').select('*');
-    
-    if (enemyIds && enemyIds.length > 0) {
-      query = query.in('id', enemyIds);
-    }
+    try {
+      let query = supabase.from('enemy_definitions').select('*');
+      
+      if (enemyIds && enemyIds.length > 0) {
+        query = query.in('id', enemyIds);
+      }
 
-    const { data, error } = await query;
+      const { data, error } = await query;
 
-    if (!error && data && data.length > 0) {
-      return (data as any[]).map((row) => ({
-        id: row.id,
-        name: row.name,
-        title: row.title,
-        element: row.element,
-        rarity: row.rarity,
-        maxLevel: row.max_level,
-        baseStats: row.base_stats,
-        spriteUrl: row.sprite_url,
-        cssFilter: row.css_filter,
-        skills: row.skills ?? [],
-        aiType: row.ai_type ?? 'aggressive',
-        expReward: row.exp_reward,
-        zelReward: row.zel_reward,
-        itemDrops: row.item_drops ?? [],
-      }));
+      console.log('[loadEnemies] Query result - data:', data?.length, 'error:', error);
+      
+      if (!error && data && data.length > 0) {
+        return (data as any[]).map((row) => ({
+          id: row.id,
+          name: row.name,
+          title: row.title,
+          element: row.element,
+          rarity: row.rarity,
+          maxLevel: row.max_level,
+          baseStats: row.base_stats,
+          spriteUrl: row.sprite_url,
+          cssFilter: row.css_filter,
+          skills: row.skills ?? [],
+          aiType: row.ai_type ?? 'aggressive',
+          expReward: row.exp_reward,
+          zelReward: row.zel_reward,
+          itemDrops: row.item_drops ?? [],
+        }));
+      }
+    } catch (e) {
+      console.error('[loadEnemies] Exception:', e);
     }
   }
 
   // Fallback to local content
+  console.log('[loadEnemies] Using fallback, available:', gameContent.enemies.map(e => e.id));
   let enemies = gameContent.enemies;
   if (enemyIds && enemyIds.length > 0) {
     enemies = enemies.filter(e => enemyIds.includes(e.id));
   }
+  console.log('[loadEnemies] Fallback result:', enemies.map(e => e.id));
   return enemies;
 }
 
