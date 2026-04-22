@@ -141,10 +141,12 @@ export default function Home() {
           {!isBootstrapping && view === 'quest' && (
             <QuestScreen
               bootstrap={bootstrap}
-              onSelectQuest={(quest) => {
+              onSelectQuest={async (quest) => {
                 setPendingQuest(quest);
-                // Use startQuest from store to load enemies
-                startQuest(quest);
+                // Load enemies and wait for them
+                await startQuest(quest);
+                // Now set view to battle after enemies are loaded
+                setView('battle');
               }}
               onBack={() => setView('home')}
             />
