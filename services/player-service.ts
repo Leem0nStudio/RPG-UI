@@ -102,8 +102,8 @@ export async function loadPlayerBootstrap(): Promise<GameBootstrap> {
     quantity: item.quantity,
   }));
 
-  const isLegacyData = remoteRoster.length > 0 && remoteRoster.every(u => 
-    u.unitId.startsWith('u_hero_') || u.unitId.startsWith('u_sergio') || u.unitId.startsWith('u_vargas')
+  const hasLegacyUnits = remoteRoster.length > 0 && remoteRoster.some(u => 
+    u.unitId.startsWith('u_hero_') || u.unitId.startsWith('u_sergio') || u.unitId.startsWith('u_vargas') || u.unitId.startsWith('u_lance') || u.unitId.startsWith('u_magress')
   );
 
   return {
@@ -117,11 +117,11 @@ export async function loadPlayerBootstrap(): Promise<GameBootstrap> {
         max: profile.energy_max,
         recoverAt: profile.energy_recover_at,
       },
-      currencies: isLegacyData 
+      currencies: hasLegacyUnits 
         ? { gems: 25, zel: 1000, karma: 100 }
         : currencies,
     },
-    roster: isLegacyData ? [] : remoteRoster,
-    items: isLegacyData ? [] : remoteItems,
+    roster: hasLegacyUnits ? [] : remoteRoster,
+    items: hasLegacyUnits ? [] : remoteItems,
   };
 }
