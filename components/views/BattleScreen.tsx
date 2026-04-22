@@ -75,6 +75,8 @@ export function BattleScreen({
   const [phase, setPhase] = useState<BattlePhase>('selecting');
   const [turnCount, setTurnCount] = useState(0);
   const [currentEnemyHp, setCurrentEnemyHp] = useState(0);
+  // Persistent enemy instance - survives phase changes
+  const [battleEnemy, setBattleEnemy] = useState<EnemyInstance | null>(null);
   const [battleLog, setBattleLog] = useState<BattleAction[]>([]);
   const [lastAction, setLastAction] = useState<BattleAction | null>(null);
   const [isPlayerTurn, setIsPlayerTurn] = useState(true);
@@ -132,29 +134,34 @@ const [playerUnitHp, setPlayerUnitHp] = useState<Record<string, number>>({});
   }, [bootstrap.roster, bootstrap.content.units, bootstrap.content.jobs, playerUnitHp]);
 
   // Create enemy instance
+  // Use persisted enemy from state, or create new one
   const currentEnemy: EnemyInstance | null = React.useMemo(() => {
-    if (enemies.length === 0 || phase !== 'selecting') return null;
+    if (battleEnemy) return battleEnemy;
+    if (enemies.length === 0) return null;
 
     console.log('[BattleScreen] Creating enemy instance, def:', enemies[0]?.id);
-    
+
     const enemyDef = enemies[0];
     const avgPlayerLevel = bootstrap.roster.length > 0
       ? bootstrap.roster.reduce((sum, u) => sum + u.level, 0) / bootstrap.roster.length
       : 1;
-    
-    return createEnemyInstance(enemyDef, Math.floor(avgPlayerLevel), Math.floor(avgPlayerLevel));
-  }, [enemies, phase, bootstrap.roster]);
 
-  // Start battle
+    const enemy = createEnemyInstance(enemyDef, Math.floor(avgPlayerLevel), Math.floor(avgPlayerLevel));
+    setBattleEnemy(enemy);
+    return enemy;
+  }, [enemies, bootstrap.roster, battleEnemy]);
+
+  // Start battle - use persisted enemy
   const startBattle = useCallback(() => {
-    console.log('[BattleScreen] startBattle called, currentEnemy:', currentEnemy?.id, 'hp:', currentEnemy?.hp);
-    if (!currentEnemy) return;
-    setCurrentEnemyHp(currentEnemy.hp);
+    const enemy = battleEnemy;
+    console.log('[BattleScreen] startBattle called, enemy:', enemy?.id, 'hp:', enemy?.hp);
+    if (!enemy) return;
+    setCurrentEnemyHp(enemy.hp);
     setPhase('fighting');
     setTurnCount(0);
     setBattleLog([]);
     setIsPlayerTurn(true);
-  }, [currentEnemy]);
+  }, [battleEnemy]);
 
   // Execute player attack
   const executePlayerAttack = useCallback((unitIndex: number) => {
