@@ -50,8 +50,9 @@ export function calculateUnitStats(
     );
   }
 
+  const validItems = equippedItems.filter((item): item is ItemDefinition => item !== null);
   const equipmentStats = sumStats(
-    ...equippedItems.filter(Boolean).map((item) => item!.stats),
+    ...validItems.map((item) => item.stats),
   );
 
   return sumStats(scaledBase, jobBonus, equipmentStats);

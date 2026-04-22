@@ -31,6 +31,7 @@ export interface EnemyInstance {
   maxHp: number;
   alive: boolean;
   aiType: AIType;
+  itemDrops: EnemyDefinition['itemDrops'];
 }
 
 export interface BattleAction {
@@ -127,7 +128,6 @@ export function createEnemyInstance(
   playerAvgLevel: number
 ): EnemyInstance {
   console.log('[createEnemyInstance]', { definitionId: definition.id, level, playerAvgLevel });
-  // Scale enemy level based on player's average level (slight challenge)
   const scaledLevel = Math.max(1, Math.min(definition.maxLevel, Math.floor(level + Math.floor(Math.random() * 3) - 1)));
   
   const scaledStats = scaleBaseStats(definition.baseStats, scaledLevel, definition.maxLevel);
@@ -143,6 +143,7 @@ export function createEnemyInstance(
     maxHp: scaledStats.hp,
     alive: true,
     aiType: definition.aiType as AIType,
+    itemDrops: definition.itemDrops,
   };
 }
 
@@ -322,7 +323,7 @@ export function executeBattle(
         rewards: {
           exp: Math.round((enemy.maxHp / 10) * (1 + turn * 0.1)),
           zel: Math.round((enemy.maxHp / 5) * (1 + turn * 0.05)),
-          items: rollItemDrops(enemy.alive ? [] : []), // Items only on kill
+          items: rollItemDrops(enemy.itemDrops),
         },
         survivingUnits,
         fallenUnits,

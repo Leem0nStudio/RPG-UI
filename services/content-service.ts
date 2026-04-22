@@ -76,7 +76,14 @@ export async function loadGameContent(): Promise<GameContent> {
     supabase.from('summon_banners').select('*'),
   ]);
 
-  if (unitsRes.error || itemsRes.error || questsRes.error || bannersRes.error) {
+  if (jobsRes.error || unitsRes.error || itemsRes.error || questsRes.error || bannersRes.error) {
+    console.warn('[loadGameContent] Some queries failed, falling back to local content:', {
+      jobsError: jobsRes.error,
+      unitsError: unitsRes.error,
+      itemsError: itemsRes.error,
+      questsError: questsRes.error,
+      bannersError: bannersRes.error,
+    });
     return gameContent;
   }
 

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useGameStore } from '@/store/game-store';
 import { calculateUnitStats } from '@/core/stats';
 import { createEnemyInstance, CombatUnit, EnemyInstance, BattleAction } from '@/services/battle-service';
@@ -49,6 +49,11 @@ export function useBattle(enemyIds?: string[]) {
 
   // Player HP tracking
   const [playerUnitHp, setPlayerUnitHp] = useState<Record<string, number>>({});
+  
+  // Refs for timeout cleanup
+  const timeoutRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const isMountedRef = useRef(true);
+  const attackInProgressRef = useRef(false);
 
   // Initialize player HP when roster changes
   useEffect(() => {
@@ -61,6 +66,7 @@ export function useBattle(enemyIds?: string[]) {
         initialHp[owned.instanceId] = stats.hp;
       }
     });
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPlayerUnitHp(initialHp);
   }, [bootstrap.roster, bootstrap.content.units, bootstrap.content.jobs]);
 
@@ -95,7 +101,14 @@ export function useBattle(enemyIds?: string[]) {
       ? bootstrap.roster.reduce((sum, u) => sum + u.level, 0) / bootstrap.roster.length
       : 1;
     const enemy = createEnemyInstance(enemyDef, Math.floor(avgPlayerLevel), Math.floor(avgPlayerLevel));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setBattleEnemy(enemy);
+    
+    return () => {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setBattleEnemy(null);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enemies, bootstrap.roster]);
 
   // Start battle
@@ -110,10 +123,12 @@ export function useBattle(enemyIds?: string[]) {
 
   // Execute player attack
   const executePlayerAttack = useCallback((unitIndex: number, onVictory?: () => void, onDefeat?: () => void) => {
+    if (attackInProgressRef.current) return;
     if (phase !== 'fighting' || !isPlayerTurn || !battleEnemy || animatingAction) return;
     const unit = playerUnits[unitIndex];
     if (!unit || !unit.alive) return;
 
+    attackInProgressRef.current = true;
     setAnimatingAction(true);
     const elementMultiplier = getElementMultiplier(unit.element, battleEnemy.element);
     const rawDamage = Math.max(1, unit.stats.atk - Math.round(battleEnemy.stats.def * 0.55));
@@ -134,32 +149,55 @@ export function useBattle(enemyIds?: string[]) {
     setCurrentEnemyHp(newHp);
     setShowDamage({ value: damage, isEnemy: true });
 
-    setTimeout(() => {
+    const timeout1 = setTimeout(() => {
+      if (!isMountedRef.current) {
+        attackInProgressRef.current = false;
+        return;
+      }
       setAnimatingAction(false);
       if (newHp <= 0) {
+        attackInProgressRef.current = false;
         setPhase('victory');
         onVictory?.();
       } else {
         setIsPlayerTurn(false);
-        // Enemy turn after delay
-        setTimeout(() => {
+        const timeout2 = setTimeout(() => {
+          if (!isMountedRef.current) {
+            attackInProgressRef.current = false;
+            return;
+          }
           const aliveUnits = playerUnits.filter(u => u.alive);
           if (aliveUnits.length === 0) {
+            attackInProgressRef.current = false;
             setPhase('defeat');
             onDefeat?.();
             return;
           }
-          // Random target attack
           const target = aliveUnits[Math.floor(Math.random() * aliveUnits.length)];
           const enemyDamage = Math.max(1, battleEnemy.stats.atk - Math.round(target.stats.def * 0.55));
           setPlayerUnitHp(prev => ({ ...prev, [target.instanceId]: Math.max(0, target.hp - enemyDamage) }));
           setTurnCount(prev => prev + 1);
           setIsPlayerTurn(true);
+          attackInProgressRef.current = false;
         }, 800);
+        timeoutRef.current.set('enemyTurn', timeout2);
       }
       setShowDamage(null);
     }, 600);
+    timeoutRef.current.set('playerAttack', timeout1);
   }, [phase, isPlayerTurn, battleEnemy, currentEnemyHp, playerUnits, animatingAction]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      attackInProgressRef.current = false;
+      const timeouts = timeoutRef.current;
+      timeouts.forEach((timeout) => clearTimeout(timeout));
+      timeouts.clear();
+    };
+  }, []);
 
   return {
     // State

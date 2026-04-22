@@ -124,35 +124,43 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
     });
   },
   bootstrapGame: async () => {
-    set({ isBootstrapping: true });
+    try {
+      set({ isBootstrapping: true });
 
-    const [content, player] = await Promise.all([loadGameContent(), loadPlayerBootstrap()]);
-    const mergedBootstrap: GameBootstrap = {
-      ...player,
-      content,
-    };
+      const [content, player] = await Promise.all([loadGameContent(), loadPlayerBootstrap()]);
+      const mergedBootstrap: GameBootstrap = {
+        ...player,
+        content,
+      };
 
-    set({
-      isBootstrapping: false,
-      bootstrap: mergedBootstrap,
-      selectedUnitInstanceId: mergedBootstrap.roster[0]?.instanceId ?? null,
-    });
+      set({
+        isBootstrapping: false,
+        bootstrap: mergedBootstrap,
+        selectedUnitInstanceId: mergedBootstrap.roster[0]?.instanceId ?? null,
+      });
+    } catch (error) {
+      console.error('[store] bootstrapGame failed:', error);
+      set({ isBootstrapping: false });
+    }
   },
   
   startQuest: async (quest: QuestDefinition) => {
-    const state = get();
-    
-    // Load enemies for this quest
-    console.log('[store] startQuest called, enemyIds:', quest.enemyIds);
-    const enemies = await loadEnemies(quest.enemyIds);
-    console.log('[store] startQuest loaded enemies:', enemies.length, enemies.map(e => e.id));
-    
-    set({
-      currentQuest: quest,
-      currentEnemies: enemies,
-      view: 'battle',
-    });
-    console.log('[store] startQuest set state, currentEnemies:', enemies.length);
+    try {
+      const state = get();
+      
+      console.log('[store] startQuest called, enemyIds:', quest.enemyIds);
+      const enemies = await loadEnemies(quest.enemyIds);
+      console.log('[store] startQuest loaded enemies:', enemies.length, enemies.map(e => e.id));
+      
+      set({
+        currentQuest: quest,
+        currentEnemies: enemies,
+        view: 'battle',
+      });
+      console.log('[store] startQuest set state, currentEnemies:', enemies.length);
+    } catch (error) {
+      console.error('[store] startQuest failed:', error);
+    }
   },
   
   enterBattle: async () => {
