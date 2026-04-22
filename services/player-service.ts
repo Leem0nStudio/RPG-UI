@@ -99,13 +99,25 @@ export async function loadPlayerBootstrap(): Promise<GameBootstrap> {
     quantity: item.quantity,
   }));
 
+  const isLegacyUnitId = (id: string) => {
+    return (
+      id.startsWith('u_hero_') || id.startsWith('u_sergio_') ||
+      id.startsWith('u_vargas') || id.startsWith('u_lance') ||
+      id.startsWith('u_magress') || id.startsWith('u_silver') ||
+      id.startsWith('u_bronze') || id.startsWith('u_gold') ||
+      id.startsWith('u_platinum') || id.startsWith('u_diamond') ||
+      !id.includes('_') || id.length < 10
+    );
+  };
+
   const hasLegacyRoster = remoteRoster.length > 0 && (
-    remoteRoster.some(u => 
-      u.unitId.startsWith('u_hero_') || u.unitId.startsWith('u_sergio') || 
-      u.unitId.startsWith('u_vargas') || u.unitId.startsWith('u_lance') || 
-      u.unitId.startsWith('u_magress')
-    ) || remoteRoster.length === 3
+    remoteRoster.some(u => isLegacyUnitId(u.unitId)) || remoteRoster.length === 3
   );
+
+  if (hasLegacyRoster && remoteRoster.length > 0) {
+    const legacyIds = remoteRoster.map(u => u.instanceId);
+    await supabase.from('player_units').delete().in('id', legacyIds);
+  }
 
   return {
     ...bootstrapData,
