@@ -143,7 +143,8 @@ export default function Home() {
               bootstrap={bootstrap}
               onSelectQuest={(quest) => {
                 setPendingQuest(quest);
-                setView('battle');
+                // Use startQuest from store to load enemies
+                startQuest(quest);
               }}
               onBack={() => setView('home')}
             />
