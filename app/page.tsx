@@ -156,9 +156,13 @@ export default function Home() {
             <UnitListView
               characters={uiCharacters}
               onSelectCharacter={(unitId) => {
+                console.log('[page] onSelectCharacter:', { unitId, roster: bootstrap.roster.map(r => r.instanceId + ':' + r.unitId) });
                 const owned = bootstrap.roster.find((entry) => entry.unitId === unitId);
+                console.log('[page] found owned:', owned);
                 if (owned) {
+                  console.log('[page] calling selectUnit:', owned.instanceId);
                   selectUnit(owned.instanceId);
+                  console.log('[page] called setView character');
                   setView('character');
                 }
               }}
@@ -189,6 +193,7 @@ export default function Home() {
           )}
 
           {!isBootstrapping && view === 'character' && currentUnit && (
+            console.log('[page] Rendering CharacterView:', { view, currentUnit: currentUnit?.name, selectedUnitInstanceId: state.selectedUnitInstanceId });
             <CharacterView
               character={{
                 ...currentUnit,
