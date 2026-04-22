@@ -1,5 +1,6 @@
 import React from 'react';
-import { Settings, Diamond } from 'lucide-react';
+import { Settings, Diamond, LogOut } from 'lucide-react';
+import { signOut } from '@/services/auth-service';
 
 export function TopBar({
   playerName = 'Summoner',
@@ -14,6 +15,11 @@ export function TopBar({
   zel?: number;
   karma?: number;
 }) {
+  const handleLogout = async () => {
+    await signOut();
+    window.location.reload();
+  };
+
   return (
     <div className="relative w-full bg-[var(--color-surface-4)] border-b-[3px] border-[var(--color-surface-5)] shadow-[var(--shadow-low)] z-30 flex-shrink-0">
       <div className="absolute top-0 w-full h-[1.5px] bg-[var(--color-surface-3)]"></div>
@@ -36,21 +42,31 @@ export function TopBar({
           </div>
         </div>
 
-        <div className="flex flex-col gap-[1px] bg-[var(--color-surface-5)] border border-[var(--color-surface-3)] rounded-[2px] p-[2px] w-[96px] sm:w-[110px] fx-low">
-          <div className="flex items-center justify-between text-white text-[11px] font-bold px-1 relative h-[16px] bg-gradient-to-r from-[#2a1a0c] to-transparent rounded-sm ui-text">
-            <Diamond size={13} className="fill-[#00ffcc] text-[#00ccaa] -ml-[2px]" />
-            <span className="text-stroke-black text-right z-10 ui-text tracking-tight">{gems}</span>
+        <div className="flex gap-2 items-start">
+          <button 
+            onClick={handleLogout}
+            className="p-2 bg-[#2a1a1a] rounded border border-[#4a2a2a] hover:bg-[#3a2a2a]"
+            title="Logout"
+          >
+            <LogOut size={14} className="text-[#aa6a6a]" />
+          </button>
+          
+          <div className="flex flex-col gap-[1px] bg-[var(--color-surface-5)] border border-[var(--color-surface-3)] rounded-[2px] p-[2px] w-[96px] sm:w-[110px] fx-low">
+            <div className="flex items-center justify-between text-white text-[11px] font-bold px-1 relative h-[16px] bg-gradient-to-r from-[#2a1a0c] to-transparent rounded-sm ui-text">
+              <Diamond size={13} className="fill-[#00ffcc] text-[#00ccaa] -ml-[2px]" />
+              <span className="text-stroke-black text-right z-10 ui-text tracking-tight">{gems}</span>
+            </div>
+            <div className="flex items-center justify-between text-white text-[11px] font-bold px-[5px] relative h-[16px] bg-gradient-to-r from-[#2a1a0c] to-transparent rounded-sm ui-text">
+              <div className="w-[11px] h-[11px] rounded-full bg-gradient-to-br from-[#4a9eff] to-[#0033aa] border-[1px] border-[#001144] shadow-inner -ml-[1px]"></div>
+              <span className="text-stroke-black text-right z-10 ui-text tracking-tight">{zel}</span>
+            </div>
+            <div className="flex items-center justify-between text-white text-[11px] font-bold px-[5px] relative h-[16px] bg-gradient-to-r from-[#2a1a0c] to-transparent rounded-sm ui-text">
+              <div className="w-[11px] h-[11px] rounded-full bg-gradient-to-br from-[#ffd700] to-[#aa6600] border-[1px] border-[#442200] shadow-inner -ml-[1px]"></div>
+              <span className="text-stroke-black text-right z-10 ui-text tracking-tight">{karma}</span>
+            </div>
           </div>
-          <div className="flex items-center justify-between text-white text-[11px] font-bold px-[5px] relative h-[16px] bg-gradient-to-r from-[#2a1a0c] to-transparent rounded-sm ui-text">
-            <div className="w-[11px] h-[11px] rounded-full bg-gradient-to-br from-[#4a9eff] to-[#0033aa] border-[1px] border-[#001144] shadow-inner -ml-[1px]"></div>
-            <span className="text-stroke-black text-right z-10 ui-text tracking-tight">{zel}</span>
-          </div>
-          <div className="flex items-center justify-between text-white text-[11px] font-bold px-[5px] relative h-[16px] bg-gradient-to-r from-[#2a1a0c] to-transparent rounded-sm ui-text">
-            <div className="w-[11px] h-[11px] rounded-full bg-gradient-to-br from-[#ffd700] to-[#aa6600] border-[1px] border-[#442200] shadow-inner -ml-[1px]"></div>
-            <span className="text-stroke-black text-right z-10 ui-text tracking-tight">{karma}</span>
-          </div>
+</div>
         </div>
-      </div>
       <div className="absolute -bottom-[10px] left-1/2 -translate-x-1/2 w-6 h-6 flex items-center justify-center z-40 bg-gradient-to-b from-[#5c412d] to-[#3a2517] rounded-full border-[1.5px] border-[#1d1209] shadow-md">
         <Settings size={12} className="text-[#baab99] drop-shadow-md" />
       </div>

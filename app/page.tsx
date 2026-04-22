@@ -10,8 +10,10 @@ import { InventoryView } from '@/components/views/InventoryView';
 import { QuestScreen } from '@/components/views/QuestScreen';
 import { BattleScreen } from '@/components/views/BattleScreen';
 import { SummoningScreenView } from '@/components/views/SummoningScreenView';
+import { AuthScreen } from '@/components/views/AuthScreen';
 import { calculateUnitStats } from '@/core/stats';
 import { useGameStore, selectCurrentOwnedUnit, selectCurrentUnitDefinition, selectEquippedItems } from '@/store/game-store';
+import { onAuthStateChange } from '@/services/auth-service';
 import type { JobDefinition, QuestDefinition, EnemyDefinition, BattleState, StatBlock } from '@/backend-contracts/game';
 import { useMemo } from 'react';
 
@@ -46,12 +48,33 @@ export default function Home() {
   
   // Local state for quest selection flow
   const [pendingQuest, setPendingQuest] = useState<QuestDefinition | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
+    const unsubscribe = onAuthStateChange((user) => {
+      setIsAuthenticated(!!user);
+    });
+    
     startTransition(() => {
       void bootstrapGame();
     });
+
+    return () => {
+      unsubscribe();
+    };
   }, [bootstrapGame]);
+
+  if (isAuthenticated === null) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-gradient-to-b from-[#1a0a05] to-[#0d0502]">
+        <div className="text-[#6a5a4a]">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <AuthScreen />;
+  }
 
   // Get state directly to avoid selector issues
   const state = useGameStore();

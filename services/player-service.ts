@@ -45,14 +45,11 @@ async function ensureSession() {
     data: { session },
   } = await supabase.auth.getSession();
 
-  if (session) return { supabase, session };
-
-  const anonymousSignIn = await supabase.auth.signInAnonymously();
-  if (anonymousSignIn.error || !anonymousSignIn.data.session) {
+  if (!session) {
     return null;
   }
 
-  return { supabase, session: anonymousSignIn.data.session };
+  return { supabase, session };
 }
 
 export async function loadPlayerBootstrap(): Promise<GameBootstrap> {
