@@ -102,21 +102,62 @@ export function QRScannerView({ onClose }: { onClose: () => void }) {
   const startCamera = useCallback(async () => {
     try {
       setCameraError(null);
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
-      });
+      setMessage('Requesting camera access...');
+      setState('processing');
+      
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('NOT_SUPPORTED');
+      }
+      
+      const constraints = [
+        { video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } } },
+        { video: { facingMode: 'environment' } },
+        { video: true },
+      ];
+      
+      let stream: MediaStream | null = null;
+      for (const constraint of constraints) {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia(constraint);
+          break;
+        } catch {
+          continue;
+        }
+      }
+      
+      if (!stream) {
+        throw new Error('NO_CAMERA');
+      }
+      
       streamRef.current = stream;
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        await videoRef.current.play();
+        videoRef.current.setAttribute('playsinline', '');
+        videoRef.current.setAttribute('autoplay', '');
+        videoRef.current.setAttribute('muted', '');
+        videoRef.current.muted = true;
+        videoRef.current.play().catch(() => {});
       }
       
       setState('scanning');
       setMessage('Point camera at a QR code');
-    } catch (err) {
-      setCameraError('Camera access denied. Use manual entry below.');
+    } catch (err: any) {
+      let errorMsg = 'Camera access denied. Use manual entry below.';
+      if (err.message === 'NOT_SUPPORTED') {
+        errorMsg = 'Camera not supported on this browser.';
+      } else if (err.message === 'NO_CAMERA') {
+        errorMsg = 'No camera found on this device.';
+      } else if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        errorMsg = 'Camera permission denied. Please allow camera access in browser settings.';
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        errorMsg = 'No camera detected on this device.';
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        errorMsg = 'Camera is in use by another app.';
+      }
+      setCameraError(errorMsg);
       setState('idle');
+      setMessage('');
     }
   }, []);
 
@@ -145,13 +186,28 @@ export function QRScannerView({ onClose }: { onClose: () => void }) {
       </div>
 
       <div className="flex-1 p-4 overflow-y-auto">
-        {state === 'scanning' && (
+        {(streamRef.current || state === 'scanning' || state === 'processing') && (state === 'scanning' || state === 'processing') && (
           <div className="mb-4 relative bg-black rounded-lg overflow-hidden aspect-square">
-            <video ref={videoRef} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-48 h-48 border-2 border-[#89e09d] rounded-lg animate-pulse" />
-            </div>
-            <canvas ref={canvasRef} className="hidden" />
+            <video 
+              ref={videoRef} 
+              className="w-full h-full object-cover"
+              playsInline
+              autoPlay
+              muted
+            />
+            {state === 'processing' && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                <Loader2 size={48} className="text-white animate-spin" />
+              </div>
+            )}
+            {state === 'scanning' && (
+              <>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="w-48 h-48 border-2 border-[#89e09d] rounded-lg animate-pulse" />
+                </div>
+                <canvas ref={canvasRef} className="hidden" />
+              </>
+            )}
           </div>
         )}
 

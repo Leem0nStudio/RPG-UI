@@ -19,6 +19,13 @@ import { loadEnemies } from '@/services/battle-service';
 
 export type AppView = 'home' | 'unitList' | 'character' | 'inventory' | 'quest' | 'battle' | 'summon' | 'qrScanner';
 
+type BadgeCount = {
+  quests?: number;
+  units?: number;
+  summon?: number;
+  home?: number;
+};
+
 interface NotificationPayload {
   type: 'reward' | 'achievement' | 'levelup' | 'rare' | 'info';
   title: string;
@@ -32,6 +39,9 @@ interface GameStoreState {
   targetSlot: ItemType | null;
   bootstrap: GameBootstrap;
   selectedUnitInstanceId: string | null;
+  
+  // Badge counts for navbar
+  badgeCounts: BadgeCount;
 
   // Battle state
   currentQuest: QuestDefinition | null;
@@ -55,6 +65,7 @@ interface GameStoreState {
   equipItem: (itemId: string) => void;
   unequipItem: (slot: ItemType) => void;
   addGeneratedUnit: (unitData: { instanceId: string; unitId: string; jobId: string; level: number; stats: StatBlock; rarity: number; name: string; title: string; element: Element; skills?: any[]; spriteUrl?: string; cssFilter?: string }) => void;
+  setBadgeCount: (key: keyof BadgeCount, value: number | undefined) => void;
   bootstrapGame: () => Promise<void>;
   pushNotification: (notification: NotificationPayload) => void;
   showLevelUpCelebration: (newLevel: number, unitName?: string) => void;
@@ -102,6 +113,9 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   notifications: [],
   showCelebration: false,
   celebrationData: null,
+  
+  // Badge counts
+  badgeCounts: { home: 0, quests: 0, units: 0, summon: 0 },
 
   setView: (view) => set({ view }),
   selectUnit: (instanceId) => set({ selectedUnitInstanceId: instanceId, view: 'character' }),
@@ -154,6 +168,14 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       targetSlot: null,
     });
   },
+  setBadgeCount: (key, value) => {
+    set((state) => ({
+      badgeCounts: {
+        ...state.badgeCounts,
+        [key]: value,
+      },
+    }));
+  },
   addGeneratedUnit: (unitData) => {
     const state = get();
     const newOwned: OwnedUnit = {
@@ -194,6 +216,10 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
         },
       },
       selectedUnitInstanceId: unitData.instanceId,
+      badgeCounts: {
+        ...state.badgeCounts,
+        units: (state.badgeCounts.units ?? 0) + 1,
+      },
     });
   },
   pushNotification: (notification) => {

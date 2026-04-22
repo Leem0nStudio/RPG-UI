@@ -50,6 +50,7 @@ export default function Home() {
     showCelebration,
     celebrationData,
     hideCelebration,
+    badgeCounts,
   } = useGameStore();
   
   // Local state for quest selection flow
@@ -306,7 +307,7 @@ export default function Home() {
           )}
         </div>
 
-        <BottomNavBar currentView={view} setView={setView} />
+        <BottomNavBar currentView={view} setView={setView} badges={badgeCounts} />
         </div>
       </div>
 
