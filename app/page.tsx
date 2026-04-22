@@ -49,10 +49,14 @@ export default function Home() {
   // Local state for quest selection flow
   const [pendingQuest, setPendingQuest] = useState<QuestDefinition | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
     const unsubscribe = onAuthStateChange((user) => {
+      if (!mounted) return;
       setIsAuthenticated(!!user);
+      setIsLoadingAuth(false);
     });
     
     startTransition(() => {
@@ -60,21 +64,10 @@ export default function Home() {
     });
 
     return () => {
+      mounted = false;
       unsubscribe();
     };
   }, [bootstrapGame]);
-
-  if (isAuthenticated === null) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-gradient-to-b from-[#1a0a05] to-[#0d0502]">
-        <div className="text-[#6a5a4a]">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <AuthScreen />;
-  }
 
   // Get state directly to avoid selector issues
   const state = useGameStore();
@@ -118,6 +111,18 @@ export default function Home() {
   const inventory = bootstrap.content.items.filter((item) =>
     bootstrap.items.some((ownedItem) => ownedItem.itemId === item.id && ownedItem.quantity > 0)
   );
+
+  if (isLoadingAuth) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-gradient-to-b from-[#1a0a05] to-[#0d0502]">
+        <div className="text-[#6a5a4a]">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <AuthScreen />;
+  }
 
   return (
     <div className="flex h-screen w-full items-center justify-center overflow-hidden select-none ui-text bg-[var(--color-bg-root)]">
