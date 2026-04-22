@@ -213,6 +213,8 @@ export default function Home() {
             />
           )}
 
+          {console.log('[page] battle render:', { view, pendingQuest: pendingQuest?.id, currentEnemiesLen: currentEnemies.length, currentEnemiesIds: currentEnemies.map(e => e.id) }) && null}
+
           {!isBootstrapping && view === 'battle' && pendingQuest && currentEnemies.length === 0 && (
             <div className="flex-1 flex items-center justify-center text-[#a58d78] text-center p-4">
               <div>
