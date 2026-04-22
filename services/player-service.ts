@@ -115,7 +115,11 @@ export async function loadPlayerBootstrap(): Promise<GameBootstrap> {
       },
       currencies,
     },
-    roster: remoteRoster.length > 0 ? remoteRoster : defaultRoster,
-    items: remoteItems.length > 0 ? remoteItems : defaultInventory,
+    roster: remoteRoster.length > 0 && remoteRoster.every(u => u.unitId.startsWith('u_hero_') || u.unitId.startsWith('u_sergio') || u.unitId.startsWith('u_vargas')) 
+      ? [] 
+      : remoteRoster,
+    items: remoteItems.length > 0 && remoteItems.length < 5
+      ? []
+      : remoteItems,
   };
 }
