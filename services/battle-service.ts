@@ -126,6 +126,7 @@ export function createEnemyInstance(
   level: number,
   playerAvgLevel: number
 ): EnemyInstance {
+  console.log('[createEnemyInstance]', { definitionId: definition.id, level, playerAvgLevel });
   // Scale enemy level based on player's average level (slight challenge)
   const scaledLevel = Math.max(1, Math.min(definition.maxLevel, Math.floor(level + Math.floor(Math.random() * 3) - 1)));
   

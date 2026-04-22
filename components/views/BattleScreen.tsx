@@ -134,6 +134,8 @@ const [playerUnitHp, setPlayerUnitHp] = useState<Record<string, number>>({});
   // Create enemy instance
   const currentEnemy: EnemyInstance | null = React.useMemo(() => {
     if (enemies.length === 0 || phase !== 'selecting') return null;
+
+    console.log('[BattleScreen] Creating enemy instance, def:', enemies[0]?.id);
     
     const enemyDef = enemies[0];
     const avgPlayerLevel = bootstrap.roster.length > 0
@@ -145,6 +147,7 @@ const [playerUnitHp, setPlayerUnitHp] = useState<Record<string, number>>({});
 
   // Start battle
   const startBattle = useCallback(() => {
+    console.log('[BattleScreen] startBattle called, currentEnemy:', currentEnemy?.id, 'hp:', currentEnemy?.hp);
     if (!currentEnemy) return;
     setCurrentEnemyHp(currentEnemy.hp);
     setPhase('fighting');
