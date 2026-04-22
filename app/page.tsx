@@ -193,7 +193,6 @@ export default function Home() {
           )}
 
           {!isBootstrapping && view === 'character' && currentUnit && (
-            console.log('[page] Rendering CharacterView:', { view, currentUnit: currentUnit?.name, selectedUnitInstanceId: state.selectedUnitInstanceId });
             <CharacterView
               character={{
                 ...currentUnit,
