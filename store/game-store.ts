@@ -17,7 +17,7 @@ import { loadGameContent } from '@/services/content-service';
 import { loadPlayerBootstrap } from '@/services/player-service';
 import { loadEnemies } from '@/services/battle-service';
 
-export type AppView = 'home' | 'unitList' | 'character' | 'inventory' | 'quest' | 'battle' | 'summon' | 'qrScanner';
+export type AppView = 'home' | 'unitList' | 'character' | 'inventory' | 'quest' | 'battle' | 'summon' | 'qrScanner' | 'dailyQuests' | 'campaign' | 'story';
 
 type BadgeCount = {
   quests?: number;

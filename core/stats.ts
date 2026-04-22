@@ -1,4 +1,5 @@
 import type { ItemDefinition, JobDefinition, OwnedUnit, StatBlock, UnitDefinition } from '@/backend-contracts/game';
+import { calculateDamage, calculateExpReward, calculateZelReward, calculateEnemyStats, LEVEL_MULTIPLIERS } from './balance';
 
 export function sumStats(...blocks: StatBlock[]): StatBlock {
   return blocks.reduce(
@@ -15,10 +16,10 @@ export function sumStats(...blocks: StatBlock[]): StatBlock {
 export function scaleBaseStats(base: StatBlock, level: number, maxLevel: number): StatBlock {
   const growth = Math.max(0, (level - 1) / Math.max(1, maxLevel - 1));
   return {
-    hp: Math.round(base.hp * (1 + growth * 0.85)),
-    atk: Math.round(base.atk * (1 + growth * 0.82)),
-    def: Math.round(base.def * (1 + growth * 0.78)),
-    rec: Math.round(base.rec * (1 + growth * 0.7)),
+    hp: Math.round(base.hp * (1 + growth * LEVEL_MULTIPLIERS.hp)),
+    atk: Math.round(base.atk * (1 + growth * LEVEL_MULTIPLIERS.atk)),
+    def: Math.round(base.def * (1 + growth * LEVEL_MULTIPLIERS.def)),
+    rec: Math.round(base.rec * (1 + growth * LEVEL_MULTIPLIERS.rec)),
   };
 }
 
@@ -56,6 +57,26 @@ export function calculateUnitStats(
   );
 
   return sumStats(scaledBase, jobBonus, equipmentStats);
+}
+
+export function calculatePlayerDamage(atk: number, def: number, level: number): number {
+  return calculateDamage(atk, def, level);
+}
+
+export function getExpReward(level: number, difficulty: 'Normal' | 'Hard' | 'Heroic'): number {
+  return calculateExpReward(level, difficulty);
+}
+
+export function getZelReward(level: number, difficulty: 'Normal' | 'Hard' | 'Heroic'): number {
+  return calculateZelReward(level, difficulty);
+}
+
+export function getEnemyStatsForDifficulty(
+  baseStats: StatBlock,
+  difficulty: 'Normal' | 'Hard' | 'Heroic',
+  enemyLevel: number
+): StatBlock {
+  return calculateEnemyStats(baseStats, difficulty, enemyLevel);
 }
 
 export function canEvolve(owned: OwnedUnit, jobs: JobDefinition[]): boolean {

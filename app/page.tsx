@@ -14,6 +14,9 @@ import { AuthScreen } from '@/components/views/AuthScreen';
 import { QRScannerView } from '@/components/views/QRScannerView';
 import { NotificationProvider } from '@/components/ui/Notifications';
 import { CelebrationPopup } from '@/components/ui/GameEffects';
+import { DailyQuestsView } from '@/components/views/DailyQuestsView';
+import { CampaignView } from '@/components/views/CampaignView';
+import { StoryModeView } from '@/components/views/StoryModeView';
 import { calculateUnitStats } from '@/core/stats';
 import { useGameStore, selectCurrentOwnedUnit, selectCurrentUnitDefinition, selectEquippedItems } from '@/store/game-store';
 import { onAuthStateChange } from '@/services/auth-service';
@@ -55,6 +58,7 @@ export default function Home() {
   
   // Local state for quest selection flow
   const [pendingQuest, setPendingQuest] = useState<QuestDefinition | null>(null);
+  const [currentStoryChapter, setCurrentStoryChapter] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
@@ -169,6 +173,38 @@ export default function Home() {
               onOpenQuest={() => setView('quest')}
               onOpenSummon={() => setView('summon')}
               onOpenQR={() => setView('qrScanner')}
+              onOpenDailyQuests={() => setView('dailyQuests')}
+              onOpenCampaign={() => setView('campaign')}
+            />
+          )}
+          
+          {!isBootstrapping && view === 'dailyQuests' && (
+            <DailyQuestsView onClose={() => setView('home')} />
+          )}
+          
+          {!isBootstrapping && view === 'campaign' && (
+            <CampaignView 
+              onClose={() => setView('home')} 
+              onStartChapter={(id) => setView('story')}
+              onOpenStory={(id) => {
+                setCurrentStoryChapter(id);
+                setView('story');
+              }}
+            />
+          )}
+          
+          {!isBootstrapping && view === 'story' && currentStoryChapter && (
+            <StoryModeView 
+              chapterId={currentStoryChapter}
+              onClose={() => setView('campaign')}
+              onComplete={() => setView('campaign')}
+              onNextChapter={(nextId) => {
+                if (nextId) {
+                  setCurrentStoryChapter(nextId);
+                } else {
+                  setView('campaign');
+                }
+              }}
             />
           )}
           

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Swords, Users, Sparkles, ScanLine, Gem, Zap, Star, Trophy, Flame, Snowflake, Leaf, Sun, Moon, ChevronRight, TrendingUp, Target, Award } from 'lucide-react';
+import { Swords, Users, Sparkles, ScanLine, Gem, Zap, Star, Trophy, Flame, Snowflake, Leaf, Sun, Moon, ChevronRight, TrendingUp, Target, Award, Scroll, BookOpen } from 'lucide-react';
 import type { GameBootstrap } from '@/backend-contracts/game';
 import { RarityBadge } from '@/components/ui/GameEffects';
 
@@ -11,9 +11,11 @@ type Props = {
   onOpenQuest: () => void;
   onOpenSummon: () => void;
   onOpenQR: () => void;
+  onOpenDailyQuests: () => void;
+  onOpenCampaign: () => void;
 };
 
-export function HomeHubView({ bootstrap, onOpenUnits, onOpenQuest, onOpenSummon, onOpenQR }: Props) {
+export function HomeHubView({ bootstrap, onOpenUnits, onOpenQuest, onOpenSummon, onOpenQR, onOpenDailyQuests, onOpenCampaign }: Props) {
   const { player, roster, items, content } = bootstrap;
   const energyPercent = Math.round((player.energy.current / player.energy.max) * 100);
   const unitCount = roster.length;
@@ -150,7 +152,7 @@ export function HomeHubView({ bootstrap, onOpenUnits, onOpenQuest, onOpenSummon,
           </div>
         </button>
 
-        {/* QR Hunt - Secondary */}
+{/* QR Hunt - Secondary */}
         <button 
           onClick={onOpenQR}
           className="ui-panel p-3 text-left relative overflow-hidden active:scale-[0.98] transition-transform group"
@@ -164,6 +166,49 @@ export function HomeHubView({ bootstrap, onOpenUnits, onOpenQuest, onOpenSummon,
               <h3 className="ui-heading text-[14px] text-white text-stroke-sm">QR Hunt</h3>
               <p className="text-[9px] text-[#3c2a16]">Escanea códigos reales para loot</p>
               <div className="mt-1 px-2 py-0.5 bg-[#4ade80]/20 rounded text-[9px] text-[#4ade80] font-bold flex items-center gap-1">
+                <span className="animate-pulse">●</span> NEW
+              </div>
+            </div>
+          </div>
+        </button>
+      </section>
+
+      {/* Campaign & Daily Quests */}
+      <section className="grid grid-cols-2 gap-2">
+        {/* Campaign - New */}
+        <button 
+          onClick={onOpenCampaign}
+          className="ui-panel p-3 text-left relative overflow-hidden active:scale-[0.98] transition-transform group"
+        >
+          <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-[#b388ff]/20 to-transparent rounded-bl-full" />
+          <div className="relative z-10 flex items-start gap-3">
+            <div className="p-2 bg-[#b388ff]/10 rounded-lg">
+              <Scroll size={22} className="text-[#b388ff]" />
+            </div>
+            <div className="flex-1">
+              <h3 className="ui-heading text-[14px] text-white text-stroke-sm">Campaña</h3>
+              <p className="text-[9px] text-[#3c2a16]">Historia y decisiones ��picas</p>
+              <div className="mt-1 px-2 py-0.5 bg-[#b388ff]/20 rounded text-[9px] text-[#b388ff] font-bold">
+                Cap 1-5
+              </div>
+            </div>
+          </div>
+        </button>
+
+        {/* Daily Quests - New */}
+        <button 
+          onClick={onOpenDailyQuests}
+          className="ui-panel p-3 text-left relative overflow-hidden active:scale-[0.98] transition-transform group"
+        >
+          <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-[#ffd66e]/20 to-transparent rounded-bl-full" />
+          <div className="relative z-10 flex items-start gap-3">
+            <div className="p-2 bg-[#ffd66e]/10 rounded-lg">
+              <Trophy size={22} className="text-[#ffd66e]" />
+            </div>
+            <div className="flex-1">
+              <h3 className="ui-heading text-[14px] text-white text-stroke-sm">Misiones</h3>
+              <p className="text-[9px] text-[#3c2a16]">Recompensas diarias y semanales</p>
+              <div className="mt-1 px-2 py-0.5 bg-[#ffd66e]/20 rounded text-[9px] text-[#ffd66e] font-bold flex items-center gap-1">
                 <span className="animate-pulse">●</span> NEW
               </div>
             </div>
