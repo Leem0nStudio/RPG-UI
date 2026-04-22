@@ -19,6 +19,10 @@ const getSprite = (jobId: string) => {
 };
 
 const fallbackUnits = [
+  { id: 'u_sergio', name: 'Sergio', title: 'NOVICE', element: 'Water' as const, rarity: 3, maxLevel: 50, jobId: 'job_swordman', maxJobLevel: 50, cost: 5, baseStats: { hp: 2000, atk: 550, def: 500, rec: 300 }, skills: [] },
+  { id: 'u_vargas', name: 'Vargas', title: 'SOLDIER', element: 'Water' as const, rarity: 4, maxLevel: 60, jobId: 'job_swordman', maxJobLevel: 50, cost: 5, baseStats: { hp: 3500, atk: 800, def: 700, rec: 400 }, skills: [] },
+  { id: 'u_lance', name: 'Lance', title: 'ROGUE', element: 'Dark' as const, rarity: 4, maxLevel: 80, jobId: 'job_thief', maxJobLevel: 50, cost: 5, baseStats: { hp: 2800, atk: 950, def: 400, rec: 350 }, skills: [] },
+  { id: 'u_magress', name: 'Magress', title: 'GUARDIAN', element: 'Earth' as const, rarity: 5, maxLevel: 100, jobId: 'job_knight', maxJobLevel: 50, cost: 5, baseStats: { hp: 5000, atk: 650, def: 1200, rec: 500 }, skills: [] },
   { id: 'u_hero_1', name: 'Knight', title: 'BRAVE SOLDIER', element: 'Water' as const, rarity: 3, maxLevel: 40, jobId: 'job_swordman', maxJobLevel: 50, cost: 5, baseStats: { hp: 2050, atk: 600, def: 600, rec: 580 }, skills: [] },
   { id: 'u_hero_2', name: 'Mage', title: 'FLAME ARCHER', element: 'Fire' as const, rarity: 3, maxLevel: 40, jobId: 'job_mage', maxJobLevel: 50, cost: 5, baseStats: { hp: 1500, atk: 750, def: 300, rec: 450 }, skills: [] },
   { id: 'u_hero_3', name: 'Archer', title: 'WIND HUNTER', element: 'Earth' as const, rarity: 3, maxLevel: 40, jobId: 'job_archer', maxJobLevel: 50, cost: 5, baseStats: { hp: 1800, atk: 650, def: 400, rec: 350 }, skills: [] },
