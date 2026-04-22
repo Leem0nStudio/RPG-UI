@@ -85,6 +85,7 @@ export function BattleScreen({
         enemy={battleEnemy}
         currentEnemyHp={currentEnemyHp}
         onStartBattle={startBattle}
+        onAttack={handleUnitAttack}
         onBack={onBack}
         onFlee={onFlee}
       />

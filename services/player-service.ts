@@ -102,8 +102,12 @@ export async function loadPlayerBootstrap(): Promise<GameBootstrap> {
     quantity: item.quantity,
   }));
 
-  const hasLegacyUnits = remoteRoster.length > 0 && remoteRoster.some(u => 
-    u.unitId.startsWith('u_hero_') || u.unitId.startsWith('u_sergio') || u.unitId.startsWith('u_vargas') || u.unitId.startsWith('u_lance') || u.unitId.startsWith('u_magress')
+  const hasLegacyRoster = remoteRoster.length > 0 && (
+    remoteRoster.some(u => 
+      u.unitId.startsWith('u_hero_') || u.unitId.startsWith('u_sergio') || 
+      u.unitId.startsWith('u_vargas') || u.unitId.startsWith('u_lance') || 
+      u.unitId.startsWith('u_magress')
+    ) || remoteRoster.length === 3
   );
 
   return {
@@ -117,11 +121,13 @@ export async function loadPlayerBootstrap(): Promise<GameBootstrap> {
         max: profile.energy_max,
         recoverAt: profile.energy_recover_at,
       },
-      currencies: hasLegacyUnits 
+      currencies: hasLegacyRoster 
         ? { gems: 25, zel: 1000, karma: 100 }
         : currencies,
     },
-    roster: hasLegacyUnits ? [] : remoteRoster,
-    items: hasLegacyUnits ? [] : remoteItems,
+    roster: hasLegacyRoster ? [] : remoteRoster,
+    items: hasLegacyRoster 
+      ? [{ itemId: 'w_iron_sword', quantity: 1 }, { itemId: 'a_wood_shield', quantity: 1 }, { itemId: 'ac_power_ring', quantity: 1 }]
+      : remoteItems,
   };
 }

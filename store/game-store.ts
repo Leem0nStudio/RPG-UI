@@ -37,7 +37,7 @@ interface GameStoreState {
   openInventoryForSlot: (slot: ItemType) => void;
   equipItem: (itemId: string) => void;
   unequipItem: (slot: ItemType) => void;
-  addGeneratedUnit: (unitData: { instanceId: string; unitId: string; jobId: string; level: number; stats: StatBlock; rarity: number }) => void;
+  addGeneratedUnit: (unitData: { instanceId: string; unitId: string; jobId: string; level: number; stats: StatBlock; rarity: number; name: string; title: string; element: Element; skills?: any[]; spriteUrl?: string; cssFilter?: string }) => void;
   bootstrapGame: () => Promise<void>;
   
   // Battle actions
@@ -149,20 +149,23 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
             ...state.bootstrap.content.units,
             {
               id: unitData.unitId,
-              name: `Unit ${state.bootstrap.roster.length + 1}`,
-              title: 'Summoned',
-              element: 'Fire' as Element,
+              name: unitData.name,
+              title: unitData.title,
+              element: unitData.element,
               rarity: unitData.rarity,
               maxLevel: 50,
               jobId: unitData.jobId,
               maxJobLevel: 50,
               cost: 5,
               baseStats: unitData.stats,
-              skills: [],
+              skills: unitData.skills || [],
+              spriteUrl: unitData.spriteUrl || '',
+              cssFilter: unitData.cssFilter || '',
             },
           ],
         },
       },
+      selectedUnitInstanceId: unitData.instanceId,
     });
   },
   bootstrapGame: async () => {

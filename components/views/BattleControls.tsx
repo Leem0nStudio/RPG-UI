@@ -10,6 +10,7 @@ interface BattleControlsProps {
   enemy: EnemyInstance | null;
   currentEnemyHp: number;
   onStartBattle: () => void;
+  onAttack?: (unitIndex: number) => void;
   onBack?: () => void;
   onFlee?: () => void;
 }
@@ -21,6 +22,7 @@ export function BattleControls({
   enemy,
   currentEnemyHp,
   onStartBattle,
+  onAttack,
   onBack,
   onFlee,
 }: BattleControlsProps) {
@@ -59,7 +61,11 @@ export function BattleControls({
 
       {phase === 'fighting' && (
         <div className="grid grid-cols-3 gap-2">
-          <button className="py-3 bg-[#2a4a6a] border border-[#4a6a8a] rounded text-white text-sm font-bold flex items-center justify-center gap-1">
+          <button 
+            onClick={() => onAttack?.(0)} 
+            disabled={!playerUnits[0]?.alive}
+            className="py-3 bg-[#2a4a6a] border border-[#4a6a8a] rounded text-white text-sm font-bold flex items-center justify-center gap-1 disabled:opacity-50"
+          >
             <Zap size={14} /> Attack
           </button>
           <button className="py-3 bg-[#3a2a5a] border border-[#5a4a8a] rounded text-white text-sm font-bold flex items-center justify-center gap-1">

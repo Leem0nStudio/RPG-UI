@@ -64,6 +64,12 @@ export function SummoningScreenView({ banners }: { banners: SummonBanner[] }) {
           level: 1,
           stats: generated.baseStats,
           rarity: getRarityNumber(generated.rarity),
+          name: generated.name,
+          title: generated.title,
+          element: generated.element,
+          skills: generated.skills,
+          spriteUrl: '',
+          cssFilter: '',
         });
       }, 2500);
     } catch (err) {

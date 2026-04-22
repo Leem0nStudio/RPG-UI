@@ -87,7 +87,11 @@ export const bootstrapData: GameBootstrap = {
     currencies: { gems: 25, zel: 1000, karma: 100 },
   },
   roster: [],
-  items: [],
+  items: [
+    { itemId: 'w_iron_sword', quantity: 1 },
+    { itemId: 'a_wood_shield', quantity: 1 },
+    { itemId: 'ac power_ring', quantity: 1 },
+  ],
   content: gameContent,
 };
 
