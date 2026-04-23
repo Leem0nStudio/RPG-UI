@@ -13,6 +13,8 @@ import { SummoningScreenView } from '@/components/views/SummoningScreenView';
 import { AuthScreen } from '@/components/views/AuthScreen';
 import { QRScannerView } from '@/components/views/QRScannerView';
 import { NotificationProvider } from '@/components/ui/Notifications';
+import { updateCurrencies } from '@/services/write-service';
+import { useNotifications } from '@/components/ui/Notifications';
 import { CelebrationPopup } from '@/components/ui/GameEffects';
 import { DailyQuestsView } from '@/components/views/DailyQuestsView';
 import { CampaignView } from '@/components/views/CampaignView';
@@ -301,20 +303,31 @@ export default function Home() {
           {!isBootstrapping && view === 'battle' && pendingQuest && currentEnemies.length > 0 && (
             <BattleScreen
               quest={pendingQuest}
-              onVictory={() => {
+              onVictory={async () => {
+                // Calculate real rewards from the enemy
+                const enemy = currentEnemies[0];
+                const turnNumber = 1; // Could track this properly
+                const zelReward = Math.round((enemy.baseStats.hp / 5) * (1 + turnNumber * 0.05));
+                
+                // Update currencies with real rewards
+                if (zelReward > 0) {
+                  await updateCurrencies([{ code: 'zel', amount: zelReward }]);
+                }
+                
+                // Complete battle with real data
                 void completeBattle({
                   questId: pendingQuest?.id ?? null,
-                  enemyInstanceId: '',
+                  enemyInstanceId: enemy.id,
                   enemyHp: 0,
-                  enemyMaxHp: 0,
-                  enemyElement: 'Water',
-                  playerUnits: bootstrap.roster.slice(0, 4).map(u => ({
+                  enemyMaxHp: enemy.baseStats.hp,
+                  enemyElement: enemy.element,
+                  playerUnits: (state.battleState?.playerUnits ?? []).map(u => ({
                     instanceId: u.instanceId,
-                    currentHp: 0,
-                    bbGauge: 0,
+                    currentHp: u.currentHp,
+                    bbGauge: u.bbGauge,
                   })),
                   battlePhase: 'victory',
-                  turnNumber: 1,
+                  turnNumber,
                 });
                 setView('home');
               }}

@@ -140,21 +140,36 @@ function calculateCombatDamage(
   return { damage: finalDamage, elementMultiplier, isCritical };
 }
 
-export function calculateDamage(
-  attacker: CombatUnit,
-  defender: EnemyInstance
+/**
+ * Generic damage calculator - works for any attacker/defender with stats and element
+ */
+export function calculateUnitDamage(
+  attacker: { stats: StatBlock; element: Element },
+  defender: { stats: StatBlock; element: Element }
 ): { damage: number; elementMultiplier: number; isCritical: boolean } {
   return calculateCombatDamage(attacker.stats, attacker.element, defender.stats, defender.element);
 }
 
 /**
- * Calculate damage from enemy to combat unit
+ * Calculate damage from player unit to enemy
+ * @deprecated Use calculateUnitDamage instead
+ */
+export function calculateDamage(
+  attacker: CombatUnit,
+  defender: EnemyInstance
+): { damage: number; elementMultiplier: number; isCritical: boolean } {
+  return calculateUnitDamage(attacker, defender);
+}
+
+/**
+ * Calculate damage from enemy to player unit
+ * @deprecated Use calculateUnitDamage instead
  */
 export function calculateEnemyDamage(
   attacker: EnemyInstance,
   defender: CombatUnit
 ): { damage: number; elementMultiplier: number; isCritical: boolean } {
-  return calculateCombatDamage(attacker.stats, attacker.element, defender.stats, defender.element);
+  return calculateUnitDamage(attacker, defender);
 }
 
 /**
