@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { calculateUnitStats } from '@/core/stats';
 import type {
   BattleState,
   CurrencyCode,
@@ -15,7 +16,6 @@ import type {
 import { bootstrapData } from '@/content/game-content';
 import { loadGameContent } from '@/services/content-service';
 import { loadPlayerBootstrap } from '@/services/player-service';
-import { loadEnemies } from '@/services/battle-service';
 
 export type AppView = 'home' | 'unitList' | 'character' | 'inventory' | 'quest' | 'battle' | 'summon' | 'qrScanner' | 'dailyQuests' | 'campaign' | 'story';
 
@@ -74,12 +74,12 @@ interface GameStoreState {
   hideCelebration: () => void;
 
   // Battle actions
-  startQuest: (quest: QuestDefinition) => Promise<void>;
-  enterBattle: () => Promise<void>;
+  startQuest: (quest: QuestDefinition) => void;
+  enterBattle: () => void;
   setBattleState: (state: BattleState | null) => void;
   completeBattle: (result: BattleState) => Promise<void>;
   cancelBattle: () => void;
-  refreshEnemies: () => Promise<void>;
+  refreshEnemies: () => void;
 }
 
 function findUnitDefinition(units: UnitDefinition[], unitId: string) {
@@ -283,38 +283,55 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   },
   
   startQuest: async (quest: QuestDefinition) => {
-    try {
-      const state = get();
-      
-      const enemies = await loadEnemies(quest.enemyIds);
-      
-      set({
-        currentQuest: quest,
-        currentEnemies: enemies,
-        view: 'battle',
-      });
-    } catch (error) {
-      console.error('[store] startQuest failed:', error);
-    }
+    const state = get();
+    const enemies = state.bootstrap.content.enemies.filter((e) =>
+      quest.enemyIds.includes(e.id)
+    );
+    
+    set({
+      currentQuest: quest,
+      currentEnemies: enemies,
+      view: 'battle',
+    });
   },
   
   enterBattle: async () => {
     const state = get();
-    
-    if (!state.currentQuest) return;
-    
+    if (!state.currentQuest || state.currentEnemies.length === 0) return;
+
+    const enemy = state.currentEnemies[0];
+    const enemyHp = enemy.baseStats.hp;
+
+    const playerUnits = state.bootstrap.roster.slice(0, 4).map((owned) => {
+      const unitDefinition = state.bootstrap.content.units.find((unit) => unit.id === owned.unitId);
+      const jobDefinition = unitDefinition
+        ? state.bootstrap.content.jobs.find((job) => job.id === unitDefinition.jobId)
+        : undefined;
+
+      const equippedItems = ['Weapon', 'Armor', 'Accessory'] as const;
+      const itemStats = equippedItems.map((slot) =>
+        state.bootstrap.content.items.find((item) => item.id === owned.equipment[slot]) ?? null
+      );
+
+      const stats = unitDefinition && jobDefinition
+        ? calculateUnitStats(unitDefinition, owned, itemStats, jobDefinition)
+        : { hp: 1, atk: 1, def: 0, rec: 0 };
+
+      return {
+        instanceId: owned.instanceId,
+        currentHp: stats.hp,
+        bbGauge: 0,
+      };
+    });
+
     set({
       battleState: {
         questId: state.currentQuest.id,
-        enemyInstanceId: '',
-        enemyHp: 0,
-        enemyMaxHp: 0,
-        enemyElement: 'Water',
-        playerUnits: state.bootstrap.roster.slice(0, 4).map(u => ({
-          instanceId: u.instanceId,
-          currentHp: 0,
-          bbGauge: 0,
-        })),
+        enemyInstanceId: enemy.id,
+        enemyHp,
+        enemyMaxHp: enemyHp,
+        enemyElement: enemy.element,
+        playerUnits,
         battlePhase: 'player_turn',
         turnNumber: 0,
       },
@@ -326,29 +343,11 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   },
   
   completeBattle: async (result: BattleState) => {
-    const state = get();
-    
-    // Update battle state
+    // Update battle state and keep the last result.
     set({
       battleState: result,
       lastBattleResult: result,
     });
-    
-    // Update local currencies (optimistic update)
-    if (result.battlePhase === 'victory') {
-      set({
-        bootstrap: {
-          ...state.bootstrap,
-          player: {
-            ...state.bootstrap.player,
-            currencies: {
-              ...state.bootstrap.player.currencies,
-              zel: state.bootstrap.player.currencies.zel + 100,
-            },
-          },
-        },
-      });
-    }
   },
   
   cancelBattle: () => {
@@ -359,10 +358,12 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
     });
   },
   
-  refreshEnemies: async () => {
+  refreshEnemies: () => {
     const state = get();
     if (state.currentQuest) {
-      const enemies = await loadEnemies(state.currentQuest.enemyIds);
+      const enemies = state.bootstrap.content.enemies.filter((e) =>
+        state.currentQuest!.enemyIds.includes(e.id)
+      );
       set({ currentEnemies: enemies });
     }
   },

@@ -18,93 +18,66 @@ export interface PlayerStoryProgress {
   loreBody: string;
 }
 
+interface PlayerStoryProgressRow {
+  chapter_id: string;
+  status: 'locked' | 'active' | 'completed';
+  path_type?: PathType;
+}
+
 export interface ChapterReward {
   gems: number;
   zel: number;
   items: Array<{ itemId: string; quantity: number }>;
 }
 
+function defaultStoryProgress(chapter: StoryChapter, idx: number): PlayerStoryProgress {
+  return {
+    chapterId: chapter.id,
+    chapterNumber: chapter.chapterNumber,
+    title: chapter.title,
+    subtitle: chapter.subtitle,
+    world: chapter.world,
+    requiredLevel: chapter.requiredLevel,
+    status: idx === 0 ? 'active' : 'locked',
+    pathType: 'neutral',
+    isBossChapter: chapter.isBossChapter,
+    canStart: idx === 0,
+    loreIntro: chapter.loreIntro,
+    loreBody: chapter.loreBody,
+  };
+}
+
 export async function getStoryProgress(): Promise<PlayerStoryProgress[]> {
   const supabase = getSupabaseBrowserClient();
-  if (!supabase) return storyChapters.map(ch => ({
-    chapterId: ch.id,
-    chapterNumber: ch.chapterNumber,
-    title: ch.title,
-    subtitle: ch.subtitle,
-    world: ch.world,
-    requiredLevel: ch.requiredLevel,
-    status: ch.chapterNumber === 1 ? 'locked' : 'locked',
-    pathType: 'neutral' as PathType,
-    isBossChapter: ch.isBossChapter,
-    canStart: ch.chapterNumber === 1,
-    loreIntro: ch.loreIntro,
-    loreBody: ch.loreBody,
-  }));
+  if (!supabase) return storyChapters.map(defaultStoryProgress);
 
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
-    return storyChapters.map(ch => ({
-      chapterId: ch.id,
-      chapterNumber: ch.chapterNumber,
-      title: ch.title,
-      subtitle: ch.subtitle,
-      world: ch.world,
-      requiredLevel: ch.requiredLevel,
-      status: 'locked' as const,
-      pathType: 'neutral' as PathType,
-      isBossChapter: ch.isBossChapter,
-      canStart: ch.chapterNumber === 1,
-      loreIntro: ch.loreIntro,
-      loreBody: ch.loreBody,
-    }));
+    return storyChapters.map(defaultStoryProgress);
   }
 
   try {
-    const { data, error } = await (supabase as any)
-      .rpc('get_player_story_progress', { p_player_id: session.user.id });
+    const { data, error } = await supabase.rpc<PlayerStoryProgressRow>('get_player_story_progress', {
+      p_player_id: session.user.id,
+    });
 
     if (error) {
       console.error('Error fetching story progress:', error);
-      return storyChapters.map(ch => ({
-        chapterId: ch.id,
-        chapterNumber: ch.chapterNumber,
-        title: ch.title,
-        subtitle: ch.subtitle,
-        world: ch.world,
-        requiredLevel: ch.requiredLevel,
-        status: ch.chapterNumber === 1 ? 'locked' : 'locked',
-        pathType: 'neutral' as PathType,
-        isBossChapter: ch.isBossChapter,
-        canStart: ch.chapterNumber === 1,
-        loreIntro: ch.loreIntro,
-        loreBody: ch.loreBody,
-      }));
+      return storyChapters.map(defaultStoryProgress);
     }
 
-    if (!data || data.length === 0) {
-      return storyChapters.map((ch, idx) => ({
-        chapterId: ch.id,
-        chapterNumber: ch.chapterNumber,
-        title: ch.title,
-        subtitle: ch.subtitle,
-        world: ch.world,
-        requiredLevel: ch.requiredLevel,
-        status: idx === 0 ? 'locked' : 'locked',
-        pathType: 'neutral' as PathType,
-        isBossChapter: ch.isBossChapter,
-        canStart: idx === 0,
-        loreIntro: ch.loreIntro,
-        loreBody: ch.loreBody,
-      }));
-    }
+    const progressRows = data ?? [];
+    const progressMap = new Map<string, PlayerStoryProgressRow>(
+      progressRows.map((row) => [row.chapter_id, row])
+    );
 
-    const progressMap = new Map<string, any>(data.map((row: any) => [row.chapter_id, row]));
-    
     return storyChapters.map((chapter, idx) => {
       const progress = progressMap.get(chapter.id);
-      const prevChapter = idx > 0 ? progressMap.get(storyChapters[idx - 1].id) : null;
-      const previousCompleted = idx === 0 || (prevChapter?.status === 'completed');
-      
+      const prevChapterProgress = idx > 0 ? progressMap.get(storyChapters[idx - 1].id) : null;
+      const previousCompleted = idx === 0 || prevChapterProgress?.status === 'completed';
+      const canStart = previousCompleted;
+      const status = progress?.status ?? (canStart ? 'active' : 'locked');
+
       return {
         chapterId: chapter.id,
         chapterNumber: chapter.chapterNumber,
@@ -112,30 +85,18 @@ export async function getStoryProgress(): Promise<PlayerStoryProgress[]> {
         subtitle: chapter.subtitle,
         world: chapter.world,
         requiredLevel: chapter.requiredLevel,
-        status: progress?.status || (previousCompleted ? 'locked' : 'locked'),
-        pathType: (progress?.path_type || 'neutral') as PathType,
+        status,
+        pathType: progress?.path_type ?? 'neutral',
         isBossChapter: chapter.isBossChapter,
-        canStart: previousCompleted,
+        canStart,
         loreIntro: chapter.loreIntro,
         loreBody: chapter.loreBody,
       };
     });
-  } catch (err) {
-    console.error('Exception fetching story progress:', err);
-    return storyChapters.map((ch, idx) => ({
-      chapterId: ch.id,
-      chapterNumber: ch.chapterNumber,
-      title: ch.title,
-      subtitle: ch.subtitle,
-      world: ch.world,
-      requiredLevel: ch.requiredLevel,
-      status: idx === 0 ? 'locked' : 'locked',
-      pathType: 'neutral' as PathType,
-      isBossChapter: ch.isBossChapter,
-      canStart: idx === 0,
-      loreIntro: ch.loreIntro,
-      loreBody: ch.loreBody,
-    }));
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error fetching story progress';
+    console.error('Exception fetching story progress:', message);
+    return storyChapters.map(defaultStoryProgress);
   }
 }
 
@@ -147,19 +108,19 @@ export async function startChapter(chapterId: string): Promise<{ success: boolea
   if (!session) return { success: false, error: 'Not authenticated' };
 
   try {
-    const { error } = await (supabase as any)
-      .rpc('start_chapter', {
-        p_player_id: session.user.id,
-        p_chapter_id: chapterId,
-      });
+    const { error } = await supabase.rpc<null>('start_chapter', {
+      p_player_id: session.user.id,
+      p_chapter_id: chapterId,
+    });
 
     if (error) {
       return { success: false, error: error.message };
     }
 
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    return { success: false, error: message };
   }
 }
 
@@ -178,21 +139,21 @@ export async function completeChapter(
   if (!session) return { success: false, error: 'Not authenticated' };
 
   try {
-    const { data, error } = await (supabase as any)
-      .rpc('complete_chapter', {
-        p_player_id: session.user.id,
-        p_chapter_id: chapterId,
-        p_choice_id: choiceId,
-        p_path_type: pathType,
-      });
+    const { data, error } = await supabase.rpc<{ rewards?: ChapterReward }>('complete_chapter', {
+      p_player_id: session.user.id,
+      p_chapter_id: chapterId,
+      p_choice_id: choiceId,
+      p_path_type: pathType,
+    });
 
     if (error) {
       return { success: false, error: error.message };
     }
 
     return { success: true, rewards: data?.rewards };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    return { success: false, error: message };
   }
 }
 

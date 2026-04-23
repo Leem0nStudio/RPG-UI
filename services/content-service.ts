@@ -64,19 +64,37 @@ type BannerRow = {
   active: boolean;
 };
 
+type EnemyRow = {
+  id: string;
+  name: string;
+  title: string | null;
+  element: GameContent['enemies'][number]['element'];
+  rarity: number;
+  max_level: number;
+  base_stats: GameContent['enemies'][number]['baseStats'];
+  sprite_url: string | null;
+  css_filter: string | null;
+  skills: GameContent['enemies'][number]['skills'];
+  ai_type?: 'aggressive' | 'defensive' | 'balanced' | 'boss';
+  exp_reward: number;
+  zel_reward: number;
+  item_drops: GameContent['enemies'][number]['itemDrops'];
+};
+
 export async function loadGameContent(): Promise<GameContent> {
   const supabase = getSupabaseBrowserClient();
   if (!supabase) return gameContent;
 
-  const [jobsRes, unitsRes, itemsRes, questsRes, bannersRes] = await Promise.all([
+  const [jobsRes, unitsRes, itemsRes, questsRes, bannersRes, enemiesRes] = await Promise.all([
     supabase.from('job_definitions').select('*'),
     supabase.from('unit_definitions').select('*'),
     supabase.from('item_definitions').select('*'),
     supabase.from('quest_definitions').select('*'),
     supabase.from('summon_banners').select('*'),
+    supabase.from('enemy_definitions').select('*'),
   ]);
 
-  if (jobsRes.error || unitsRes.error || itemsRes.error || questsRes.error || bannersRes.error) {
+  if (jobsRes.error || unitsRes.error || itemsRes.error || questsRes.error || bannersRes.error || enemiesRes.error) {
     console.warn('[loadGameContent] Some queries failed, falling back to local content');
     return gameContent;
   }
@@ -143,12 +161,29 @@ export async function loadGameContent(): Promise<GameContent> {
     active: row.active,
   }));
 
+  const remoteEnemies = ((enemiesRes.data as EnemyRow[] | null) ?? []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    title: row.title ?? undefined,
+    element: row.element,
+    rarity: row.rarity,
+    maxLevel: row.max_level,
+    baseStats: row.base_stats,
+    spriteUrl: row.sprite_url ?? undefined,
+    cssFilter: row.css_filter ?? undefined,
+    skills: row.skills ?? [],
+    aiType: row.ai_type ?? 'aggressive',
+    expReward: row.exp_reward,
+    zelReward: row.zel_reward,
+    itemDrops: row.item_drops ?? [],
+  }));
+
   return {
     units: remoteUnits.length > 0 ? remoteUnits : gameContent.units,
     items: remoteItems.length > 0 ? remoteItems : gameContent.items,
     quests: remoteQuests.length > 0 ? remoteQuests : gameContent.quests,
     banners: remoteBanners.length > 0 ? remoteBanners : gameContent.banners,
     jobs: remoteJobs.length > 0 ? remoteJobs : gameContent.jobs,
-    enemies: gameContent.enemies,
+    enemies: remoteEnemies.length > 0 ? remoteEnemies : gameContent.enemies,
   };
 }

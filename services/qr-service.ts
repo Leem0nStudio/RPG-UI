@@ -1,5 +1,20 @@
 import { getSupabaseBrowserClient } from './supabase/client';
 
+interface ClaimQRResultRow {
+  success: boolean;
+  error?: string;
+  type?: 'item' | 'unit' | 'currency';
+  reward?: Record<string, unknown>;
+  location?: string;
+  message?: string;
+  next_reset?: string;
+}
+
+interface QRCodeRow {
+  code: string;
+  location_name: string;
+}
+
 export interface QRReward {
   type: 'item' | 'unit' | 'currency';
   reward: {
@@ -36,7 +51,7 @@ export async function claimQRReward(code: string): Promise<ClaimQRResult> {
     return { success: false, error: 'Not authenticated' };
   }
 
-  const { data, error } = await (supabase as any).rpc('claim_qr_reward', {
+  const { data, error } = await supabase.rpc<ClaimQRResultRow>('claim_qr_reward', {
     p_code: code.trim().toUpperCase(),
     p_player_id: session.user.id,
   });
@@ -45,23 +60,21 @@ export async function claimQRReward(code: string): Promise<ClaimQRResult> {
     return { success: false, error: error.message };
   }
 
-  const result = data as any;
-
-  if (!result.success) {
+  if (!data?.success) {
     return {
       success: false,
-      error: result.error,
-      nextReset: result.next_reset,
+      error: data?.error,
+      nextReset: data?.next_reset,
     };
   }
 
   return {
     success: true,
     reward: {
-      type: result.type,
-      reward: result.reward,
-      location: result.location,
-      message: result.message,
+      type: data.type ?? 'item',
+      reward: data.reward ?? {},
+      location: data.location ?? '',
+      message: data.message ?? '',
     },
   };
 }
@@ -71,13 +84,13 @@ export async function getQRAvailableCodes(): Promise<string[]> {
   if (!supabase) return [];
 
   const { data, error } = await supabase
-    .from('qr_codes')
+    .from<QRCodeRow>('qr_codes')
     .select('code, location_name')
     .eq('is_active', true);
 
   if (error) return [];
 
-  return (data as any[])?.map((qr) => qr.code) ?? [];
+  return data?.map((qr) => qr.code) ?? [];
 }
 
 export function isValidQRFormat(data: string): boolean {

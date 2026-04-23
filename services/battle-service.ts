@@ -5,6 +5,23 @@ import { getElementMultiplier } from '@/core/elemental';
 import { getSupabaseBrowserClient } from '@/services/supabase/client';
 import { gameContent } from '@/content/game-content';
 
+interface EnemyRow {
+  id: string;
+  name: string;
+  title: string | null;
+  element: Element;
+  rarity: number;
+  max_level: number;
+  base_stats: StatBlock;
+  sprite_url: string | null;
+  css_filter: string | null;
+  skills: EnemyDefinition['skills'];
+  ai_type?: AIType;
+  exp_reward: number;
+  zel_reward: number;
+  item_drops: EnemyDefinition['itemDrops'];
+}
+
 // AI Types
 export type AIType = 'aggressive' | 'defensive' | 'balanced' | 'boss';
 
@@ -66,49 +83,15 @@ const ELEMENT_SPRITES: Record<Element, string> = {
 };
 
 /**
- * Load enemy definitions from database
+ * Filter enemies for a specific quest from the content pool
+ * Assumes enemies are already loaded via loadGameContent()
  */
-export async function loadEnemies(enemyIds?: string[]): Promise<EnemyDefinition[]> {
-  const supabase = getSupabaseBrowserClient();
-  
-  if (supabase) {
-    try {
-      let query = supabase.from('enemy_definitions').select('*');
-      
-      if (enemyIds && enemyIds.length > 0) {
-        query = query.in('id', enemyIds);
-      }
-
-      const { data, error } = await query;
-      
-      if (!error && data && data.length > 0) {
-        return (data as any[]).map((row) => ({
-          id: row.id,
-          name: row.name,
-          title: row.title,
-          element: row.element,
-          rarity: row.rarity,
-          maxLevel: row.max_level,
-          baseStats: row.base_stats,
-          spriteUrl: row.sprite_url,
-          cssFilter: row.css_filter,
-          skills: row.skills ?? [],
-          aiType: row.ai_type ?? 'aggressive',
-          expReward: row.exp_reward,
-          zelReward: row.zel_reward,
-          itemDrops: row.item_drops ?? [],
-        }));
-      }
-    } catch (e) {
-      console.error('[loadEnemies] Exception:', e);
-    }
-  }
-
-  let enemies = gameContent.enemies;
-  if (enemyIds && enemyIds.length > 0) {
-    enemies = enemies.filter(e => enemyIds.includes(e.id));
-  }
-  return enemies;
+export function getEnemiesForQuest(
+  allEnemies: EnemyDefinition[],
+  enemyIds: string[]
+): EnemyDefinition[] {
+  if (!enemyIds || enemyIds.length === 0) return [];
+  return allEnemies.filter(e => enemyIds.includes(e.id));
 }
 
 /**
@@ -141,19 +124,27 @@ export function createEnemyInstance(
 /**
  * Calculate damage from a combat unit to an enemy
  */
+function calculateCombatDamage(
+  attackerStats: StatBlock,
+  attackerElement: Element,
+  defenderStats: StatBlock,
+  defenderElement: Element
+): { damage: number; elementMultiplier: number; isCritical: boolean } {
+  const elementMultiplier = getElementMultiplier(attackerElement, defenderElement);
+  const rawDamage = Math.max(1, attackerStats.atk - Math.round(defenderStats.def * 0.55));
+  const damage = Math.round(rawDamage * elementMultiplier);
+
+  const isCritical = Math.random() < 0.1;
+  const finalDamage = isCritical ? Math.round(damage * 1.5) : damage;
+
+  return { damage: finalDamage, elementMultiplier, isCritical };
+}
+
 export function calculateDamage(
   attacker: CombatUnit,
   defender: EnemyInstance
 ): { damage: number; elementMultiplier: number; isCritical: boolean } {
-  const elementMultiplier = getElementMultiplier(attacker.element, defender.element);
-  const rawDamage = Math.max(1, attacker.stats.atk - Math.round(defender.stats.def * 0.55));
-  const damage = Math.round(rawDamage * elementMultiplier);
-  
-  // 10% crit chance (for now, can be expanded)
-  const isCritical = Math.random() < 0.1;
-  const finalDamage = isCritical ? Math.round(damage * 1.5) : damage;
-  
-  return { damage: finalDamage, elementMultiplier, isCritical };
+  return calculateCombatDamage(attacker.stats, attacker.element, defender.stats, defender.element);
 }
 
 /**
@@ -163,14 +154,7 @@ export function calculateEnemyDamage(
   attacker: EnemyInstance,
   defender: CombatUnit
 ): { damage: number; elementMultiplier: number; isCritical: boolean } {
-  const elementMultiplier = getElementMultiplier(attacker.element, defender.element);
-  const rawDamage = Math.max(1, attacker.stats.atk - Math.round(defender.stats.def * 0.55));
-  const damage = Math.round(rawDamage * elementMultiplier);
-  
-  const isCritical = Math.random() < 0.1;
-  const finalDamage = isCritical ? Math.round(damage * 1.5) : damage;
-  
-  return { damage: finalDamage, elementMultiplier, isCritical };
+  return calculateCombatDamage(attacker.stats, attacker.element, defender.stats, defender.element);
 }
 
 /**

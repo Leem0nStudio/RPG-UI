@@ -1,5 +1,23 @@
 import { getSupabaseBrowserClient } from './supabase/client';
 
+interface QuestProgressRow {
+  quest_id: string;
+  quest_type: 'daily' | 'weekly';
+  quest_title: string;
+  target_count: number;
+  progress: number;
+  completed: boolean;
+  claimed: boolean;
+  period_start: string;
+  time_until_reset: number;
+}
+
+interface ClaimQuestRewardRow {
+  success: boolean;
+  error?: string;
+  reward?: Record<string, unknown>;
+}
+
 export interface DailyQuest {
   id: string;
   type: 'daily' | 'weekly';
@@ -39,15 +57,16 @@ export async function getDailyQuests(): Promise<DailyQuest[]> {
   if (!session) return [];
 
   try {
-    const { data, error } = await (supabase as any)
-      .rpc('get_player_quest_progress', { p_player_id: session.user.id });
+    const { data, error } = await supabase.rpc<QuestProgressRow>('get_player_quest_progress', {
+      p_player_id: session.user.id,
+    });
 
     if (error) {
       console.error('Error fetching daily quests:', error);
       return [];
     }
 
-    return (data || []).map((row: any) => ({
+    return (data || []).map((row) => ({
       id: row.quest_id,
       type: row.quest_type,
       title: row.quest_title,
@@ -74,12 +93,11 @@ export async function updateQuestProgress(type: 'daily' | 'weekly', increment: n
   if (!session) return false;
 
   try {
-    const { error } = await (supabase as any)
-      .rpc('update_quest_progress', {
-        p_player_id: session.user.id,
-        p_quest_type: type,
-        p_increment: increment,
-      });
+    const { error } = await supabase.rpc<null>('update_quest_progress', {
+      p_player_id: session.user.id,
+      p_quest_type: type,
+      p_increment: increment,
+    });
 
     if (error) {
       console.error('Error updating quest progress:', error);
@@ -93,7 +111,9 @@ export async function updateQuestProgress(type: 'daily' | 'weekly', increment: n
   }
 }
 
-export async function claimQuestReward(questId: string): Promise<{ success: boolean; reward?: any; error?: string }> {
+export async function claimQuestReward(
+  questId: string
+): Promise<{ success: boolean; reward?: Record<string, unknown>; error?: string }> {
   const supabase = getSupabaseBrowserClient();
   if (!supabase) return { success: false, error: 'Supabase not configured' };
 
@@ -101,19 +121,19 @@ export async function claimQuestReward(questId: string): Promise<{ success: bool
   if (!session) return { success: false, error: 'Not authenticated' };
 
   try {
-    const { data, error } = await (supabase as any)
-      .rpc('claim_quest_reward', {
-        p_player_id: session.user.id,
-        p_quest_id: questId,
-      });
+    const { data, error } = await supabase.rpc<ClaimQuestRewardRow>('claim_quest_reward', {
+      p_player_id: session.user.id,
+      p_quest_id: questId,
+    });
 
     if (error) {
       return { success: false, error: error.message };
     }
 
-    return { success: true, reward: data };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+    return { success: true, reward: data?.reward };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    return { success: false, error: message };
   }
 }
 

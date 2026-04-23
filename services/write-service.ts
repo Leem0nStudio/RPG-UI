@@ -106,7 +106,7 @@ export async function updateCurrencies(
 
     results.push({ code: change.code, amount: newAmount });
 
-    const { error } = await (supabase as any).rpc('upsert_currency', {
+    const { error } = await supabase.rpc<null>('upsert_currency', {
       p_player_id: userId,
       p_code: change.code,
       p_amount: newAmount,
@@ -153,7 +153,7 @@ export async function addUnitToRoster(
   // Use provided jobId or the unit's default job
   const finalJobId = jobId || (unitDef as { job_id: string }).job_id;
 
-  const { data: newUnitId, error: insertError } = await (supabase as any).rpc('add_unit_to_roster', {
+  const { data: newUnitId, error: insertError } = await supabase.rpc<unknown>('add_unit_to_roster', {
     p_player_id: userId,
     p_unit_id: unitId,
     p_level: level,
@@ -164,7 +164,10 @@ export async function addUnitToRoster(
     return { success: false, error: insertError.message };
   }
 
-  return { success: true, instanceId: newUnitId };
+  return {
+    success: true,
+    instanceId: typeof newUnitId === 'string' ? newUnitId : undefined,
+  };
 }
 
 /**
@@ -231,7 +234,7 @@ export async function addUnitExp(
       leveledUnits.push({ instanceId: currentUnit.id, newLevel, newExp: Math.min(newExp, maxExp) });
     }
 
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('player_units')
       .update({ level: newLevel, exp: Math.min(newExp, maxExp) })
       .eq('player_id', userId)
@@ -271,7 +274,7 @@ export async function addItems(
     const current = (currentData as { quantity: number } | null)?.quantity ?? 0;
     const newQuantity = current + reward.quantity;
 
-    const { error } = await (supabase as any).rpc('upsert_item', {
+    const { error } = await supabase.rpc<null>('upsert_item', {
       p_player_id: userId,
       p_item_id: reward.itemId,
       p_quantity: newQuantity,
@@ -310,7 +313,7 @@ export async function updateQuestProgress(
 
   if (existing) {
     const existingData = existing as { attempts: number; completed: boolean };
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('player_quest_progress')
       .update({
         completed: completed || existingData.completed,
@@ -324,7 +327,7 @@ export async function updateQuestProgress(
       return { success: false, error: error.message };
     }
   } else {
-    const { error } = await (supabase as any).from('player_quest_progress').insert({
+    const { error } = await supabase.from('player_quest_progress').insert({
       player_id: userId,
       quest_id: questId,
       completed,
@@ -386,7 +389,7 @@ export async function deductEnergy(
 
   const newEnergy = currentEnergy - energyCost;
 
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('player_profiles')
     .update({ energy_current: newEnergy })
     .eq('id', userId);
@@ -424,7 +427,7 @@ export async function restoreEnergy(amount: number): Promise<WriteResult> {
   const profileData = profile as { energy_current: number; energy_max: number };
   const newEnergy = Math.min(profileData.energy_current + amount, profileData.energy_max);
 
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('player_profiles')
     .update({ energy_current: newEnergy })
     .eq('id', userId);
