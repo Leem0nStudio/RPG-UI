@@ -1,5 +1,3 @@
-import { getSupabaseBrowserClient } from '@/services/supabase/client';
-
 export interface PlayerBattleMetrics {
   playerId: string;
   totalBattles: number;
@@ -52,8 +50,10 @@ export const LEVEL_DIFF_BONUS = 0.05;
 export const MIN_REWARD_MODIFIER = 0.7;
 export const MAX_REWARD_MODIFIER = 1.5;
 
-export async function getPlayerMetrics(playerId: string): Promise<PlayerBattleMetrics> {
-  const supabase = getSupabaseBrowserClient();
+export async function getPlayerMetrics(
+  playerId: string,
+  supabase: any = null
+): Promise<PlayerBattleMetrics> {
   if (!supabase) {
     return getDefaultMetrics(playerId);
   }
@@ -81,7 +81,7 @@ export async function getPlayerMetrics(playerId: string): Promise<PlayerBattleMe
   };
 }
 
-function getDefaultMetrics(playerId: string): PlayerBattleMetrics {
+export function getDefaultMetrics(playerId: string): PlayerBattleMetrics {
   return {
     playerId,
     totalBattles: 0,
@@ -102,31 +102,29 @@ export function calculateWinRate(metrics: PlayerBattleMetrics, difficulty: strin
   const losses = metrics.lossesByDifficulty[difficulty as keyof typeof metrics.lossesByDifficulty] || 0;
   const total = wins + losses;
   
-  return total > 0 ? wins / total : 0.5;
+  if (total === 0) return 0.5;
+  return wins / total;
 }
 
-export function calculateDifficultyAdjustment(
-  metrics: PlayerBattleMetrics,
-  currentDifficulty: string
-): number {
-  const winRate = calculateWinRate(metrics, currentDifficulty);
-  const config = DIFFICULTY_PRESETS[currentDifficulty];
+export function calculateDifficultyAdjustment(metrics: PlayerBattleMetrics): number {
+  const normalWinRate = calculateWinRate(metrics, 'Normal');
+  const hardWinRate = calculateWinRate(metrics, 'Hard');
+  const heroicWinRate = calculateWinRate(metrics, 'Heroic');
   
-  if (!config) return 1.0;
-  
-  const diff = config.targetWinRate - winRate;
+  const avgWinRate = (normalWinRate + hardWinRate + heroicWinRate) / 3;
+  const diff = avgWinRate - 0.7;
   
   if (diff > 0.15) {
-    return 0.8;
-  } else if (diff > 0.05) {
-    return 0.9;
-  } else if (diff < -0.15) {
     return 1.2;
-  } else if (diff < -0.05) {
+  } else if (diff > 0.05) {
     return 1.1;
+  } else if (diff > -0.05) {
+    return 1.0;
+  } else if (diff > -0.15) {
+    return 0.9;
   }
   
-  return 1.0;
+  return 0.8;
 }
 
 export function calculateRewardModifier(
@@ -160,12 +158,12 @@ export async function recordBattleOutcome(
   damageDealt: number,
   damageTaken: number,
   enemiesKilled: number,
-  unitsLost: number
+  unitsLost: number,
+  supabase: any = null
 ): Promise<void> {
-  const supabase = getSupabaseBrowserClient();
   if (!supabase) return;
   
-  const currentMetrics = await getPlayerMetrics(playerId);
+  const currentMetrics = await getPlayerMetrics(playerId, supabase);
   
   const updates: any = {
     player_id: playerId,
@@ -190,6 +188,10 @@ export async function recordBattleOutcome(
   } else {
     await (supabase.from as any)('player_battle_metrics').update(updates).eq('player_id', playerId);
   }
+}
+
+export function calculateWinRateForDifficulty(metrics: PlayerBattleMetrics, difficulty: string): number {
+  return calculateWinRate(metrics, difficulty);
 }
 
 export function getRecommendedDifficulty(metrics: PlayerBattleMetrics): string {

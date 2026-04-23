@@ -4,7 +4,8 @@ import { previewDamage } from '@/core/battle';
 import { getElementMultiplier } from '@/core/elemental';
 import { getSupabaseBrowserClient } from '@/services/supabase/client';
 import { gameContent } from '@/content/game-content';
-import { calculateRewardModifier, recordBattleOutcome, calculateEnemyLevelScaler, getPlayerMetrics } from '@/core/balance-system';
+import { calculateRewardModifier, calculateEnemyLevelScaler } from '@/core/balance-system';
+import { recordBattleOutcome } from '@/services/metrics-service';
 
 interface EnemyRow {
   id: string;
