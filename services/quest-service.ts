@@ -163,3 +163,67 @@ export function formatCountdown(ms: number): string {
   if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
   return `${seconds}s`;
 }
+
+import type { EnemyDefinition, QuestDefinition } from '@/backend-contracts/game';
+import { calculateQuestDifficulty } from '@/core/balance-system';
+
+export interface QuestContext {
+  playerLevel: number;
+  playerProgress: number;
+  quest: QuestDefinition;
+  availableEnemies: EnemyDefinition[];
+}
+
+export interface QuestResult {
+  quest: QuestDefinition;
+  adjustedEnemies: EnemyDefinition[];
+  difficultyConfig: ReturnType<typeof calculateQuestDifficulty>;
+}
+
+export function prepareQuest(context: QuestContext): QuestResult {
+  const { playerLevel, playerProgress, quest, availableEnemies } = context;
+  
+  const enemies = availableEnemies.filter(e => quest.enemyIds.includes(e.id));
+  const baseQuestLevel = quest.baseLevel ?? 1;
+  
+  const difficultyConfig = calculateQuestDifficulty(playerLevel, playerProgress, baseQuestLevel);
+  const isOverLeveled = playerLevel > baseQuestLevel + 3;
+  const isUnderLeveled = playerLevel < baseQuestLevel - 2;
+  
+  const adjustedEnemies = enemies.map(enemy => {
+    let hpMult = difficultyConfig.difficultyMultiplier;
+    let atkMult = difficultyConfig.difficultyMultiplier;
+    
+    if (isOverLeveled) {
+      hpMult *= 1.2;
+      atkMult *= 1.3;
+    } else if (isUnderLeveled) {
+      hpMult *= 0.7;
+      atkMult *= 0.7;
+    }
+    
+    return {
+      ...enemy,
+      baseStats: {
+        ...enemy.baseStats,
+        hp: Math.round(enemy.baseStats.hp * hpMult),
+        atk: Math.round(enemy.baseStats.atk * atkMult),
+      },
+    };
+  });
+  
+  return {
+    quest,
+    adjustedEnemies,
+    difficultyConfig,
+  };
+}
+
+export function getQuestDifficultyLabel(playerLevel: number, baseQuestLevel: number): string {
+  const diff = playerLevel - baseQuestLevel;
+  if (diff > 3) return 'Easy (Overleveled)';
+  if (diff > 0) return 'Easy';
+  if (diff === 0) return 'Balanced';
+  if (diff >= -2) return 'Challenging';
+  return 'Hard';
+}
