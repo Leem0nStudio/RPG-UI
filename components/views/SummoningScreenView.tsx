@@ -5,19 +5,24 @@ import type { SummonBanner } from '@/backend-contracts/game';
 import { useGameStore } from '@/store/game-store';
 import { updateCurrencies } from '@/services/write-service';
 import { generateUnit, getRarityNumber } from '@/services/unit-generator';
+import { pullSingle, pullMulti, type PullResult } from '@/services/gacha-service';
 
 const SUMMON_COST = 5;
+const MULTI_PULL_COST = 50;
 
 export function SummoningScreenView({ banners }: { banners: SummonBanner[] }) {
-  const { bootstrap, addGeneratedUnit, showSummonCelebration } = useGameStore();
+  const { bootstrap, addGeneratedUnit, showSummonCelebration, showGachaReward } = useGameStore();
   const [summoningState, setSummoningState] = useState<'idle' | 'summoning' | 'result'>('idle');
   const [resultChar, setResultChar] = useState<CharacterData | null>(null);
+  const [gachaResults, setGachaResults] = useState<PullResult[]>([]);
+  const [pullType, setPullType] = useState<'single' | 'multi'>('single');
   const [isConsuming, setIsConsuming] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const hasEnoughGems = bootstrap.player.currencies.gems >= SUMMON_COST;
+const hasEnoughGems = bootstrap.player.currencies.gems >= SUMMON_COST;
+  const hasEnoughForMulti = bootstrap.player.currencies.gems >= MULTI_PULL_COST;
 
-  const handleSummon = useCallback(async () => {
+  const handleSinglePull = useCallback(async () => {
     if (!hasEnoughGems) {
       setError('Not enough gems!');
       return;
@@ -25,6 +30,7 @@ export function SummoningScreenView({ banners }: { banners: SummonBanner[] }) {
 
     setError(null);
     setIsConsuming(true);
+    setPullType('single');
 
     try {
       const currencyResult = await updateCurrencies([{ code: 'gems', amount: -SUMMON_COST }]);
@@ -34,51 +40,61 @@ export function SummoningScreenView({ banners }: { banners: SummonBanner[] }) {
         return;
       }
 
-      const generated = generateUnit(undefined, undefined, '1');
+      const result = await pullSingle(bootstrap.player.id);
       
-      setResultChar({
-        id: generated.id,
-        name: generated.name,
-        title: generated.title,
-        element: generated.element,
-        rarity: getRarityNumber(generated.rarity),
-        spriteUrl: '',
-        cssFilter: '',
-        jobId: generated.jobId,
-        cost: 5,
-        level: 1,
-        maxLevel: 50,
-        exp: 0,
-        maxExp: 750,
-      } as CharacterData);
+      setGachaResults([result]);
       setSummoningState('summoning');
+      setResultChar(null);
 
-      setTimeout(async () => {
+      setTimeout(() => {
         setSummoningState('result');
         setIsConsuming(false);
 
-        addGeneratedUnit({
-          instanceId: generated.id,
-          unitId: generated.id,
-          jobId: generated.jobId,
-          level: 1,
-          stats: generated.baseStats,
-          rarity: getRarityNumber(generated.rarity),
-          name: generated.name,
-          title: generated.title,
-          element: generated.element,
-          skills: generated.skills,
-          spriteUrl: '',
-          cssFilter: '',
-        });
+        const rewardDisplay = [{ name: result.item.name, type: result.type, rarity: result.rarity }];
+        showGachaReward(rewardDisplay);
+      }, 2000);
+    } catch (err) {
+      setError('An error occurred during summon');
+      setIsConsuming(false);
+    }
+  }, [hasEnoughGems, bootstrap.player.id, showGachaReward]);
 
-        showSummonCelebration(generated.name, getRarityNumber(generated.rarity));
+  const handleMultiPull = useCallback(async () => {
+    if (!hasEnoughForMulti) {
+      setError('Not enough gems for multi pull!');
+      return;
+    }
+
+    setError(null);
+    setIsConsuming(true);
+    setPullType('multi');
+
+    try {
+      const currencyResult = await updateCurrencies([{ code: 'gems', amount: -MULTI_PULL_COST }]);
+      if (!currencyResult.success) {
+        setError(currencyResult.error ?? 'Failed to process summon');
+        setIsConsuming(false);
+        return;
+      }
+
+      const results = await pullMulti(bootstrap.player.id);
+      
+      setGachaResults(results);
+      setSummoningState('summoning');
+      setResultChar(null);
+
+      setTimeout(() => {
+        setSummoningState('result');
+        setIsConsuming(false);
+
+        const rewardDisplay = results.map(r => ({ name: r.item.name, type: r.type, rarity: r.rarity }));
+        showGachaReward(rewardDisplay);
       }, 2500);
     } catch (err) {
       setError('An error occurred during summon');
       setIsConsuming(false);
     }
-  }, [hasEnoughGems, addGeneratedUnit, showSummonCelebration]);
+  }, [hasEnoughForMulti, bootstrap.player.id, showGachaReward]);
 
   const resetSummon = () => {
     setSummoningState('idle');
@@ -137,13 +153,24 @@ export function SummoningScreenView({ banners }: { banners: SummonBanner[] }) {
             )}
 
             <button 
-              onClick={handleSummon}
+              onClick={handleSinglePull}
               disabled={isConsuming || !hasEnoughGems}
               className={`w-full relative overflow-hidden bg-gradient-to-b from-[#ffcc00] via-[#ff9900] to-[#cc3300] border-[2px] border-[#ffea99] rounded-[4px] py-3 flex items-center justify-center shadow-[0_6px_15px_rgba(200,80,0,0.6),inset_0_2px_5px_rgba(255,255,255,0.7)] group transition-all duration-200 ${!hasEnoughGems || isConsuming ? 'brightness-75 scale-95 pointer-events-none opacity-50' : 'hover:brightness-110 active:scale-95'}`}
             >
                <div className="absolute top-0 w-full h-[30%] bg-gradient-to-b from-white to-transparent opacity-30"></div>
                <span className="ui-heading font-bold text-white text-[18px] sm:text-[20px] text-stroke-sm fx-low z-10 group-hover:drop-shadow-[0_0_8px_white]">
-                  SUMMON NOW
+                  SUMMON (1)
+               </span>
+            </button>
+
+            <button 
+              onClick={handleMultiPull}
+              disabled={isConsuming || !hasEnoughForMulti}
+              className={`w-full relative overflow-hidden bg-gradient-to-b from-[#ff0055] via-[#cc0044] to-[#990033] border-[2px] border-[#ff88aa] rounded-[4px] py-3 flex items-center justify-center shadow-[0_6px_15px_rgba(200,0,80,0.6),inset_0_2px_5px_rgba(255,255,255,0.7)] group transition-all duration-200 ${!hasEnoughForMulti || isConsuming ? 'brightness-75 scale-95 pointer-events-none opacity-50' : 'hover:brightness-110 active:scale-95'}`}
+            >
+               <div className="absolute top-0 w-full h-[30%] bg-gradient-to-b from-white to-transparent opacity-30"></div>
+               <span className="ui-heading font-bold text-white text-[18px] sm:text-[20px] text-stroke-sm fx-low z-10 group-hover:drop-shadow-[0_0_8px_white]">
+                  SUMMON (10) - {MULTI_PULL_COST} Gems
                </span>
             </button>
          </div>
@@ -215,34 +242,64 @@ export function SummoningScreenView({ banners }: { banners: SummonBanner[] }) {
                  {resultChar.name}
               </span>
               <div className={`w-[80%] bg-gradient-to-r ${rarityColors.rays} h-[2px] opacity-80 my-1`}></div>
-              <span className="text-white text-[14px] sm:text-[16px] font-bold tracking-[0.2em] uppercase drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">
-                 {resultChar.title}
-              </span>
+<span className="text-white text-[14px] sm:text-[16px] font-bold tracking-[0.2em] uppercase drop-shadow-[0_2px_2px_rgba(0,0,0,1)]">
+                  {resultChar.title}
+               </span>
+            </div>
 
-<div className="mt-4 w-full flex justify-center pt-2 border-t border-[rgba(255,255,255,0.1)] gap-4">
-                 <div className="flex flex-col items-center">
-                   <span className="text-[#a3c2e0] text-[10px] font-bold uppercase tracking-widest">Class</span>
-                   <span className="text-white text-[13px] font-bold capitalize">{resultChar.jobId ? resultChar.jobId.replace('job_', '') : '-'}</span>
-                 </div>
-                <div className="w-[1px] h-full bg-[rgba(255,255,255,0.2)]"></div>
-                <div className="flex flex-col items-center">
-                  <span className="text-[#a3c2e0] text-[10px] font-bold uppercase tracking-widest">Element</span>
-                  <span className={`text-[13px] font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,1)]
-                    ${resultChar.element === 'Fire' ? 'text-[#ff5500]' : 
-                      resultChar.element === 'Water' ? 'text-[#00ccff]' : 
-                      resultChar.element === 'Earth' ? 'text-[#55ff00]' :
-                      resultChar.element === 'Light' ? 'text-[#ffeb3b]' : 'text-[#cc00ff]'}`}
-                  >{resultChar.element}</span>
+            <button 
+              onClick={resetSummon}
+              className="relative z-20 mt-6 bg-[#1a110a] border-[2px] border-[var(--color-accent-gold)] rounded px-6 py-2 shadow-[0_4px_10px_rgba(0,0,0,0.8)] hover:bg-[#2a1b12] active:scale-95 transition-all text-white ui-heading font-bold tracking-widest text-[14px]"
+            >
+               CONTINUE
+            </button>
+         </div>
+       )}
+
+      {summoningState === 'result' && gachaResults.length > 0 && !resultChar && (
+        <div className="flex flex-col items-center justify-between w-full h-full relative pt-8 pb-6 animate-in zoom-in-95 duration-500">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#1a0a2e] via-[#0a0515] to-[#050208]"></div>
+          
+          <div className="relative z-20 flex flex-col items-center w-full px-4">
+            <span className="ui-heading font-bold text-[#f2e6d5] text-[20px] sm:text-[24px] text-stroke-black text-center mb-2">
+              {pullType === 'multi' ? 'MULTI PULL!' : 'SINGLE PULL!'}
+            </span>
+            
+            <div className="w-full flex flex-col gap-2 mt-4 max-h-[400px] overflow-y-auto">
+              {gachaResults.map((result, idx) => (
+                <div 
+                  key={idx}
+                  className={`w-full p-3 rounded-lg border-2 flex items-center gap-3 ${
+                    result.rarity === 'mythic' ? 'bg-gradient-to-r from-[#4a0080] to-[#1a0030] border-[#ff00ff]' :
+                    result.rarity === 'legendary' ? 'bg-gradient-to-r from-[#4a3000] to-[#1a1000] border-[#ffaa00]' :
+                    result.rarity === 'epic' ? 'bg-gradient-to-r from-[#2a1a4a] to-[#100a1a] border-[#8844ff]' :
+                    result.rarity === 'rare' ? 'bg-gradient-to-r from-[#1a2a4a] to-[#081018] border-[#4488ff]' :
+                    'bg-gradient-to-r from-[#1a2a1a] to-[#080c08] border-[#44ff88]'
+                  }`}
+                >
+                  <div className="w-12 h-12 rounded bg-black/50 flex items-center justify-center text-2xl">
+                    {result.type === 'card' ? '🃏' : result.type === 'weapon' ? '⚔️' : '✨'}
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-white font-bold text-[14px]">{result.item.name}</div>
+                    <div className="text-white/70 text-[11px] capitalize">{result.type} • {result.rarity}</div>
+                  </div>
+                  <div className="flex gap-0.5">
+                    {[...Array(result.rarity === 'mythic' ? 5 : result.rarity === 'legendary' ? 4 : result.rarity === 'epic' ? 3 : result.rarity === 'rare' ? 2 : 1)].map((_, i) => (
+                      <Star key={i} size={12} className="text-yellow-400 fill-yellow-400" />
+                    ))}
+                  </div>
                 </div>
-              </div>
-           </div>
+              ))}
+            </div>
+          </div>
 
-           <button 
-             onClick={resetSummon}
-             className="relative z-20 mt-6 bg-[#1a110a] border-[2px] border-[var(--color-accent-gold)] rounded px-6 py-2 shadow-[0_4px_10px_rgba(0,0,0,0.8)] hover:bg-[#2a1b12] active:scale-95 transition-all text-white ui-heading font-bold tracking-widest text-[14px]"
-           >
-              CONTINUE
-           </button>
+          <button 
+            onClick={resetSummon}
+            className="relative z-20 mt-6 bg-[#1a110a] border-[2px] border-[var(--color-accent-gold)] rounded px-6 py-2 shadow-[0_4px_10px_rgba(0,0,0,0.8)] hover:bg-[#2a1b12] active:scale-95 transition-all text-white ui-heading font-bold tracking-widest text-[14px]"
+          >
+             CONTINUE
+          </button>
         </div>
       )}
     </div>

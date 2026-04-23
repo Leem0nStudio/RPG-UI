@@ -20,7 +20,8 @@ import { DailyQuestsView } from '@/components/views/DailyQuestsView';
 import { CampaignView } from '@/components/views/CampaignView';
 import { StoryModeView } from '@/components/views/StoryModeView';
 import { calculateUnitStats } from '@/core/stats';
-import { useGameStore, selectCurrentOwnedUnit, selectCurrentUnitDefinition, selectEquippedItems } from '@/store/game-store';
+import { canEvolve as checkCanEvolve, getJob } from '@/core/progression';
+import { useGameStore, selectCurrentOwnedUnit, selectEquippedItems, selectCurrentUnitDefinition } from '@/store/game-store';
 import { onAuthStateChange } from '@/services/auth-service';
 import type { JobDefinition, QuestDefinition, EnemyDefinition, BattleState, StatBlock } from '@/backend-contracts/game';
 import { useMemo } from 'react';
@@ -56,6 +57,7 @@ export default function Home() {
     celebrationData,
     hideCelebration,
     badgeCounts,
+    evolveUnit,
   } = useGameStore();
   
   // Local state for quest selection flow
@@ -105,6 +107,31 @@ export default function Home() {
     const job = state.bootstrap.content.jobs.find(j => j.id === currentUnit.jobId);
     return calculateUnitStats(currentUnit, currentOwnedUnit, [equipped.Weapon, equipped.Armor, equipped.Accessory], job);
   }, [currentUnit, currentOwnedUnit, equipped, state.bootstrap.content.jobs]);
+  
+  const currentJob = useMemo(() => 
+    state.bootstrap.content.jobs.find(j => j.id === currentUnit?.jobId),
+    [currentUnit, state.bootstrap.content.jobs]
+  );
+  
+  const branchOptions = useMemo(() => {
+    if (!currentJob || !currentOwnedUnit) return [];
+    const jobAny = currentJob as any;
+    if (typeof jobAny.tier === 'number' && jobAny.tier >= 2) return [];
+    return jobAny.branchOptions ?? [];
+  }, [currentJob, currentOwnedUnit]);
+  
+  const canEvolveToJob = useMemo(() => {
+    if (!currentJob || !currentOwnedUnit) return false;
+    const jobAny = currentJob as any;
+    if (typeof jobAny.tier === 'number' && jobAny.tier >= 2) return false;
+    if (!jobAny.evolutionRequirements) return false;
+    return currentOwnedUnit.level >= (jobAny.evolutionRequirements?.level ?? 20);
+  }, [currentJob, currentOwnedUnit]);
+  
+  const handleEvolve = (targetJobId: string) => {
+    if (!currentOwnedUnit) return;
+    evolveUnit(currentOwnedUnit.instanceId, targetJobId);
+  };
 
   const uiCharacters = bootstrap.content.units.map((unit) => {
     const owned = bootstrap.roster.find((entry) => entry.unitId === unit.id);
@@ -272,6 +299,9 @@ export default function Home() {
               job={bootstrap.content.jobs.find(j => j.id === currentUnit.jobId)}
               stats={currentStats}
               equipped={equipped}
+              branchOptions={branchOptions}
+              canEvolve={canEvolveToJob}
+              onEvolve={handleEvolve}
               onOpenInventory={openInventoryForSlot}
               onBack={() => setView('unitList')}
             />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeft, Flame, Droplet, Leaf, Moon, Sun, Star, Flag, Sparkles, Sword } from 'lucide-react';
+import { ChevronLeft, Flame, Droplet, Leaf, Moon, Sun, Star, Flag, Sparkles, Sword, ArrowRight, Lock } from 'lucide-react';
 import { CharacterData, ItemType, CharEquipment } from '@/lib/types';
 import type { JobDefinition, StatBlock } from '@/backend-contracts/game';
 import { StatBox } from '@/components/ui/StatBox';
@@ -11,11 +11,14 @@ interface CharacterViewProps {
   job?: JobDefinition;
   stats: StatBlock;
   equipped: CharEquipment;
+  branchOptions?: string[];
+  canEvolve?: boolean;
+  onEvolve?: (jobId: string) => void;
   onOpenInventory: (slot: ItemType) => void;
   onBack: () => void;
 }
 
-export function CharacterView({ character, job, stats, equipped, onOpenInventory, onBack }: CharacterViewProps) {
+export function CharacterView({ character, job, stats, equipped, branchOptions = [], canEvolve = false, onEvolve, onOpenInventory, onBack }: CharacterViewProps) {
   const spriteUrl = job?.spriteUrl ?? character.spriteUrl ?? '';
   const cssFilter = job?.cssFilter ?? character.cssFilter ?? '';
   const getStatColor = (current: number, base: number) => current > base ? "text-[#00ffcc]" : "text-white";
@@ -189,6 +192,49 @@ export function CharacterView({ character, job, stats, equipped, onOpenInventory
             <EquipmentSlot type="Accessory" item={equipped.Accessory} onEquip={() => onOpenInventory('Accessory')} />
         </div>
       </div>
+
+      {/* JOB EVOLUTION PANEL */}
+      {branchOptions.length > 0 && (
+        <div className="w-full mt-2 ui-panel p-2 rpg-panel-shadow relative z-20 text-black overflow-hidden flex flex-col flex-shrink-0">
+          <div className="absolute inset-0 border border-[#f3e5ca] rounded-[2px] pointer-events-none"></div>
+          
+          <div className="flex items-center gap-1 mb-2">
+            <Sparkles size={16} className="text-[#ffd700]" />
+            <span className="ui-heading text-[13px] font-bold text-stroke-black text-white tracking-wide">JOB EVOLUTION</span>
+          </div>
+
+          <div className="flex justify-between items-start w-full gap-2 overflow-x-auto custom-scrollbar pb-1">
+            {branchOptions.map((jobId) => {
+              const jobAny = job as any;
+              return (
+                <button
+                  key={jobId}
+                  onClick={() => onEvolve?.(jobId)}
+                  disabled={!canEvolve}
+                  className={`flex-1 min-w-[80px] p-2 rounded-lg border-2 flex flex-col items-center gap-1 transition-all ${
+                    canEvolve 
+                      ? 'bg-gradient-to-b from-[#ffd700] to-[#b8860b] border-[#ffec8b] hover:brightness-110 active:scale-95' 
+                      : 'bg-gray-700 border-gray-500 opacity-50'
+                  }`}
+                >
+                  {canEvolve ? (
+                    <>
+                      <Sparkles size={16} className="text-[#4a3520]" />
+                      <span className="text-[11px] font-bold text-[#4a3520] text-center capitalize">{jobId}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock size={16} className="text-gray-400" />
+                      <span className="text-[10px] text-gray-400 text-center capitalize">{jobId}</span>
+                      <span className="text-[9px] text-gray-500">Lv {jobAny?.evolutionRequirements?.level ?? 20}+</span>
+                    </>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

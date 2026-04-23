@@ -14,7 +14,7 @@ const RARITY_RATES = {
 const PITY_THRESHOLD = 50;
 const PITY_RARITY: Rarity = 'rare';
 
-interface PullResult {
+export interface PullResult {
   type: 'card' | 'weapon' | 'skill';
   item: any;
   rarity: Rarity;

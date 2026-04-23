@@ -16,6 +16,7 @@ import type {
 import { bootstrapData } from '@/content/game-content';
 import { loadGameContent } from '@/services/content-service';
 import { loadPlayerBootstrap } from '@/services/player-service';
+import { canEvolve, getJob, getAvailableEvolutions } from '@/core/progression';
 import { calculateRewardModifier } from '@/core/balance-system';
 import { prepareQuest } from '@/services/quest-service';
 
@@ -41,6 +42,10 @@ interface GameStoreState {
   targetSlot: ItemType | null;
   bootstrap: GameBootstrap;
   selectedUnitInstanceId: string | null;
+  
+  // Party system
+  partySlots: string[];
+  unlockedPartySlots: number;
   
   // Badge counts for navbar
   badgeCounts: BadgeCount;
@@ -72,6 +77,7 @@ interface GameStoreState {
   pushNotification: (notification: NotificationPayload) => void;
   showLevelUpCelebration: (newLevel: number, unitName?: string) => void;
   showSummonCelebration: (unitName: string, rarity: number) => void;
+  showGachaReward: (rewards: Array<{ name: string; type: string; rarity: string }>) => void;
   showBattleWinCelebration: () => void;
   hideCelebration: () => void;
   getPlayerLevel: () => number;
@@ -83,6 +89,16 @@ interface GameStoreState {
   completeBattle: (result: BattleState) => Promise<void>;
   cancelBattle: () => void;
   refreshEnemies: () => void;
+  
+  // Party actions
+  setPartySlots: (slots: string[]) => void;
+  addToParty: (unitId: string) => void;
+  removeFromParty: (slotIndex: number) => void;
+  reorderParty: (fromIndex: number, toIndex: number) => void;
+  unlockPartySlot: () => boolean;
+  
+  // Unit actions
+  evolveUnit: (unitId: string, targetJobId: string) => boolean;
 }
 
 function findUnitDefinition(units: UnitDefinition[], unitId: string) {
@@ -105,7 +121,11 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   targetSlot: null,
   bootstrap: bootstrapData,
   selectedUnitInstanceId: bootstrapData.roster[0]?.instanceId ?? null,
-
+  
+  // Party system
+  partySlots: [],
+  unlockedPartySlots: 3,
+  
   // Battle state
   currentQuest: null,
   currentEnemies: [],
@@ -254,6 +274,17 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       },
     });
   },
+  showGachaReward: (rewards: Array<{ name: string; type: string; rarity: string }>) => {
+    set({
+      showCelebration: true,
+      celebrationData: {
+        type: 'summon',
+        title: 'Gacha Pull!',
+        subtitle: `${rewards.length} reward${rewards.length > 1 ? 's' : ''}`,
+        items: rewards.map(r => ({ name: r.name, rarity: r.rarity === 'mythic' ? 5 : r.rarity === 'legendary' ? 4 : r.rarity === 'epic' ? 3 : r.rarity === 'rare' ? 2 : 1 })),
+      },
+    });
+  },
   showBattleWinCelebration: () => {
     set({
       showCelebration: true,
@@ -281,6 +312,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
         isBootstrapping: false,
         bootstrap: mergedBootstrap,
         selectedUnitInstanceId: mergedBootstrap.roster[0]?.instanceId ?? null,
+        partySlots: mergedBootstrap.roster.slice(0, 3).map(u => u.instanceId),
       });
     } catch (error) {
       console.error('[store] bootstrapGame failed:', error);
@@ -317,7 +349,11 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
     const enemy = state.currentEnemies[0];
     const enemyHp = enemy.baseStats.hp;
 
-    const playerUnits = state.bootstrap.roster.slice(0, 4).map((owned) => {
+    const partySlots = state.partySlots ?? state.bootstrap.roster.slice(0, 3).map(u => u.instanceId);
+    const playerUnits = state.bootstrap.roster
+      .filter(owned => partySlots.includes(owned.instanceId))
+      .slice(0, 5)
+      .map((owned) => {
       const unitDefinition = state.bootstrap.content.units.find((unit) => unit.id === owned.unitId);
       const jobDefinition = unitDefinition
         ? state.bootstrap.content.jobs.find((job) => job.id === unitDefinition.jobId)
@@ -387,6 +423,91 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
     const state = get();
     const owned = selectCurrentOwnedUnit(state);
     return owned?.level ?? 1;
+  },
+  
+  setPartySlots: (slots: string[]) => {
+    set({ partySlots: slots.slice(0, 5) });
+  },
+  
+  addToParty: (unitId: string) => {
+    const state = get();
+    const currentSlots = state.partySlots ?? [];
+    const maxSlots = state.unlockedPartySlots ?? 3;
+    
+    if (currentSlots.length >= maxSlots) return;
+    if (currentSlots.includes(unitId)) return;
+    
+    set({ partySlots: [...currentSlots, unitId] });
+  },
+  
+  removeFromParty: (slotIndex: number) => {
+    const state = get();
+    const currentSlots = [...(state.partySlots ?? [])];
+    if (slotIndex < 0 || slotIndex >= currentSlots.length) return;
+    
+    currentSlots.splice(slotIndex, 1);
+    set({ partySlots: currentSlots });
+  },
+  
+  reorderParty: (fromIndex: number, toIndex: number) => {
+    const state = get();
+    const currentSlots = [...(state.partySlots ?? [])];
+    if (fromIndex < 0 || fromIndex >= currentSlots.length) return;
+    if (toIndex < 0 || toIndex >= currentSlots.length) return;
+    
+    const [moved] = currentSlots.splice(fromIndex, 1);
+    currentSlots.splice(toIndex, 0, moved);
+    set({ partySlots: currentSlots });
+  },
+  
+  unlockPartySlot: () => {
+    const state = get();
+    const currentMax = state.unlockedPartySlots ?? 3;
+    const playerLevel = state.getPlayerLevel();
+    
+    if (currentMax >= 5) return false;
+    
+    const requiredLevels = [10, 30, 60];
+    const nextUnlockIndex = currentMax - 3;
+    if (playerLevel < requiredLevels[nextUnlockIndex]) return false;
+    
+    set({ unlockedPartySlots: currentMax + 1 });
+    return true;
+  },
+  
+  evolveUnit: (unitInstanceId: string, targetJobId: string) => {
+    const state = get();
+    const unit = state.bootstrap.roster.find(u => u.instanceId === unitInstanceId);
+    if (!unit) return false;
+    
+    const result = canEvolve(unit, targetJobId);
+    if (!result.canEvolve) return false;
+    
+    const zel = state.bootstrap.player.currencies.zel;
+    if (zel < result.cost.zel) return false;
+    
+    const targetJob = getJob(targetJobId);
+    if (!targetJob) return false;
+    
+    set(state => ({
+      bootstrap: {
+        ...state.bootstrap,
+        player: {
+          ...state.bootstrap.player,
+          currencies: {
+            ...state.bootstrap.player.currencies,
+            zel: state.bootstrap.player.currencies.zel - result.cost.zel,
+          },
+        },
+        roster: state.bootstrap.roster.map(u => 
+          u.instanceId === unitInstanceId 
+            ? { ...u, jobId: targetJobId, unlockedJobs: [...u.unlockedJobs, targetJobId] }
+            : u
+        ),
+      },
+    }));
+    
+    return true;
   },
 }));
 
