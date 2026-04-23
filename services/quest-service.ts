@@ -57,7 +57,7 @@ export async function getDailyQuests(): Promise<DailyQuest[]> {
   if (!session) return [];
 
   try {
-    const { data, error } = await supabase.rpc<QuestProgressRow>('get_player_quest_progress', {
+    const { data, error } = await (supabase.rpc as any)('get_player_quest_progress', {
       p_player_id: session.user.id,
     });
 
@@ -66,7 +66,7 @@ export async function getDailyQuests(): Promise<DailyQuest[]> {
       return [];
     }
 
-    return (data || []).map((row) => ({
+    return ((data as any) || []).map((row: any) => ({
       id: row.quest_id,
       type: row.quest_type,
       title: row.quest_title,
@@ -93,7 +93,7 @@ export async function updateQuestProgress(type: 'daily' | 'weekly', increment: n
   if (!session) return false;
 
   try {
-    const { error } = await supabase.rpc<null>('update_quest_progress', {
+    const { error } = await (supabase.rpc as any)('update_quest_progress', {
       p_player_id: session.user.id,
       p_quest_type: type,
       p_increment: increment,
@@ -121,7 +121,7 @@ export async function claimQuestReward(
   if (!session) return { success: false, error: 'Not authenticated' };
 
   try {
-    const { data, error } = await supabase.rpc<ClaimQuestRewardRow>('claim_quest_reward', {
+    const { data, error } = await (supabase.rpc as any)('claim_quest_reward', {
       p_player_id: session.user.id,
       p_quest_id: questId,
     });

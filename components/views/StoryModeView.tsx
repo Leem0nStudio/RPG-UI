@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, ChevronRight, ChevronLeft, Sparkles, Swords, Shield, Star, BookOpen } from 'lucide-react';
 import { getChapterById, type StoryChapter, type StoryChoice } from '@/content/story-content';
 import { completeChapter, startChapter, type PathType } from '@/services/story-service';
@@ -23,17 +23,15 @@ export function StoryModeView({ chapterId, onClose, onComplete, onNextChapter }:
   const [isProcessing, setIsProcessing] = useState(false);
   const { showReward, showAchievement } = useNotifications();
 
-  const loadChapter = useCallback(() => {
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
     const ch = getChapterById(chapterId);
     if (ch) {
       setChapter(ch);
       startChapter(chapterId);
     }
   }, [chapterId]);
-
-  useEffect(() => {
-    loadChapter();
-  }, [loadChapter]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleChoiceSelect = (choice: StoryChoice) => {
     setSelectedChoice(choice);

@@ -18,6 +18,7 @@ export function QRScannerView({ onClose }: { onClose: () => void }) {
   const [manualCode, setManualCode] = useState('');
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [claimedCodes, setClaimedCodes] = useState<Set<string>>(new Set());
+  const [cameraActive, setCameraActive] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -34,7 +35,36 @@ export function QRScannerView({ onClose }: { onClose: () => void }) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
+    setCameraActive(false);
   }, []);
+
+  const handleReward = useCallback(async (reward: QRReward) => {
+    if (reward.type === 'item' && reward.reward.itemId) {
+      await addItems([{ itemId: reward.reward.itemId, quantity: reward.reward.quantity ?? 1 }]);
+    }
+    if (reward.type === 'unit' && reward.reward.unitId) {
+      const { generateUnit } = await import('@/services/unit-generator');
+      const generated = generateUnit(undefined, reward.reward.unitId, '1');
+      generated.name = `${reward.location.split(' ')[0]} Unit`;
+      generated.title = 'QR Hunt Special';
+      generated.rarity = 'rare' as RarityTier;
+      
+      addGeneratedUnit({
+        instanceId: `qr_${Date.now()}`,
+        unitId: generated.id,
+        jobId: generated.jobId,
+        level: reward.reward.level ?? 1,
+        stats: generated.baseStats,
+        rarity: getRarityNumber(generated.rarity),
+        name: generated.name,
+        title: generated.title,
+        element: generated.element,
+        skills: generated.skills,
+      });
+      
+      showSummonCelebration(generated.name, getRarityNumber(generated.rarity));
+    }
+  }, [addGeneratedUnit, showSummonCelebration]);
 
   const processQRCode = useCallback(async (data: string) => {
     const code = parseQRPayload(data);
@@ -69,35 +99,7 @@ export function QRScannerView({ onClose }: { onClose: () => void }) {
     if (result.reward) {
       await handleReward(result.reward);
     }
-  }, [claimedCodes, addGeneratedUnit]);
-
-  const handleReward = async (reward: QRReward) => {
-    if (reward.type === 'item' && reward.reward.itemId) {
-      await addItems([{ itemId: reward.reward.itemId, quantity: reward.reward.quantity ?? 1 }]);
-    }
-    if (reward.type === 'unit' && reward.reward.unitId) {
-      const { generateUnit } = await import('@/services/unit-generator');
-      const generated = generateUnit(undefined, reward.reward.unitId, '1');
-      generated.name = `${reward.location.split(' ')[0]} Unit`;
-      generated.title = 'QR Hunt Special';
-      generated.rarity = 'rare' as RarityTier;
-      
-      addGeneratedUnit({
-        instanceId: `qr_${Date.now()}`,
-        unitId: generated.id,
-        jobId: generated.jobId,
-        level: reward.reward.level ?? 1,
-        stats: generated.baseStats,
-        rarity: getRarityNumber(generated.rarity),
-        name: generated.name,
-        title: generated.title,
-        element: generated.element,
-        skills: generated.skills,
-      });
-      
-      showSummonCelebration(generated.name, getRarityNumber(generated.rarity));
-    }
-  };
+  }, [claimedCodes, handleReward]);
 
   const startCamera = useCallback(async () => {
     try {
@@ -130,6 +132,7 @@ export function QRScannerView({ onClose }: { onClose: () => void }) {
       }
       
       streamRef.current = stream;
+      setCameraActive(true);
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -186,7 +189,7 @@ export function QRScannerView({ onClose }: { onClose: () => void }) {
       </div>
 
       <div className="flex-1 p-4 overflow-y-auto">
-        {(streamRef.current || state === 'scanning' || state === 'processing') && (state === 'scanning' || state === 'processing') && (
+        {(cameraActive || state === 'scanning' || state === 'processing') && (state === 'scanning' || state === 'processing') && (
           <div className="mb-4 relative bg-black rounded-lg overflow-hidden aspect-square">
             <video 
               ref={videoRef} 

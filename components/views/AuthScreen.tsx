@@ -237,7 +237,7 @@ export function AuthScreen() {
         {/* Recover Mode Info (Recover) */}
         {mode === 'recover' && (
           <p className="mt-4 text-[11px] text-[#6a5a4a] text-center">
-            Enter your email and we'll send you a link to reset your password.
+            Enter your email and we will send you a link to reset your password.
           </p>
         )}
       </div>

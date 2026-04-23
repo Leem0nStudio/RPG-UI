@@ -57,7 +57,7 @@ export async function getStoryProgress(): Promise<PlayerStoryProgress[]> {
   }
 
   try {
-    const { data, error } = await supabase.rpc<PlayerStoryProgressRow>('get_player_story_progress', {
+    const { data, error } = await (supabase.rpc as any)('get_player_story_progress', {
       p_player_id: session.user.id,
     });
 
@@ -66,9 +66,9 @@ export async function getStoryProgress(): Promise<PlayerStoryProgress[]> {
       return storyChapters.map(defaultStoryProgress);
     }
 
-    const progressRows = data ?? [];
-    const progressMap = new Map<string, PlayerStoryProgressRow>(
-      progressRows.map((row) => [row.chapter_id, row])
+    const progressRows = (data as any) ?? [];
+    const progressMap = new Map<string, any>(
+      progressRows.map((row: any) => [row.chapter_id, row])
     );
 
     return storyChapters.map((chapter, idx) => {
@@ -108,7 +108,7 @@ export async function startChapter(chapterId: string): Promise<{ success: boolea
   if (!session) return { success: false, error: 'Not authenticated' };
 
   try {
-    const { error } = await supabase.rpc<null>('start_chapter', {
+    const { error } = await (supabase.rpc as any)('start_chapter', {
       p_player_id: session.user.id,
       p_chapter_id: chapterId,
     });
@@ -139,7 +139,7 @@ export async function completeChapter(
   if (!session) return { success: false, error: 'Not authenticated' };
 
   try {
-    const { data, error } = await supabase.rpc<{ rewards?: ChapterReward }>('complete_chapter', {
+    const { data, error } = await (supabase.rpc as any)('complete_chapter', {
       p_player_id: session.user.id,
       p_chapter_id: chapterId,
       p_choice_id: choiceId,

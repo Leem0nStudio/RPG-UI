@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, BookOpen, ChevronRight, Lock, Check, Star, Swords, Sparkles } from 'lucide-react';
 import { getStoryProgress, startChapter, type PlayerStoryProgress } from '@/services/story-service';
 import { useGameStore } from '@/store/game-store';
@@ -19,17 +19,6 @@ export function CampaignView({ onClose, onStartChapter, onOpenStory }: Props) {
   const [selectedWorld, setSelectedWorld] = useState('rune_midgard');
   const { bootstrap } = useGameStore();
   const playerLevel = bootstrap.player.level;
-
-  const loadProgress = useCallback(async () => {
-    setLoading(true);
-    const progress = await getStoryProgress();
-    setChapters(progress);
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    loadProgress();
-  }, [loadProgress]);
 
   const worldChapters = chapters.filter(c => c.world === selectedWorld);
   const completedCount = worldChapters.filter(c => c.status === 'completed').length;

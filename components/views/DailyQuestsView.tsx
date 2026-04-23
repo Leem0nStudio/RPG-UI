@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Check, Clock, Gift, Zap, Swords, Sparkles, ScanLine, Trophy, Star } from 'lucide-react';
 import { getDailyQuests, claimQuestReward, formatCountdown, getTimeUntilNextReset, type DailyQuest } from '@/services/quest-service';
 import { useGameStore } from '@/store/game-store';
@@ -19,16 +19,15 @@ export function DailyQuestsView({ onClose }: Props) {
   const [weeklyReset, setWeeklyReset] = useState(getTimeUntilNextReset('weekly'));
   const { showReward } = useNotifications();
 
-  const loadQuests = useCallback(async () => {
-    setLoading(true);
-    const data = await getDailyQuests();
-    setQuests(data);
-    setLoading(false);
-  }, []);
-
   useEffect(() => {
-    loadQuests();
-  }, [loadQuests]);
+    const fetchQuests = async () => {
+      setLoading(true);
+      const data = await getDailyQuests();
+      setQuests(data);
+      setLoading(false);
+    };
+    fetchQuests();
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -47,14 +46,14 @@ export function DailyQuestsView({ onClose }: Props) {
       const result = await claimQuestReward(quest.id);
       
       if (result.success && result.reward) {
-        const rewardData = result.reward;
+        const rewardData = result.reward as { gems?: number; zel?: number };
         
-        if (rewardData.gems) {
-          await updateCurrencies([{ code: 'gems', amount: rewardData.gems }]);
+        if (rewardData.gems as number) {
+          await updateCurrencies([{ code: 'gems', amount: rewardData.gems as number }]);
           showReward(`+${rewardData.gems} Gemas`, 'Misión completada!');
         }
-        if (rewardData.zel) {
-          await updateCurrencies([{ code: 'zel', amount: rewardData.zel }]);
+        if (rewardData.zel as number) {
+          await updateCurrencies([{ code: 'zel', amount: rewardData.zel as number }]);
           showReward(`+${rewardData.zel} Zel`, 'Recompensa de misión');
         }
         

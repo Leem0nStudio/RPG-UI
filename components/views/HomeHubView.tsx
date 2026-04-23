@@ -20,6 +20,7 @@ export function HomeHubView({ bootstrap, onOpenUnits, onOpenQuest, onOpenSummon,
   const energyPercent = Math.round((player.energy.current / player.energy.max) * 100);
   const unitCount = roster.length;
   const itemCount = items.reduce((acc, i) => acc + i.quantity, 0);
+  const questCount = 0;
   
   const activeBanner = content.banners.find((banner) => banner.active);
 

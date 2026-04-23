@@ -78,7 +78,7 @@ export function SummoningScreenView({ banners }: { banners: SummonBanner[] }) {
       setError('An error occurred during summon');
       setIsConsuming(false);
     }
-  }, [hasEnoughGems]);
+  }, [hasEnoughGems, addGeneratedUnit, showSummonCelebration]);
 
   const resetSummon = () => {
     setSummoningState('idle');

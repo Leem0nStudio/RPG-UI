@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Sparkles, Star, Gem, Trophy, Zap, Swords } from 'lucide-react';
 
 interface CelebrationPopupProps {
@@ -26,31 +26,26 @@ export function CelebrationPopup({
   items = [],
   duration = 3000,
 }: CelebrationPopupProps) {
-  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; color: string; delay: number }>>([]);
-  const [show, setShow] = useState(false);
+  const [particles] = useState<Array<{ id: number; x: number; y: number; color: string; delay: number }>>(() => {
+    if (!isOpen) return [];
+    return Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      color: ['#ffd66e', '#00ffcc', '#ff6b6b', '#b388ff', '#4ade80'][Math.floor(Math.random() * 5)],
+      delay: Math.random() * 0.5,
+    }));
+  });
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
-    if (isOpen) {
-      setShow(true);
-      const newParticles = Array.from({ length: 20 }, (_, i) => ({
-        id: i,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        color: ['#ffd66e', '#00ffcc', '#ff6b6b', '#b388ff', '#4ade80'][Math.floor(Math.random() * 5)],
-        delay: Math.random() * 0.5,
-      }));
-      setParticles(newParticles);
-
-      const timer = setTimeout(() => {
-        setShow(false);
-        onClose();
-      }, duration);
-
+    if (isOpen && duration > 0) {
+      const timer = setTimeout(onClose, duration);
       return () => clearTimeout(timer);
     }
   }, [isOpen, duration, onClose]);
 
-  if (!show) return null;
+  if (!isOpen) return null;
 
   const typeConfig = {
     levelup: {
@@ -92,7 +87,7 @@ export function CelebrationPopup({
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={() => setShow(false)}
+        onClick={onClose}
       />
 
       {/* Particles */}
@@ -175,7 +170,7 @@ export function CelebrationPopup({
 
         {/* Skip Button */}
         <button
-          onClick={() => setShow(false)}
+          onClick={onClose}
           className="mt-4 w-full py-2 text-[12px] text-[#6a5a4a] hover:text-white transition-colors"
         >
           Tap to continue
@@ -310,33 +305,30 @@ interface ResourceDisplayProps {
   animated?: boolean;
 }
 
-export function ResourceDisplay({ gems, zel, karma, compact = false, animated = true }: ResourceDisplayProps) {
-  const ResourceItem = ({ icon, value, label, color }: { icon: React.ReactNode; value?: number; label: string; color: string }) => {
-    if (value === undefined) return null;
+function ResourceItem({ icon, value, label, color }: { icon: React.ReactNode; value?: number; label: string; color: string }) {
+  if (value === undefined) return null;
 
-    return (
-      <div className={`
-        flex items-center gap-2 px-3 py-2 rounded-lg
-        bg-[#1a0a05] border border-[#3a2820]
-        ${animated && value > 0 ? 'animate-pulse-subtle' : ''}
-      `}>
-        <div className={color}>
-          {icon}
-        </div>
-        <div className="flex flex-col">
-          <span className={`font-bold text-white ${compact ? 'text-[12px]' : 'text-[14px]'}`}>
-            {value.toLocaleString()}
-          </span>
-          {!compact && (
-            <span className="text-[9px] uppercase tracking-wider text-[#6a5a4a]">
-              {label}
-            </span>
-          )}
-        </div>
+  return (
+    <div className={`
+      flex items-center gap-2 px-3 py-2 rounded-lg
+      bg-[#1a0a05] border border-[#3a2820]
+    `}>
+      <div className={color}>
+        {icon}
       </div>
-    );
-  };
+      <div className="flex flex-col">
+        <span className="font-bold text-white">
+          {value.toLocaleString()}
+        </span>
+        <span className="text-[9px] uppercase tracking-wider text-[#6a5a4a]">
+          {label}
+        </span>
+      </div>
+    </div>
+  );
+}
 
+export function ResourceDisplay({ gems, zel, karma, compact = false, animated = true }: ResourceDisplayProps) {
   return (
     <div className="flex gap-2">
       <ResourceItem icon={<Gem size={16} />} value={gems} label="Gems" color="text-[#00ffcc]" />

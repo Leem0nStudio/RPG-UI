@@ -51,7 +51,7 @@ export async function claimQRReward(code: string): Promise<ClaimQRResult> {
     return { success: false, error: 'Not authenticated' };
   }
 
-  const { data, error } = await supabase.rpc<ClaimQRResultRow>('claim_qr_reward', {
+  const { data, error } = await (supabase.rpc as any)('claim_qr_reward', {
     p_code: code.trim().toUpperCase(),
     p_player_id: session.user.id,
   });
@@ -83,14 +83,13 @@ export async function getQRAvailableCodes(): Promise<string[]> {
   const supabase = getSupabaseBrowserClient();
   if (!supabase) return [];
 
-  const { data, error } = await supabase
-    .from<QRCodeRow>('qr_codes')
+  const { data, error } = await (supabase.from as any)('qr_codes')
     .select('code, location_name')
     .eq('is_active', true);
 
   if (error) return [];
 
-  return data?.map((qr) => qr.code) ?? [];
+  return data?.map((qr: QRCodeRow) => qr.code) ?? [];
 }
 
 export function isValidQRFormat(data: string): boolean {
