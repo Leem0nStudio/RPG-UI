@@ -190,10 +190,6 @@ export async function recordBattleOutcome(
   }
 }
 
-export function calculateWinRateForDifficulty(metrics: PlayerBattleMetrics, difficulty: string): number {
-  return calculateWinRate(metrics, difficulty);
-}
-
 export function getRecommendedDifficulty(metrics: PlayerBattleMetrics): string {
   const normalWinRate = calculateWinRate(metrics, 'Normal');
   const hardWinRate = calculateWinRate(metrics, 'Hard');
