@@ -163,6 +163,7 @@ export function CharacterView({ character, job, stats, equipped, onOpenInventory
             </div>
 
             <div className="absolute -bottom-[15px] left-1/2 -translate-x-1/2 w-[140px] sm:w-[160px] h-[50px] sm:h-[60px] -z-10 drop-shadow-[0_12px_15px_rgba(0,0,0,0.9)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/assets/ui/plataforma.png"
                 alt="platform"
