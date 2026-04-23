@@ -18,6 +18,7 @@ export function DailyQuestsView({ onClose }: Props) {
   const [dailyReset, setDailyReset] = useState(getTimeUntilNextReset('daily'));
   const [weeklyReset, setWeeklyReset] = useState(getTimeUntilNextReset('weekly'));
   const { showReward } = useNotifications();
+  const { setBadgeCount } = useGameStore();
 
   useEffect(() => {
     const fetchQuests = async () => {
@@ -60,6 +61,10 @@ export function DailyQuestsView({ onClose }: Props) {
         setQuests(prev => prev.map(q => 
           q.id === quest.id ? { ...q, claimed: true } : q
         ));
+        
+        // Update badge count for quests
+        const { badgeCounts } = useGameStore.getState();
+        setBadgeCount('quests', (badgeCounts.quests ?? 0) + 1);
       }
     } catch (err) {
       console.error('Error claiming reward:', err);

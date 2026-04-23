@@ -4,6 +4,7 @@ import React from 'react';
 import { Swords, Users, Sparkles, ScanLine, Gem, Zap, Star, Trophy, Flame, Snowflake, Leaf, Sun, Moon, ChevronRight, TrendingUp, Target, Award, Scroll, BookOpen } from 'lucide-react';
 import type { GameBootstrap } from '@/backend-contracts/game';
 import { RarityBadge } from '@/components/ui/GameEffects';
+import { useGameStore } from '@/store/game-store';
 
 type Props = {
   bootstrap: GameBootstrap;
@@ -17,10 +18,11 @@ type Props = {
 
 export function HomeHubView({ bootstrap, onOpenUnits, onOpenQuest, onOpenSummon, onOpenQR, onOpenDailyQuests, onOpenCampaign }: Props) {
   const { player, roster, items, content } = bootstrap;
+  const { badgeCounts } = useGameStore();
   const energyPercent = Math.round((player.energy.current / player.energy.max) * 100);
   const unitCount = roster.length;
   const itemCount = items.reduce((acc, i) => acc + i.quantity, 0);
-  const questCount = 0;
+  const questCount = badgeCounts.quests ?? 0;
   
   const activeBanner = content.banners.find((banner) => banner.active);
 
