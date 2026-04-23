@@ -1,0 +1,67 @@
+# Plan de Consistencia - Arquitectura RPG UI
+
+## Estado Actual
+
+### Capas (correctas ✅)
+| Capa | Módulos | Propósito |
+|------|--------|----------|
+| **core/** | 7 archivos | Lógica pura de juego (stats, balance, elemental, skills, stamina, battle) |
+| **services/** | 12 archivos | Integración DB/API, infraestructura, lógica de negocio |
+| **store/** | 1 archivo | Estado global Zustand |
+| **content/** | 2 archivos | Datos seed (fallback) |
+| **backend-contracts/** | 1 archivo | Tipos Zod compartidos |
+
+### Reglas de Imports ✅
+- `core/` → NO imports de services/ (puro)
+- `services/` → puede importar core/
+- `store/` → puede importar services/ y core/
+- `content/` → NO imports de services/, store/, components/
+
+---
+
+## Issues Identificados
+
+### 1. Funciones Duplicadas (MEDIUM)
+
+| Función | Ubiciones | Problema |
+|--------|----------|---------|
+| `calculateDamage` | `core/balance.ts`, `services/battle-service.ts` | Duplicada, ambas en uso |
+| `calculateWinRate` | `core/balance-system.ts:98`, `core/balance-system.ts:193` | Duplicada internally |
+| `calculateExpReward` | `core/balance.ts`, ¿other? | Posible duplicación |
+
+### 2. Funciones Deprecated (LOW)
+- `calculateDamage` en `battle-service.ts` marcada como `@deprecated` pero aúnimportada
+- `calculateEnemyDamage` en `battle-service.ts` marcada como `@deprecated`
+
+### 3. Convenciones de Nombres (LOW)
+- Algunos archivos usan `--` en nombres (`qr-service.ts`, `env.ts`)
+- othersusan camelCase (`quest-service.ts`)
+
+---
+
+## Plan de Fixes
+
+### Inmediato (P0 -Esta semana)
+
+- [ ] **Mergelar calculateWinRate** - eliminar duplicado en balance-system.ts:193
+- [ ] **Marcar calculateDamage como deprecated** - ya está marcado, solo verificarque nose use
+
+### Corto plazo (P1 - Proximasemana)
+
+- [ ] **Unificar calculateDamage** - mover lógica a core/ y mantener solo wrappersen services
+- [ ] **Renombrar archivos inconsistentes** - `qr-service.ts` → `qrService.ts`
+
+### Medio plazo (P2 - Proximo mes)
+
+- [ ] **Auditar otros duplicados** - buscar más funciones duplicadas
+- [ ] **Documentar arquitectura** - crear ARCHITECTURE.md
+- [ ] **Agregar lint rule** - prevenir imports cruzados incorrectos
+
+---
+
+## Referencias
+
+- Dependencias verificadas: `npm run build` y `npm run lint` pasan
+- Commits recientes:
+  - `15c54ce` refactor: separate core from services
+  - `55ae4a0` refactor: extract quest business logic
