@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Camera, X, Loader2, Gift, AlertCircle, CheckCircle, Sparkles } from 'lucide-react';
-import { claimQRReward, parseQRPayload, type QRReward } from '@/services/qr-service';
+import { claimQRReward, parseQRPayload, type QRReward } from '@/services/qrService';
 import { useGameStore } from '@/store/game-store';
 import { addItems } from '@/services/write-service';
 import type { RarityTier } from '@/services/unit-generator';

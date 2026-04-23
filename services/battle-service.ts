@@ -142,41 +142,20 @@ function calculateCombatDamage(
   return { damage: finalDamage, elementMultiplier, isCritical };
 }
 
-/**
- * Generic damage calculator - works for any attacker/defender with stats and element
- */
 export function calculateUnitDamage(
   attacker: { stats: StatBlock; element: Element },
   defender: { stats: StatBlock; element: Element }
 ): { damage: number; elementMultiplier: number; isCritical: boolean } {
-  return calculateCombatDamage(attacker.stats, attacker.element, defender.stats, defender.element);
+  const elementMultiplier = getElementMultiplier(attacker.element, defender.element);
+  const rawDamage = Math.max(1, attacker.stats.atk - Math.round(defender.stats.def * 0.55));
+  const damage = Math.round(rawDamage * elementMultiplier);
+
+  const isCritical = Math.random() < 0.1;
+  const finalDamage = isCritical ? Math.round(damage * 1.5) : damage;
+
+  return { damage: finalDamage, elementMultiplier, isCritical };
 }
 
-/**
- * Calculate damage from player unit to enemy
- * @deprecated Use calculateUnitDamage instead
- */
-export function calculateDamage(
-  attacker: CombatUnit,
-  defender: EnemyInstance
-): { damage: number; elementMultiplier: number; isCritical: boolean } {
-  return calculateUnitDamage(attacker, defender);
-}
-
-/**
- * Calculate damage from enemy to player unit
- * @deprecated Use calculateUnitDamage instead
- */
-export function calculateEnemyDamage(
-  attacker: EnemyInstance,
-  defender: CombatUnit
-): { damage: number; elementMultiplier: number; isCritical: boolean } {
-  return calculateUnitDamage(attacker, defender);
-}
-
-/**
- * Execute a battle turn
- */
 export function executeTurn(
   playerUnits: CombatUnit[],
   enemy: EnemyInstance
@@ -189,7 +168,7 @@ export function executeTurn(
   for (const unit of playerUnits) {
     if (!unit.alive || currentEnemyHp <= 0) continue;
     
-    const { damage, elementMultiplier, isCritical } = calculateDamage(unit, enemy);
+    const { damage, elementMultiplier, isCritical } = calculateUnitDamage(unit, enemy);
     currentEnemyHp = Math.max(0, currentEnemyHp - damage);
     
     actions.push({
@@ -218,7 +197,7 @@ export function executeTurn(
       : aliveUnits.slice(0, 1);
     
     for (const target of targetsToAttack) {
-      const { damage, elementMultiplier, isCritical } = calculateEnemyDamage(enemy, target);
+      const { damage, elementMultiplier, isCritical } = calculateUnitDamage(enemy, target);
       
       target.hp = Math.max(0, target.hp - damage);
       target.alive = target.hp > 0;
