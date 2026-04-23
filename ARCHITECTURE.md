@@ -41,22 +41,22 @@
 
 ## Plan de Fixes
 
-### ✅ Completado
+### ✅ P0/P1/P2 Completado
 
 - [x] **Mergelar calculateWinRate** - duplicate removed at commit ee3762a
 - [x] **Unificar calculateDamage** - single calculateUnitDamage at commit 7d4a2e6
 - [x] **Renombrar qr-service.ts** - renamed at commit 7d4a2e6
+- [x] **Auditar otros duplicados** - audit done, intentional wrappers confirmed
+- [x] **Documentar arquitectura** - ARCHITECTURE.md complete
 
-### Corto plazo (P1 - Proximasemana)
+### Hallazgos P2 (Información)
 
-- [ ] ~~**Unificar calculateDamage**~~ - completado
-- [ ] ~~**Renombrar archivos inconsistentes**~~ - completado
+**Naming inconsistente** (NO cambiar - convención mixta aceptada):
+- `services/*-service.ts` (9 archivos) - convención accepted
+- `core/balance-system.ts` - un archivo
 
-### Medio plazo (P2 - Proximo mes)
-
-- [ ] **Auditar otros duplicados** - buscar más funciones duplicadas
-- [ ] **Documentar arquitectura** - crear ARCHITECTURE.md (completado)
-- [ ] **Agregar lint rule** - prevenir imports cruzados incorrectos
+**Wrappers intencionales** (NO cambiar):
+- `calculateExpReward` en balance.ts + `getExpReward` en stats.ts - usado así a propósito
 
 ---
 
