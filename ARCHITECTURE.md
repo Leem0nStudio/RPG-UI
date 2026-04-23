@@ -41,20 +41,23 @@
 
 ## Plan de Fixes
 
+### ✅ Completado
+
+- [x] **Mergelar calculateWinRate** - duplicate removed at commit ee3762a
+
 ### Inmediato (P0 -Esta semana)
 
-- [ ] **Mergelar calculateWinRate** - eliminar duplicado en balance-system.ts:193
-- [ ] **Marcar calculateDamage como deprecated** - ya está marcado, solo verificarque nose use
+- [ ] **Marcar calculateDamage como deprecated** - ya está marcado, solo verificar que nose use
 
 ### Corto plazo (P1 - Proximasemana)
 
-- [ ] **Unificar calculateDamage** - mover lógica a core/ y mantener solo wrappersen services
+- [ ] **Unificar calculateDamage** - mover lógica a core/ y mantener solo wrappers en services
 - [ ] **Renombrar archivos inconsistentes** - `qr-service.ts` → `qrService.ts`
 
 ### Medio plazo (P2 - Proximo mes)
 
 - [ ] **Auditar otros duplicados** - buscar más funciones duplicadas
-- [ ] **Documentar arquitectura** - crear ARCHITECTURE.md
+- [ ] **Documentar arquitectura** - crear ARCHITECTURE.md (completado)
 - [ ] **Agregar lint rule** - prevenir imports cruzados incorrectos
 
 ---
