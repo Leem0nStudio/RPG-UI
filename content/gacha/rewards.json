@@ -1,0 +1,62 @@
+{
+  "cards": [
+    { "id": "c_atk_10", "name": "Strength I", "rarity": "common", "effect": { "type": "stat", "stat": "atk", "value": 0.10 }, "applicableJobs": [] },
+    { "id": "c_hp_10", "name": "Vitality I", "rarity": "common", "effect": { "type": "stat", "stat": "hp", "value": 0.10 }, "applicableJobs": [] },
+    { "id": "c_def_10", "name": "Hardness I", "rarity": "common", "effect": { "type": "stat", "stat": "def", "value": 0.10 }, "applicableJobs": [] },
+    { "id": "c_crit_5", "name": "Precision I", "rarity": "common", "effect": { "type": "stat", "stat": "critRate", "value": 0.05 }, "applicableJobs": [] },
+    { "id": "c_agi_10", "name": "Agility I", "rarity": "common", "effect": { "type": "stat", "stat": "agi", "value": 0.10 }, "applicableJobs": [] },
+    
+    { "id": "r_atk_20", "name": "Strength II", "rarity": "rare", "effect": { "type": "stat", "stat": "atk", "value": 0.20 }, "applicableJobs": ["swordman", "knight", "assassin"] },
+    { "id": "r_magic_15", "name": "Arcane I", "rarity": "rare", "effect": { "type": "stat", "stat": "matk", "value": 0.15 }, "applicableJobs": ["mage", "wizard"] },
+    { "id": "r_crit_10", "name": "Precision II", "rarity": "rare", "effect": { "type": "stat", "stat": "critRate", "value": 0.10 }, "applicableJobs": ["archer", "hunter"] },
+    { "id": "r_lifesteal", "name": "Vampiric I", "rarity": "rare", "effect": { "type": "onHit", "heal": 0.03 }, "applicableJobs": [] },
+    { "id": "r_hp_20", "name": "Vitality II", "rarity": "rare", "effect": { "type": "stat", "stat": "hp", "value": 0.20 }, "applicableJobs": [] },
+    
+    { "id": "e_bleed", "name": "Bleed Edge", "rarity": "epic", "effect": { "type": "onAttack", "chance": 0.20, "condition": "bleed", "damage": 0.15 }, "applicableJobs": ["knight", "assassin"] },
+    { "id": "e_double", "name": "Double Strike", "rarity": "epic", "effect": { "type": "hits", "bonus": 1 }, "applicableJobs": [] },
+    { "id": "e_magic_boost", "name": "Arcane II", "rarity": "epic", "effect": { "type": "stat", "stat": "matk", "value": 0.25 }, "applicableJobs": ["mage", "wizard"] },
+    { "id": "e_tank_25", "name": "Fortress", "rarity": "epic", "effect": { "type": "stat", "stat": "def", "value": 0.25 }, "applicableJobs": ["knight", "crusader"] },
+    { "id": "e_spell_vamp", "name": "Life Drain", "rarity": "epic", "effect": { "type": "onSpell", "heal": 0.10 }, "applicableJobs": ["wizard", "warlock"] },
+    
+    { "id": "l_triple", "name": "Triple Strike", "rarity": "legendary", "effect": { "type": "hits", "bonus": 2 }, "applicableJobs": [] },
+    { "id": "l_crit_25", "name": "Deadly Precision", "rarity": "legendary", "effect": { "type": "stat", "stat": "critRate", "value": 0.25 }, "applicableJobs": [] },
+    { "id": "l_meteor", "name": "Meteor Strike", "rarity": "legendary", "effect": { "type": "skill", "skillId": "meteor" }, "applicableJobs": ["wizard", "warlock"] },
+    { "id": "l_burst_free", "name": "Burst Ready", "rarity": "legendary", "effect": { "type": "burst", "costReduce": 0.30 }, "applicableJobs": [] },
+    
+    { "id": "m_god_mode", "name": "Ascension", "rarity": "mythic", "effect": { "type": "allStats", "value": 0.15 }, "applicableJobs": [] }
+  ],
+  "weapons": [
+    { "id": "w_iron_sword", "name": "Iron Sword", "type": "sword", "rarity": "common", "stats": { "atk": 30 }, "effect": null },
+    { "id": "w_steel_sword", "name": "Steel Sword", "type": "sword", "rarity": "rare", "stats": { "atk": 50 }, "effect": null },
+    { "id": "w_falchion", "name": "Falchion", "type": "sword", "rarity": "epic", "stats": { "atk": 45, "agi": 5 }, "effect": "bleed" },
+    { "id": "w_elm_staff", "name": "Elm Staff", "type": "staff", "rarity": "common", "stats": { "matk": 35, "mdef": 10 }, "effect": null },
+    { "id": "w_oak_wand", "name": "Oak Wand", "type": "wand", "rarity": "rare", "stats": { "matk": 40 }, "effect": "spellAmp" },
+    { "id": "w_longbow", "name": "Longbow", "type": "bow", "rarity": "common", "stats": { "atk": 28, "agi": 5 }, "effect": null },
+    { "id": "w_composite_bow", "name": "Composite Bow", "type": "bow", "rarity": "rare", "stats": { "atk": 35, "agi": 8 }, "effect": null },
+    { "id": "w_dagger", "name": "Dagger", "type": "dagger", "rarity": "common", "stats": { "atk": 25, "agi": 10 }, "effect": "backstab" },
+    { "id": "w_holy_mace", "name": "Holy Mace", "type": "mace", "rarity": "epic", "stats": { "atk": 30, "mdef": 20 }, "effect": "holy" },
+    { "id": "w_guillie", "name": "Guillotine", "type": "katar", "rarity": "legendary", "stats": { "atk": 80, "agi": 15 }, "effect": "pierce" }
+  ],
+  "skills": [
+    { "id": "bash", "name": "Bash", "cost": 8, "cooldown": 3, "effect": { "damage": 1.5 }, "jobId": "swordman" },
+    { "id": "magnum_break", "name": "Magnum Break", "cost": 12, "cooldown": 5, "effect": { "damage": 2.0, "range": "aoe" }, "jobId": "swordman" },
+    { "id": "fire_bolt", "name": "Fire Bolt", "cost": 10, "cooldown": 3, "effect": { "damage": 1.3, "element": "fire" }, "jobId": "mage" },
+    { "id": "ice_wall", "name": "Ice Wall", "cost": 15, "cooldown": 6, "effect": { "defense": 1.5, "duration": 3 }, "jobId": "mage" },
+    { "id": "thunder_storm", "name": "Thunder Storm", "cost": 20, "cooldown": 8, "effect": { "damage": 2.5, "range": "aoe" }, "jobId": "mage" },
+    { "id": "aimed_shot", "name": "Aimed Shot", "cost": 10, "cooldown": 2, "effect": { "damage": 1.4, "critBonus": 0.2 }, "jobId": "archer" },
+    { "id": "double_strafe", "name": "Double Strafe", "cost": 12, "cooldown": 4, "effect": { "damage": 1.8, "hits": 2 }, "jobId": "archer" },
+    { "id": "heal", "name": "Heal", "cost": 15, "cooldown": 5, "effect": { "heal": 0.4 }, "jobId": "acolyte" },
+    { "id": "holy_bolt", "name": "Holy Bolt", "cost": 10, "cooldown": 3, "effect": { "damage": 1.2, "element": "light" }, "jobId": "acolyte" },
+    { "id": "steal", "name": "Steal", "cost": 5, "cooldown": 2, "effect": { "steal": true }, "jobId": "thief" },
+    { "id": "backstab", "name": "Backstab", "cost": 15, "cooldown": 4, "effect": { "damage": 2.5, "critBonus": 0.5 }, "jobId": "thief" },
+    { "id": "mammonite", "name": "Mammonite", "cost": 20, "cooldown": 6, "effect": { "damage": 1.8, "critBonus": 0.3 }, "jobId": "merchant" },
+    { "id": "adrenaline", "name": "Adrenaline Rush", "cost": 10, "cooldown": 8, "effect": { "atkBoost": 0.30, "duration": 5 }, "jobId": "merchant" },
+    { "id": "enchant_fire", "name": "Enchant Fire", "cost": 25, "cooldown": 10, "effect": { "element": "fire", "duration": 5 }, "jobId": "sage" },
+    { "id": "meteor", "name": "Meteor Storm", "cost": 40, "cooldown": 12, "effect": { "damage": 3.0, "range": "aoe", "element": "fire" }, "jobId": "warlock" }
+  ],
+  "job_cores": [
+    { "id": "jc_rk", "name": "Rune Knight Core", "jobId": "rune_knight", "rarity": "legendary" },
+    { "id": "jc_wl", "name": "Warlock Core", "jobId": "warlock", "rarity": "legendary" },
+    { "id": "jc_gx", "name": "Guillotine Core", "jobId": "guillotine_cross", "rarity": "mythic" }
+  ]
+}
