@@ -90,7 +90,7 @@ export async function updateCurrencies(
   const results: Array<{ code: string; amount: number }> = [];
 
   for (const change of changes) {
-    const { data: currentData } = await supabase
+    const { data: currentData } = await (supabase as any)
       .from('player_currencies')
       .select('amount')
       .eq('player_id', userId)
@@ -106,11 +106,13 @@ export async function updateCurrencies(
 
     results.push({ code: change.code, amount: newAmount });
 
-    const { error } = await (supabase.rpc as any)('upsert_currency', {
-      p_player_id: userId,
-      p_code: change.code,
-      p_amount: newAmount,
-    });
+    const { error } = await (supabase as any)
+      .from('player_currencies')
+      .upsert({
+        player_id: userId,
+        code: change.code,
+        amount: newAmount,
+      }, { onConflict: 'player_id,code' });
 
     if (error) {
       return { success: false, error: error.message };
