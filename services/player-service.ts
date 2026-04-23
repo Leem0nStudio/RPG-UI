@@ -1,6 +1,7 @@
 import type { GameBootstrap } from '@/backend-contracts/game';
 import { bootstrapData, defaultInventory, defaultPlayerProfile, defaultRoster } from '@/content/game-content';
 import { getSupabaseBrowserClient } from '@/services/supabase/client';
+import { getStartingNovices, createOwnedUnitFromTemplate } from './recruitment-service';
 
 type ProfileRow = {
   id: string;
@@ -119,6 +120,18 @@ export async function loadPlayerBootstrap(): Promise<GameBootstrap> {
     await supabase.from('player_units').delete().in('id', legacyIds);
   }
 
+  const shouldUseNewNovices = remoteRoster.length === 0 || hasLegacyRoster;
+  
+  const finalRoster = shouldUseNewNovices 
+    ? getStartingNovices().map((template, idx) => createOwnedUnitFromTemplate(template, `starter_${idx + 1}`))
+    : remoteRoster.map((u: any) => ({
+      ...u,
+      jobId: u.jobId ?? 'novice',
+      unlockedJobs: u.unlockedJobs ?? ['novice'],
+      equippedCards: u.equippedCards ?? [],
+      equippedSkills: u.equippedSkills ?? [],
+    }));
+
   return {
     ...bootstrapData,
     player: {
@@ -130,18 +143,12 @@ export async function loadPlayerBootstrap(): Promise<GameBootstrap> {
         max: profile.energy_max,
         recoverAt: profile.energy_recover_at,
       },
-      currencies: hasLegacyRoster 
+      currencies: shouldUseNewNovices 
         ? { gems: 25, zel: 1000, karma: 100 }
         : currencies,
     },
-    roster: hasLegacyRoster ? [] : remoteRoster.map((u: any) => ({
-      ...u,
-      jobId: u.jobId ?? 'novice',
-      unlockedJobs: u.unlockedJobs ?? ['novice'],
-      equippedCards: u.equippedCards ?? [],
-      equippedSkills: u.equippedSkills ?? [],
-    })),
-    items: hasLegacyRoster 
+    roster: finalRoster,
+    items: shouldUseNewNovices 
       ? [{ itemId: 'w_iron_sword', quantity: 1 }, { itemId: 'a_wood_shield', quantity: 1 }, { itemId: 'ac_power_ring', quantity: 1 }]
       : remoteItems,
   };
