@@ -35,16 +35,16 @@ const fallbackItems = [
 ];
 
 const fallbackQuests = [
-  { id: 'quest_1', worldId: 'prontera', stage: 1, name: 'First Steps', energyCost: 5, difficulty: 'Normal' as const, enemyIds: ['enemy_slime'], rewardsPreview: ['10 EXP', '20 Zel'] },
-  { id: 'quest_2', worldId: 'prontera', stage: 2, name: 'Forest Ambush', energyCost: 5, difficulty: 'Normal' as const, enemyIds: ['enemy_goblin'], rewardsPreview: ['25 EXP', '50 Zel'] },
-  { id: 'quest_3', worldId: 'prontera', stage: 3, name: 'Wolf Pack', energyCost: 7, difficulty: 'Normal' as const, enemyIds: ['enemy_wolf'], rewardsPreview: ['40 EXP', '80 Zel'] },
-  { id: 'quest_4', worldId: 'prontera', stage: 4, name: 'Cave Explorer', energyCost: 10, difficulty: 'Normal' as const, enemyIds: ['enemy_bat'], rewardsPreview: ['60 EXP', '120 Zel'] },
-  { id: 'quest_5', worldId: 'prontera', stage: 5, name: 'Fire Dungeon', energyCost: 12, difficulty: 'Hard' as const, enemyIds: ['enemy_salamander', 'enemy_ifrit'], rewardsPreview: ['80 EXP', '200 Zel'] },
-  { id: 'quest_6', worldId: 'prontera', stage: 6, name: 'Water Temple', energyCost: 15, difficulty: 'Hard' as const, enemyIds: ['enemy_sea_serpent', 'enemy_siren'], rewardsPreview: ['100 EXP', '300 Zel'] },
-  { id: 'quest_7', worldId: 'prontera', stage: 7, name: 'Earth Guardian', energyCost: 18, difficulty: 'Hard' as const, enemyIds: ['enemy_golem'], rewardsPreview: ['120 EXP', '400 Zel'] },
-  { id: 'quest_8', worldId: 'prontera', stage: 8, name: 'Dark Dungeon', energyCost: 20, difficulty: 'Heroic' as const, enemyIds: ['enemy_shadow', 'enemy_demon'], rewardsPreview: ['150 EXP', '500 Zel'] },
-  { id: 'quest_9', worldId: 'prontera', stage: 9, name: 'Light Temple', energyCost: 22, difficulty: 'Heroic' as const, enemyIds: ['enemy_spark', 'enemy_angel'], rewardsPreview: ['180 EXP', '600 Zel'] },
-  { id: 'quest_10', worldId: 'prontera', stage: 10, name: 'Final Boss', energyCost: 30, difficulty: 'Heroic' as const, enemyIds: ['enemy_titan'], rewardsPreview: ['300 EXP', '1000 Zel'] },
+  { id: 'quest_1', worldId: 'prontera', stage: 1, name: 'First Steps', energyCost: 5, difficulty: 'Normal' as const, enemyIds: ['enemy_slime'], rewardsPreview: ['10 EXP', '20 Zel'], baseLevel: 1 },
+  { id: 'quest_2', worldId: 'prontera', stage: 2, name: 'Forest Ambush', energyCost: 5, difficulty: 'Normal' as const, enemyIds: ['enemy_goblin'], rewardsPreview: ['25 EXP', '50 Zel'], baseLevel: 3 },
+  { id: 'quest_3', worldId: 'prontera', stage: 3, name: 'Wolf Pack', energyCost: 7, difficulty: 'Normal' as const, enemyIds: ['enemy_wolf'], rewardsPreview: ['40 EXP', '80 Zel'], baseLevel: 5 },
+  { id: 'quest_4', worldId: 'prontera', stage: 4, name: 'Cave Explorer', energyCost: 10, difficulty: 'Normal' as const, enemyIds: ['enemy_bat'], rewardsPreview: ['60 EXP', '120 Zel'], baseLevel: 7 },
+  { id: 'quest_5', worldId: 'prontera', stage: 5, name: 'Fire Dungeon', energyCost: 12, difficulty: 'Hard' as const, enemyIds: ['enemy_salamander', 'enemy_ifrit'], rewardsPreview: ['80 EXP', '200 Zel'], baseLevel: 10 },
+  { id: 'quest_6', worldId: 'prontera', stage: 6, name: 'Water Temple', energyCost: 15, difficulty: 'Hard' as const, enemyIds: ['enemy_sea_serpent', 'enemy_siren'], rewardsPreview: ['100 EXP', '300 Zel'], baseLevel: 15 },
+  { id: 'quest_7', worldId: 'prontera', stage: 7, name: 'Earth Guardian', energyCost: 18, difficulty: 'Hard' as const, enemyIds: ['enemy_golem'], rewardsPreview: ['120 EXP', '400 Zel'], baseLevel: 18 },
+  { id: 'quest_8', worldId: 'prontera', stage: 8, name: 'Dark Dungeon', energyCost: 20, difficulty: 'Heroic' as const, enemyIds: ['enemy_shadow', 'enemy_demon'], rewardsPreview: ['150 EXP', '500 Zel'], baseLevel: 22 },
+  { id: 'quest_9', worldId: 'prontera', stage: 9, name: 'Light Temple', energyCost: 22, difficulty: 'Heroic' as const, enemyIds: ['enemy_spark', 'enemy_angel'], rewardsPreview: ['180 EXP', '600 Zel'], baseLevel: 28 },
+  { id: 'quest_10', worldId: 'prontera', stage: 10, name: 'Final Boss', energyCost: 30, difficulty: 'Heroic' as const, enemyIds: ['enemy_titan'], rewardsPreview: ['300 EXP', '1000 Zel'], baseLevel: 35 },
 ];
 
 const fallbackEnemies: EnemyDefinition[] = [

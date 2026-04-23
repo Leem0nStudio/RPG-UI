@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { calculateUnitStats } from '@/core/stats';
+import { calculateUnitStats, scaleBaseStats } from '@/core/stats';
 import type {
   BattleState,
   CurrencyCode,
@@ -16,6 +16,7 @@ import type {
 import { bootstrapData } from '@/content/game-content';
 import { loadGameContent } from '@/services/content-service';
 import { loadPlayerBootstrap } from '@/services/player-service';
+import { calculateQuestDifficulty, calculateRewardModifier } from '@/core/balance-system';
 
 export type AppView = 'home' | 'unitList' | 'character' | 'inventory' | 'quest' | 'battle' | 'summon' | 'qrScanner' | 'dailyQuests' | 'campaign' | 'story';
 
@@ -72,7 +73,8 @@ interface GameStoreState {
   showSummonCelebration: (unitName: string, rarity: number) => void;
   showBattleWinCelebration: () => void;
   hideCelebration: () => void;
-
+  getPlayerLevel: () => number;
+  
   // Battle actions
   startQuest: (quest: QuestDefinition) => void;
   enterBattle: () => void;
@@ -280,17 +282,52 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       console.error('[store] bootstrapGame failed:', error);
       set({ isBootstrapping: false });
     }
-  },
-  
+},
+    
   startQuest: async (quest: QuestDefinition) => {
     const state = get();
     const enemies = state.bootstrap.content.enemies.filter((e) =>
       quest.enemyIds.includes(e.id)
     );
     
+    const playerLevel = state.getPlayerLevel();
+    const playerProgress = state.bootstrap.content.units.length > 0 
+      ? state.bootstrap.roster.filter(u => u.level >= playerLevel).length * 10 
+      : 0;
+    const baseQuestLevel = quest.baseLevel ?? 1;
+    
+    const difficultyConfig = calculateQuestDifficulty(playerLevel, playerProgress, baseQuestLevel);
+    const isOverLeveled = playerLevel > baseQuestLevel + 3;
+    const isUnderLeveled = playerLevel < baseQuestLevel - 2;
+    
+    const adjustedEnemies = enemies.map(enemy => {
+      let hpMult = difficultyConfig.difficultyMultiplier;
+      let atkMult = difficultyConfig.difficultyMultiplier;
+      
+      if (isOverLeveled) {
+        hpMult *= 1.2;
+        atkMult *= 1.3;
+      } else if (isUnderLeveled) {
+        hpMult *= 0.7;
+        atkMult *= 0.7;
+      }
+      
+      return {
+        ...enemy,
+        baseStats: {
+          ...enemy.baseStats,
+          hp: Math.round(enemy.baseStats.hp * hpMult),
+          atk: Math.round(enemy.baseStats.atk * atkMult),
+        },
+      };
+    });
+    
     set({
-      currentQuest: quest,
-      currentEnemies: enemies,
+      currentQuest: {
+        ...quest,
+        difficulty: quest.difficulty,
+      },
+      currentEnemies: adjustedEnemies,
       view: 'battle',
     });
   },
@@ -366,6 +403,12 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       );
       set({ currentEnemies: enemies });
     }
+  },
+  
+  getPlayerLevel: () => {
+    const state = get();
+    const owned = selectCurrentOwnedUnit(state);
+    return owned?.level ?? 1;
   },
 }));
 

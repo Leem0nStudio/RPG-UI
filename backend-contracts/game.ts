@@ -100,6 +100,7 @@ export const questDefinitionSchema = z.object({
   difficulty: z.enum(['Normal', 'Hard', 'Heroic']),
   enemyIds: z.array(z.string()),
   rewardsPreview: z.array(z.string()),
+  baseLevel: z.number().int().positive().optional(),
 });
 export type QuestDefinition = z.infer<typeof questDefinitionSchema>;
 

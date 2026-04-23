@@ -4,6 +4,7 @@ import { previewDamage } from '@/core/battle';
 import { getElementMultiplier } from '@/core/elemental';
 import { getSupabaseBrowserClient } from '@/services/supabase/client';
 import { gameContent } from '@/content/game-content';
+import { calculateRewardModifier, recordBattleOutcome, calculateEnemyLevelScaler, getPlayerMetrics } from '@/core/balance-system';
 
 interface EnemyRow {
   id: string;
@@ -270,14 +271,22 @@ export function rollItemDrops(
 /**
  * Execute full battle
  */
-export function executeBattle(
+export async function executeBattle(
   playerUnits: CombatUnit[],
   enemy: EnemyInstance,
-  maxTurns: number = 20
-): BattleResult {
+  maxTurns: number = 20,
+  playerId?: string,
+  playerLevel: number = 1
+): Promise<BattleResult> {
   const actions: BattleAction[] = [];
   const survivingUnits: string[] = [];
   const fallenUnits: string[] = [];
+  
+  let totalDamageDealt = 0;
+  let totalDamageTaken = 0;
+  
+  // No level-based modifier in enemy type, use enemy maxHp as proxy for difficulty
+  const rewardModifier = calculateRewardModifier(playerLevel, 1);
   
   // Initial state
   let currentEnemyHp = enemy.hp;
@@ -306,25 +315,47 @@ export function executeBattle(
     if (currentEnemyHp <= 0) {
       // Victory!
       survivingUnits.push(...playerUnits.filter(u => u.alive && u.hp > 0).map(u => u.instanceId));
-      return {
+      
+      const baseExp = Math.round((enemy.maxHp / 10) * (1 + turn * 0.1));
+      const baseZel = Math.round((enemy.maxHp / 5) * (1 + turn * 0.05));
+      
+      const result = {
         victory: true,
         turns: turn,
         actions,
         rewards: {
-          exp: Math.round((enemy.maxHp / 10) * (1 + turn * 0.1)),
-          zel: Math.round((enemy.maxHp / 5) * (1 + turn * 0.05)),
+          exp: Math.round(baseExp * rewardModifier),
+          zel: Math.round(baseZel * rewardModifier),
           items: rollItemDrops(enemy.itemDrops),
         },
         survivingUnits,
         fallenUnits,
       };
+      
+      // Record battle outcome if playerId provided
+      if (playerId) {
+        const damageDealt = actions.filter(a => a.type === 'attack' && a.damage).reduce((sum, a) => sum + (a.damage || 0), 0);
+        const damageTaken = playerUnits.reduce((sum, u) => sum + (enemy.stats.atk || 0), 0);
+        await recordBattleOutcome(
+          playerId,
+          'Normal',
+          true,
+          damageDealt,
+          damageTaken,
+          1,
+          0
+        );
+      }
+      
+      return result;
     }
     
-    // Check if all player units are dead
+    // Check if all player units are dead (defeat)
     const aliveCount = playerUnits.filter(u => u.alive && u.hp > 0).length;
     if (aliveCount === 0) {
       fallenUnits.push(...playerUnits.map(u => u.instanceId));
-      return {
+      
+      const result = {
         victory: false,
         turns: turn,
         actions,
@@ -336,6 +367,21 @@ export function executeBattle(
         survivingUnits: [],
         fallenUnits,
       };
+      
+      // Record battle outcome if playerId provided
+      if (playerId) {
+        await recordBattleOutcome(
+          playerId,
+          'Normal',
+          false,
+          0,
+          playerUnits.reduce((sum, u) => sum + u.hp, 0),
+          0,
+          playerUnits.length
+        );
+      }
+      
+      return result;
     }
   }
   
@@ -346,13 +392,29 @@ export function executeBattle(
   
   if (playerHpPercent > enemyHpPercent) {
     survivingUnits.push(...playerUnits.filter(u => u.alive).map(u => u.instanceId));
+    
+    // Record battle outcome if playerId provided
+    if (playerId) {
+      const damageDealt = actions.filter(a => a.type === 'attack' && a.damage).reduce((sum, a) => sum + (a.damage || 0), 0);
+      const damageTaken = playerUnits.reduce((sum, u) => sum + (enemy.stats.atk || 0), 0);
+      await recordBattleOutcome(
+        playerId,
+        'Normal',
+        true,
+        damageDealt,
+        damageTaken,
+        1,
+        fallenUnits.length
+      );
+    }
+    
     return {
       victory: true,
       turns: turn,
       actions,
       rewards: {
-        exp: Math.round((enemy.maxHp / 10) * 0.5),
-        zel: Math.round((enemy.maxHp / 5) * 0.5),
+        exp: Math.round((enemy.maxHp / 10) * 0.5 * rewardModifier),
+        zel: Math.round((enemy.maxHp / 5) * 0.5 * rewardModifier),
         items: [],
       },
       survivingUnits,
@@ -362,6 +424,22 @@ export function executeBattle(
   
   // Defeat
   fallenUnits.push(...playerUnits.map(u => u.instanceId));
+  
+  // Record battle outcome if playerId provided
+  if (playerId) {
+    const damageDealt = actions.filter(a => a.type === 'attack' && a.damage).reduce((sum, a) => sum + (a.damage || 0), 0);
+    const damageTaken = playerUnits.reduce((sum, u) => sum + u.hp, 0);
+    await recordBattleOutcome(
+      playerId,
+      'Normal',
+      false,
+      damageDealt,
+      damageTaken,
+      0,
+      playerUnits.length
+    );
+  }
+  
   return {
     victory: false,
     turns: turn,
