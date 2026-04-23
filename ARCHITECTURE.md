@@ -44,15 +44,13 @@
 ### ✅ Completado
 
 - [x] **Mergelar calculateWinRate** - duplicate removed at commit ee3762a
-
-### Inmediato (P0 -Esta semana)
-
-- [ ] **Marcar calculateDamage como deprecated** - ya está marcado, solo verificar que nose use
+- [x] **Unificar calculateDamage** - single calculateUnitDamage at commit 7d4a2e6
+- [x] **Renombrar qr-service.ts** - renamed at commit 7d4a2e6
 
 ### Corto plazo (P1 - Proximasemana)
 
-- [ ] **Unificar calculateDamage** - mover lógica a core/ y mantener solo wrappers en services
-- [ ] **Renombrar archivos inconsistentes** - `qr-service.ts` → `qrService.ts`
+- [ ] ~~**Unificar calculateDamage**~~ - completado
+- [ ] ~~**Renombrar archivos inconsistentes**~~ - completado
 
 ### Medio plazo (P2 - Proximo mes)
 
