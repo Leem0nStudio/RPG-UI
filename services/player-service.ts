@@ -89,10 +89,10 @@ export async function loadPlayerBootstrap(): Promise<GameBootstrap> {
     level: unit.level,
     exp: unit.exp,
     jobId: unit.job_id,
-    jobLevel: unit.job_level,
-    jobExp: unit.job_exp,
-    locked: unit.locked,
-    equipment: unit.equipment ?? { Weapon: null, Armor: null, Accessory: null },
+    jobLevel: (unit as any).job_level ?? 1,
+    jobExp: (unit as any).job_exp ?? 0,
+    locked: (unit as any).locked ?? false,
+    equipment: (unit as any)?.equipment ?? { Weapon: null, Armor: null, Accessory: null },
   }));
 
   const remoteItems = ((itemsRes.data as PlayerItemRow[] | null) ?? []).map((item) => ({
