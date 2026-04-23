@@ -101,7 +101,7 @@ export default function Home() {
   }, [currentOwnedUnit, state.bootstrap.content.items]);
   
   const currentStats: StatBlock = useMemo(() => {
-    if (!currentUnit || !currentOwnedUnit) return { hp: 0, atk: 0, def: 0, rec: 0 };
+    if (!currentUnit || !currentOwnedUnit) return { hp: 0, atk: 0, def: 0, rec: 0, matk: 0, mdef: 0, agi: 0 };
     const job = state.bootstrap.content.jobs.find(j => j.id === currentUnit.jobId);
     return calculateUnitStats(currentUnit, currentOwnedUnit, [equipped.Weapon, equipped.Armor, equipped.Accessory], job);
   }, [currentUnit, currentOwnedUnit, equipped, state.bootstrap.content.jobs]);

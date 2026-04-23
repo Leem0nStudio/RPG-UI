@@ -20,8 +20,25 @@ export const statBlockSchema = z.object({
   atk: z.number().int().nonnegative(),
   def: z.number().int().nonnegative(),
   rec: z.number().int().nonnegative(),
+  matk: z.number().int().nonnegative().optional(),
+  mdef: z.number().int().nonnegative().optional(),
+  agi: z.number().int().nonnegative().optional(),
 });
 export type StatBlock = z.infer<typeof statBlockSchema>;
+
+export const affinitySchema = z.enum(['physical', 'magic', 'support', 'ranged']);
+export type Affinity = z.infer<typeof affinitySchema>;
+
+export const growthRatesSchema = z.object({
+  hp: z.number().min(0.5).max(2).default(1),
+  atk: z.number().min(0.5).max(2).default(1),
+  def: z.number().min(0.5).max(2).default(1),
+  rec: z.number().min(0.5).max(2).default(1),
+  matk: z.number().min(0.5).max(2).default(1),
+  mdef: z.number().min(0.5).max(2).default(1),
+  agi: z.number().min(0.5).max(2).default(1),
+});
+export type GrowthRates = z.infer<typeof growthRatesSchema>;
 
 export const itemTypeSchema = z.enum(['Weapon', 'Armor', 'Accessory']);
 export type ItemType = z.infer<typeof itemTypeSchema>;
@@ -158,9 +175,15 @@ export const ownedUnitSchema = z.object({
   unitId: z.string(),
   level: z.number().int().positive(),
   exp: z.number().int().nonnegative(),
-  jobId: z.string(),
+  jobId: z.string().default('novice'),
   jobLevel: z.number().int().positive().default(1),
   jobExp: z.number().int().nonnegative().default(0),
+  growthRates: growthRatesSchema.optional(),
+  affinity: affinitySchema.optional(),
+  trait: z.string().optional(),
+  unlockedJobs: z.array(z.string()).default(['novice']),
+  equippedCards: z.array(z.string()).max(3).default([]),
+  equippedSkills: z.array(z.string()).max(4).default([]),
   locked: z.boolean().default(false),
   equipment: z.object({
     Weapon: z.string().nullable(),

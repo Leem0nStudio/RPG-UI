@@ -134,7 +134,13 @@ export async function loadPlayerBootstrap(): Promise<GameBootstrap> {
         ? { gems: 25, zel: 1000, karma: 100 }
         : currencies,
     },
-    roster: hasLegacyRoster ? [] : remoteRoster,
+    roster: hasLegacyRoster ? [] : remoteRoster.map((u: any) => ({
+      ...u,
+      jobId: u.jobId ?? 'novice',
+      unlockedJobs: u.unlockedJobs ?? ['novice'],
+      equippedCards: u.equippedCards ?? [],
+      equippedSkills: u.equippedSkills ?? [],
+    })),
     items: hasLegacyRoster 
       ? [{ itemId: 'w_iron_sword', quantity: 1 }, { itemId: 'a_wood_shield', quantity: 1 }, { itemId: 'ac_power_ring', quantity: 1 }]
       : remoteItems,

@@ -186,11 +186,14 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       unitId: unitData.unitId,
       level: unitData.level,
       exp: 0,
-      jobId: unitData.jobId,
+      jobId: unitData.jobId ?? 'novice',
       jobLevel: 1,
       jobExp: 0,
       locked: false,
       equipment: { Weapon: null, Armor: null, Accessory: null },
+      unlockedJobs: ['novice'],
+      equippedCards: [],
+      equippedSkills: [],
     };
     set({
       bootstrap: {
